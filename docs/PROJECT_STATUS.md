@@ -9,7 +9,7 @@ Every teammate and coding agent must read this file before starting work. Every 
 - Last updated: **28 August 2026 (MYT)**
 - Default branch: `main`
 - Current phase: **Ready to begin implementation**
-- Latest completed milestone: **Technical stack finalized and merged in PR #1**
+- Latest completed milestone: **Project-status and mandatory agent handoff process added**
 - Active implementation work: **None**
 - Current blockers: **None for project scaffolding**
 - Demo readiness: **Planning complete; no executable application yet**
