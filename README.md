@@ -81,6 +81,8 @@ Do not prioritize extra features until this full workflow works reliably.
 ## Sui Testnet Deployment
 
 - Network: Sui Testnet
+- Payment asset: native testnet USDC
+- USDC coin type: `0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC`
 - Package / Contract ID: TBD
 - Treasury Object ID: TBD
 - Other deployed object/address IDs: TBD
@@ -97,20 +99,27 @@ Important files for teammates and coding agents:
 - `docs/PROJECT_SPEC.md` — detailed product specification
 - `docs/ROADMAP.md` — implementation plan
 - `docs/ARCHITECTURE.md` — technical architecture
+- `docs/TECH_STACK.md` — finalized MVP technologies and implementation boundaries
 - `docs/DEMO_PLAN.md` — demo flow and backup plan
 
 ## Technology Stack
 
-To be finalized by the team after technical validation.
+The hackathon MVP stack is finalized:
 
-Expected components:
+- Runtime/tooling: Node.js 24 LTS, pnpm, strict TypeScript
+- Full-stack app: Next.js 16 App Router and React 19
+- UI: Tailwind CSS 4, shadcn/ui, Lucide icons
+- Validation/forms: Zod and React Hook Form
+- Backend/API: Next.js Route Handlers and server-only modules
+- Database/storage: Supabase PostgreSQL and a private Supabase Storage bucket
+- AI: OpenAI Responses API with `gpt-5.6-terra`, image input, and Structured Outputs
+- Blockchain: Sui Testnet, Move, `@mysten/sui` v2, and `@mysten/dapp-kit-react`
+- Payment asset: native Circle-issued Sui Testnet USDC
+- Hosting: Vercel and Supabase
+- Testing: Vitest, React Testing Library, Playwright, and `sui move test`
+- CI: GitHub Actions
 
-- Frontend: TBD
-- Backend/API: TBD
-- AI provider/model: TBD
-- Blockchain: Sui
-- Smart contracts: Move on Sui
-- Network for hackathon: Sui Testnet
+See `docs/TECH_STACK.md` for the full decision, boundaries, versions, and rationale.
 
 ## Setup / Installation
 
