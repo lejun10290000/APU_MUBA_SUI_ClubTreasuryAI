@@ -12,6 +12,7 @@ This roadmap is ordered by demo importance. Finish the end-to-end path before ad
 - [x] Add .gitignore and .env.example
 - [x] Add project specification
 - [x] Finalize technical stack
+- [x] Add live project-status and agent handoff process
 - [ ] Add all official team members
 
 ## Phase 1 — Frontend Skeleton

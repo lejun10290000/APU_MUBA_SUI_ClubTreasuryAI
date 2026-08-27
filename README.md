@@ -98,9 +98,18 @@ Important files for teammates and coding agents:
 - `CONTRIBUTING.md` — team workflow and Git contribution rules
 - `docs/PROJECT_SPEC.md` — detailed product specification
 - `docs/ROADMAP.md` — implementation plan
+- `docs/PROJECT_STATUS.md` — live status, blockers, next task, and agent handoff
 - `docs/ARCHITECTURE.md` — technical architecture
 - `docs/TECH_STACK.md` — finalized MVP technologies and implementation boundaries
 - `docs/DEMO_PLAN.md` — demo flow and backup plan
+
+## Start Here for Development
+
+Before starting any work, read `AGENTS.md` and `docs/PROJECT_STATUS.md`. The status file states what is actually implemented, what is missing, and the exact next recommended task.
+
+Every development pull request or direct commit must update `docs/PROJECT_STATUS.md` and the relevant `docs/ROADMAP.md` checkboxes. A feature is not complete while the status handoff is stale.
+
+For a new teammate or coding agent, use the starter prompt provided at the bottom of `docs/PROJECT_STATUS.md`.
 
 ## Technology Stack
 

@@ -115,11 +115,13 @@ See `HACKATHON_REQUIREMENTS.md` for the submission checklist.
 
 Before making a substantial change:
 
-1. Read `README.md`.
-2. Read `HACKATHON_REQUIREMENTS.md`.
-3. Read `docs/PROJECT_SPEC.md`.
-4. Read `docs/ROADMAP.md`.
-5. Check existing architecture before introducing new frameworks or services.
+1. Read `docs/PROJECT_STATUS.md` first.
+2. Read `README.md`.
+3. Read `HACKATHON_REQUIREMENTS.md`.
+4. Read `docs/PROJECT_SPEC.md`.
+5. Read `docs/ROADMAP.md`.
+6. Read `docs/TECH_STACK.md` and `docs/ARCHITECTURE.md`.
+7. Check recent commits and open pull requests before starting to avoid duplicate work.
 
 When implementing:
 
@@ -132,6 +134,22 @@ When implementing:
 - Add tests for important financial/business logic where practical.
 - Preserve a clear demo path.
 
+## Project Status and Agent Handoff Requirement
+
+`docs/PROJECT_STATUS.md` is the live implementation handoff and the single source of truth for the current phase, active work, blockers, and next recommended task.
+
+Every coding agent must:
+
+1. Read it before planning or editing.
+2. Work only on an unclaimed, in-scope task and check recent commits/open pull requests.
+3. Update it in the same pull request or commit as every development change.
+4. Keep its completed, missing, active, blocked, and next-task sections accurate.
+5. Add verification results and a short recent-development entry.
+6. Update matching `docs/ROADMAP.md` checkboxes.
+7. Never mark a UI mock, stub, fake transaction, or untested integration as implemented.
+
+A development task is not complete if `docs/PROJECT_STATUS.md` is stale.
+
 ## Definition of Done for a Feature
 
 A feature is not complete just because the UI exists. For hackathon-critical features, completion should include:
@@ -141,6 +159,8 @@ A feature is not complete just because the UI exists. For hackathon-critical fea
 - data shown is not fake unless clearly marked demo/mock data
 - Sui integration is real where the feature claims on-chain execution
 - README/docs are updated if setup changed
+- `docs/PROJECT_STATUS.md` and matching roadmap items are updated
+- verification results and the next recommended task are recorded
 - no secrets are committed
 
 ## Q&A Readiness
@@ -160,4 +180,4 @@ Be prepared to explain:
 
 ## Current Status
 
-Repository setup and product planning are in progress. Check `docs/ROADMAP.md` and recent commits before assuming a feature already exists.
+Read `docs/PROJECT_STATUS.md` for the authoritative current snapshot and next recommended task. Do not infer implementation status from planning documents alone.
