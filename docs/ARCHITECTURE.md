@@ -1,12 +1,10 @@
 # ClubTreasury AI — Architecture
 
-This document defines the finalized hackathon architecture. Exact dependency patch versions will be pinned during scaffolding; the component boundaries and service choices are final for the MVP.
+This document defines the hackathon MVP architecture. The project uses one full-stack Next.js application plus one Move package.
 
-See `docs/TECH_STACK.md` for the complete technology decision.
+See `docs/TECH_STACK.md`, `docs/DEVELOPMENT_STAGES.md`, and `docs/AI_USAGE_POLICY.md`.
 
-## Architecture Decision
-
-ClubTreasury AI uses one full-stack Next.js application plus one Move package. There is no separate backend service for the MVP.
+## High-Level Architecture
 
 ```text
 Treasurer / Club Member
@@ -15,79 +13,100 @@ Treasurer / Club Member
 Next.js 16 Web Application
   - React UI
   - Route Handlers
-  - deterministic rules
+  - deterministic financial rules
         |
-        +----------------------+----------------------+
-        |                      |                      |
-        v                      v                      v
-OpenAI Responses API    Supabase PostgreSQL    Sui Wallet
-  - budget parsing       - app metadata          |
-  - receipt extraction   - claims/reviews        v
-  - categorization       - payout status     Sui Testnet
-                         |                      - Move treasury
-                         v                      - native testnet USDC
-                 Private Storage               - approved payout
-                   - receipts
+        +------------------------+----------------------+-------------------+
+        |                        |                      |                   |
+        v                        v                      v                   v
+AIService                  Supabase PostgreSQL      Sui Wallet      Private Storage
+  |                          - metadata                |             - receipts
+  +--> MockAIService         - claims/reviews          v
+  |                          - payout state        Sui Testnet
+  +--> GeminiAIService                              - Move treasury
+       (@google/genai)                              - testnet USDC
 ```
 
-## Final Component Choices
-
-### Web and API
+## Web and API
 
 - Next.js 16 App Router
 - React 19
 - strict TypeScript
-- Next.js Route Handlers for AI, database, storage, and wallet-challenge endpoints
-- Zod for API and AI schemas
-- React Hook Form for user input
-- Tailwind CSS 4 and shadcn/ui for the interface
+- Next.js Route Handlers for AI, database, storage, and wallet challenge endpoints
+- Zod for shared API/AI schemas
+- React Hook Form for inputs
+- Tailwind CSS 4 + shadcn/ui
 
-Server-only modules hold secret-bearing OpenAI and Supabase clients. Client components handle wallet interaction and transaction signing.
+Server-only modules hold secret-bearing Gemini/Supabase clients. Client components handle wallet interaction and transaction signing.
 
-### Data and Receipt Storage
+## AI Layer
 
-Supabase PostgreSQL stores application metadata, claims, AI results, payout synchronization state, and transaction references.
+The application depends on a shared interface:
 
-Raw receipts are stored off-chain in a private Supabase Storage bucket. Access uses RLS or short-lived signed URLs. Receipt bytes are hashed for duplicate detection; raw files and URLs are never written on-chain.
+```text
+AIService
+  |- MockAIService
+  `- GeminiAIService
+```
 
-### AI Layer
+### MockAIService
 
-Use the OpenAI Responses API with `gpt-5.6-terra`.
+Used by default for normal development, CI, unit tests, normal Playwright tests, UI work, Sui work, and most rehearsals.
 
-AI responsibilities:
+It returns deterministic schema-valid fixture responses and makes **zero Gemini API calls**.
+
+### GeminiAIService
+
+Uses the official `@google/genai` JavaScript SDK with default model `gemini-2.5-flash`.
+
+Gemini responsibilities:
 
 - interpret natural-language budget instructions
-- extract merchant, amount, date, and description from receipt images
+- extract merchant/amount/date/description from receipt images
 - suggest an expense category
-- identify ambiguous or suspicious evidence
-- return structured facts and concise recommendation reasons
+- identify ambiguity/suspicious evidence
+- return concise reasons
 
-Implementation requirements:
+All output must pass server-side Zod validation.
 
-- image input uses `detail: "original"`
-- output follows Zod-backed Structured Outputs
-- receipt requests use `store: false`
-- malformed or unavailable AI output becomes manual `Review`
-- AI does not perform authoritative arithmetic or transfer funds
+Live Gemini is explicitly enabled only under `docs/AI_USAGE_POLICY.md`.
 
-### Deterministic Domain Layer
+### AI safety boundary
 
-Pure TypeScript functions perform:
+Gemini does not perform authoritative financial enforcement. Gemini cannot:
 
-- positive-amount and currency validation
+- authorize payment
+- calculate the authoritative remaining balance
+- bypass category limits
+- determine exact hash duplicates
+- sign a transaction
+- trigger a payout autonomously
+
+If Gemini is unavailable/invalid, the claim becomes manual `Review` rather than being silently approved or rejected.
+
+## Deterministic Domain Layer
+
+Pure TypeScript functions are authoritative for:
+
+- positive amount/currency validation
 - budget-total validation
-- remaining-category-budget checks
+- remaining-category checks
 - receipt/request amount comparison
-- required-field checks
+- required fields
 - exact receipt-hash duplicate checks
-- similar claim checks using normalized merchant, amount, and date
-- final recommendation policy from validated facts and rule results
+- similar-claim comparisons
+- final recommendation policy based on validated facts/rules
 
-This layer is covered by unit tests and is the authoritative source for hard business rules.
+This layer must be unit tested.
 
-### Sui Layer
+## Data and Receipt Storage
 
-Use the current Sui SDK and dApp Kit packages:
+Supabase PostgreSQL stores app metadata, claims, AI results, payout synchronization state, and transaction references.
+
+Raw receipt images are stored in a **private** Supabase Storage bucket. Receipt bytes are hashed for duplicate detection. Raw receipt files/URLs remain off-chain.
+
+## Sui Layer
+
+Use:
 
 - `@mysten/sui` v2
 - `@mysten/dapp-kit-react`
@@ -95,9 +114,7 @@ Use the current Sui SDK and dApp Kit packages:
 - Move
 - native Sui Testnet USDC
 
-The legacy `@mysten/dapp-kit` package is deprecated and must not be introduced.
-
-The selected USDC coin type is:
+Selected testnet USDC coin type:
 
 ```text
 0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC
@@ -107,15 +124,15 @@ The selected USDC coin type is:
 
 The MVP Move package should provide:
 
-- a shared `Treasury<USDC>` object holding treasury funds and confirmed category state
-- a treasurer-owned admin capability
+- shared `Treasury<USDC>` object
+- treasurer-owned admin capability
 - deposit/funding entry point
-- budget confirmation/update entry point before claims are paid
-- payout entry point restricted by the admin capability
-- on-chain check that a payout does not exceed the relevant remaining category amount
-- payout event with treasury, claim/category reference, recipient, amount, and remaining amount
+- confirmed category allocations/remaining amounts
+- payout entry point restricted by admin capability
+- on-chain check that payout does not exceed category remaining amount
+- payout event with useful reference/recipient/amount/remaining data
 
-This makes Sui responsible for actual custody, budget enforcement at payment time, and stablecoin transfer—not only transaction logging.
+Sui therefore provides real custody, authorization, payout-time budget enforcement, and stablecoin transfer.
 
 ## Claim Decision Pipeline
 
@@ -126,13 +143,14 @@ Receipt + member request
 Private receipt upload + SHA-256 hash
         |
         v
-OpenAI extraction and categorization
+AIService
+  Mock fixture OR live Gemini (explicitly enabled)
         |
         v
-Zod validation
+Zod-valid structured facts
         |
         v
-Deterministic checks
+Deterministic TypeScript checks
   - required fields
   - amount match
   - category balance
@@ -145,40 +163,38 @@ Approve / Review / Reject recommendation
 Treasurer reviews evidence
         |
         v
-Treasurer approves and signs
+Treasurer approves
         |
         v
-Move payout re-checks category budget
+Wallet signature + Move payout check
         |
         v
-Native testnet USDC transfer
+Sui Testnet USDC transfer
         |
         v
-Wait for Sui success, then mark paid and synchronize dashboard
+After Sui success: mark paid + synchronize dashboard
 ```
 
 ## Human Approval Boundary
 
-AI may analyze and recommend. It cannot sign transactions, access the admin capability, or change a claim to `paid`.
+AI may analyze and recommend. The treasurer must:
 
-The treasurer must:
-
-1. review the evidence and recommendation
-2. approve the claim
-3. confirm the wallet transaction
-4. receive a successful Sui result before the application marks the claim paid
+1. review evidence/recommendation
+2. approve or reject
+3. confirm/sign the wallet transaction
+4. receive successful Sui confirmation before the app marks the claim paid
 
 ## Identity
 
-The connected Sui wallet address is the MVP identity. Role-sensitive off-chain mutations should use a wallet-signed nonce challenge. On-chain authorization is enforced by the admin capability and the user's wallet signature.
+The connected Sui wallet address is the MVP identity. Role-sensitive off-chain mutations should use a wallet-signed nonce challenge. On-chain authorization is enforced by the admin capability and wallet signature.
 
 ## On-chain vs Off-chain
 
 ### On-chain
 
-- treasury object and administrator capability
-- native testnet USDC balance
-- confirmed category allocations and remaining amounts
+- treasury/admin capability
+- testnet USDC balance
+- confirmed category allocations/remaining amounts
 - approved payout execution
 - payout events and transaction digest
 
@@ -187,48 +203,47 @@ The connected Sui wallet address is the MVP identity. Role-sensitive off-chain m
 - club/event display metadata
 - raw receipt images
 - member/claim metadata
-- AI extraction and recommendation
+- AI extraction/recommendation
 - duplicate comparison details
-- application status and synchronization records
+- application/synchronization status
 
 ## Failure Handling
 
-### AI unavailable or invalid
+### AI unavailable/invalid
 
-Store no authoritative decision. Mark the claim for manual `Review` and allow retry.
+Return manual `Review`; do not create an authoritative automatic decision.
 
 ### Receipt unclear
 
-Return `Review` with missing or conflicting fields highlighted.
+Return `Review` with missing/conflicting fields highlighted.
 
 ### Wallet rejected
 
-Keep the claim `approved_unpaid`; do not decrement the budget. Allow retry.
+Keep claim `approved_unpaid`; do not decrement budget.
 
 ### Sui transaction fails
 
-Do not mark the claim `paid`. Record the failure safely, refresh on-chain state, and allow retry.
+Do not mark claim paid. Refresh state and allow safe retry.
 
-### Database synchronization fails after on-chain success
+### Database synchronization fails after Sui success
 
-Use the transaction digest as an idempotency key and reconcile the off-chain record from Sui before allowing another payout.
+Use transaction digest as an idempotency key and reconcile from Sui before allowing another payout.
 
 ## Deployment
 
-- Next.js application: Vercel
-- PostgreSQL and private receipt storage: Supabase
-- Smart contract and payment network: Sui Testnet
+- Next.js: Vercel
+- PostgreSQL/private receipt storage: Supabase
+- Move/payment network: Sui Testnet
 - CI: GitHub Actions
-
-The public Sui fullnode endpoint may be used during initial development, but the RPC URL remains configurable for demo reliability.
 
 ## Architecture Goal for Judging
 
-A judge should be able to see that:
+A judge should clearly see:
 
-- AI handles unstructured budget language and receipt evidence.
-- TypeScript handles deterministic financial rules.
-- The treasurer remains accountable for approval.
-- Move enforces authorization and category limits at payout time.
-- Sui executes a real native testnet USDC transfer.
-- Private receipt data remains off-chain.
+- Gemini handles unstructured budget language and receipt evidence.
+- deterministic TypeScript handles hard financial rules.
+- the treasurer remains accountable for approval.
+- Move enforces authorization/category limits at payout time.
+- Sui executes real testnet stablecoin movement.
+- private receipt data remains off-chain.
+- mock AI is used during development for reliability/cost control, while live Gemini is separately verifiable and clearly identified.
