@@ -31,25 +31,112 @@ This stack is intentionally small: one full-stack TypeScript application, one Mo
 
 Dependency patch versions will be pinned by `pnpm-lock.yaml` during Stage 1 scaffolding.
 
+## Foundation Reproducibility Rules
+
+Stage 1 must establish a stable development baseline before feature work begins.
+
+Required project metadata:
+
+- commit `pnpm-lock.yaml`
+- commit `.nvmrc` or `.node-version` for Node.js 24 LTS
+- set `packageManager` in `package.json` to the chosen pnpm version
+- keep setup commands in README synchronized with the actual scripts
+
+A teammate should be able to clone the repo, copy `.env.example` to `.env.local`, install, run, test, and build without hidden local setup.
+
 ## Application Structure
 
 ```text
 app/                         Next.js routes/pages/API handlers
-src/components/              Shared UI
+  error.tsx                  Base application error boundary
+  loading.tsx                Base loading state
+  not-found.tsx              Base not-found state
+src/config/                  Central validated runtime/environment config
+src/components/              Shared UI primitives/layout components
 src/features/treasury/       Treasury setup/dashboard
 src/features/budgets/        Budget entry/preview/confirmation
 src/features/claims/         Claim/receipt/review
-src/domain/                  Zod schemas + deterministic financial rules
-src/lib/ai/                  AI interface + mock + Gemini adapters
-src/lib/sui/                 Sui clients/transaction builders
-src/lib/supabase/            Database/private-storage adapters
+src/domain/money/            Integer/minor-unit money helpers
+src/domain/schemas/          Shared Zod domain schemas
+src/lib/ai/                  AI interface + mock + future Gemini adapter
+src/lib/sui/                 Sui client/transaction boundary
+src/lib/supabase/            Database/private-storage boundary
 move/club_treasury/          Move package/tests
 supabase/migrations/         SQL schema/RLS
 tests/e2e/                   Playwright demo flow
 tests/fixtures/ai/           Deterministic mock AI fixtures
+tests/fixtures/domain/       Sample budget/claim fixtures
 ```
 
 Do not create microservices for the MVP.
+
+## Configuration Boundary
+
+All runtime configuration should be parsed/validated through one central module such as:
+
+```text
+src/config/env.ts
+```
+
+Feature code should not directly read scattered `process.env.*` values. This makes local development, CI, Vercel, mock/live AI switching, and test behavior predictable.
+
+Minimum behavior:
+
+- invalid required values fail clearly at startup/server initialization
+- `AI_MODE` defaults safely to `mock`
+- CI can run without a Gemini key
+- public environment variables are explicitly separated from server-only secrets
+- Gemini/Supabase secret keys never use a `NEXT_PUBLIC_` prefix
+
+## Service Boundary Rule
+
+Stage 1 establishes interfaces/module boundaries before real integrations are added.
+
+Application feature code should not depend directly on vendor SDKs.
+
+Conceptual boundaries:
+
+```text
+AIService
+  |- MockAIService
+  `- GeminiAIService        // implemented in Stage 4
+
+SuiService / transaction module
+  `- concrete Sui behavior // implemented in Stage 3+
+
+Storage/Data adapter
+  `- Supabase implementation // implemented in Stage 5
+```
+
+During Stage 1, only the interface/module boundaries and safe mock/placeholders are required. Do not perform live Gemini, Supabase, or treasury operations prematurely.
+
+## Money Representation Rule
+
+Authoritative money values must not use JavaScript floating-point arithmetic.
+
+Use integer/minor-unit semantics for amounts. For example, an amount is represented as an integer number of the asset's smallest relevant units and formatted only for display.
+
+Requirements:
+
+- parse user display amounts into validated integer units
+- perform comparisons/addition/subtraction using integer semantics
+- never rely on `number` floating-point calculations for authoritative balances
+- keep asset decimals/conversion logic explicit
+- ensure TypeScript and Move interpretations of amounts remain consistent
+
+This rule should be established in Stage 1 so later budget and payout logic does not require a financial-data rewrite.
+
+## Base UX Reliability
+
+Before feature development, the app should have:
+
+- shared layout shell
+- basic loading state
+- not-found state
+- recoverable application error boundary
+- health/home route used by smoke testing
+
+The goal is not visual polish yet. The goal is preventing raw framework failures from becoming the user experience during development or demos.
 
 ## AI Implementation Decision
 
@@ -78,6 +165,8 @@ AIService
 ```
 
 Both return identical Zod-validated structures.
+
+Stage 1 creates the interface and mock-safe structure. Stage 4 implements live Gemini behavior.
 
 ### Mock-first rule
 
@@ -115,6 +204,41 @@ Gemini must not be authoritative for:
 - wallet signing/transaction execution
 
 Hard financial rules remain deterministic TypeScript. A treasurer remains the final human approver.
+
+## Test Fixture Strategy
+
+Stage 1 should create deterministic fixtures that later UI/business development can reuse without API cost or unstable external dependencies.
+
+Minimum fixture cases:
+
+- valid sample event budget
+- valid sample claim
+- valid marketing receipt extraction result
+- ambiguous receipt result
+- amount mismatch result
+- over-budget result
+- duplicate-claim result
+
+Fixtures must be clearly identified as mock/test data and conform to the same schemas later used by live Gemini.
+
+## CI Baseline
+
+GitHub Actions should run, at minimum:
+
+1. install with frozen lockfile
+2. lint
+3. typecheck
+4. unit tests
+5. production build
+
+CI requirements:
+
+- force/use `AI_MODE=mock`
+- do not require `GEMINI_API_KEY`
+- do not call Gemini
+- do not require live Supabase or Sui Testnet to verify the Stage 1 scaffold
+
+A basic smoke test should verify that the home/health route loads. Full product E2E behavior belongs to later stages.
 
 ## Sui and Stablecoin Decision
 
