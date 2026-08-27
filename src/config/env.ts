@@ -1,13 +1,16 @@
 import { z } from "zod";
 
-const booleanString = z.enum(["true", "false"]).transform((value) => value === "true");
+const booleanString = z
+  .enum(["true", "false"])
+  .default("false")
+  .transform((value) => value === "true");
 
 const serverSchema = z.object({
   APP_ENV: z.enum(["development", "test", "production"]).default("development"),
   AI_MODE: z.enum(["mock", "live"]).default("mock"),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
-  GEMINI_LIVE_REQUESTS_ENABLED: booleanString.default("false"),
+  GEMINI_LIVE_REQUESTS_ENABLED: booleanString,
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
   NEXT_PUBLIC_SUI_NETWORK: z.enum(["testnet"]).default("testnet"),
   NEXT_PUBLIC_SUI_RPC_URL: z.string().url().default("https://fullnode.testnet.sui.io:443"),
