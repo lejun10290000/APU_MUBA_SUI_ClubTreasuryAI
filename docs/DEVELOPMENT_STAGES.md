@@ -45,32 +45,81 @@ Exit criteria: planning documents exist and the next implementation task is clea
 
 ## Stage 1 — Application foundation — CURRENT
 
-Goal: create a reproducible, testable application scaffold without business features.
+Goal: create a reproducible, testable, teammate-friendly application scaffold without business features.
 
 Required work:
 
 - Next.js 16 App Router + React 19 + strict TypeScript
-- pnpm with committed lockfile
-- Tailwind CSS 4
+- pnpm with committed `pnpm-lock.yaml`
+- lock Node/pnpm versions with `.nvmrc` or `.node-version` plus `packageManager` in `package.json`
+- Tailwind CSS 4 and base shared UI primitives/layout shell
 - Sui SDK packages
 - Zod + React Hook Form
 - Vitest + React Testing Library + Playwright
-- standard scripts for lint/typecheck/test/build
-- environment validation
-- minimal health page/route
+- standard scripts for lint/format/typecheck/test/e2e/build
+- centralized environment/config module; feature code must not read scattered `process.env` values directly
+- committed/default `AI_MODE=mock`; Stage 1 must not make live Gemini calls
+- create stable service boundaries for AI, Sui, and Supabase without implementing live business integrations yet
+- create `AIService` interface and mock-safe placeholder structure; Gemini implementation remains Stage 4
+- create deterministic fixture directories for sample budget/claim/AI responses so UI work can proceed without API billing
+- create domain money utilities that represent amounts as integers/minor units, never JavaScript floating-point money
+- minimal home/health page or route proving the app builds and runs
+- app-wide basic loading, not-found, and error boundaries so failures do not expose raw framework errors during demos
 - GitHub Actions CI
-- directory boundaries from `docs/TECH_STACK.md`
+- CI must run in mock AI mode with no Gemini key required
+- create application directory boundaries from `docs/TECH_STACK.md`
+- add at least one smoke test proving the home/health path loads
+- write a developer quick-start in README covering clone, install, env template, run, test, and build
+
+Recommended Stage 1 structure:
+
+```text
+app/
+  error.tsx
+  loading.tsx
+  not-found.tsx
+src/
+  config/
+    env.ts
+  components/
+  domain/
+    money/
+    schemas/
+  features/
+  lib/
+    ai/
+      AIService.ts
+      mock/
+    sui/
+    supabase/
+tests/
+  fixtures/
+    ai/
+  e2e/
+```
+
+The folders may vary slightly with framework conventions, but the boundaries must remain clear.
 
 Exit criteria:
 
+- a new teammate can clone the repo and follow README without tribal knowledge
 - clean `pnpm install --frozen-lockfile`
+- pinned Node/pnpm versions are documented and enforced by project metadata
 - lint passes
 - typecheck passes
 - unit tests pass
 - production build passes
-- Playwright config loads
-- CI is present
+- Playwright configuration loads
+- smoke test passes
+- CI is present and passes without `GEMINI_API_KEY`
+- app runs in `AI_MODE=mock` by default
+- mock mode is structurally separated from future live Gemini integration
+- configuration is centralized and validated
+- money values are represented with integer/minor-unit semantics, not floating point
+- base error/loading/not-found UX exists
 - no secrets committed
+- no fake Sui package IDs, transaction hashes, or deployment claims
+- no Stage 2+ business feature is falsely marked complete
 
 ## Stage 2 — Core UI and deterministic domain rules — NOT STARTED
 
