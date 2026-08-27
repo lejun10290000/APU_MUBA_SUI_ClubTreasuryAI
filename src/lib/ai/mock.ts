@@ -22,11 +22,13 @@ const defaultReceipt: ReceiptAnalysis = {
 };
 
 export class MockAIService implements AIService {
-  async parseBudget(_input: string): Promise<BudgetDraft> {
+  async parseBudget(input: string): Promise<BudgetDraft> {
+    void input;
     return structuredClone(defaultBudget);
   }
 
-  async analyzeReceipt(_input: { receiptId: string; requestedAmountMinor: number }): Promise<ReceiptAnalysis> {
+  async analyzeReceipt(input: { receiptId: string; requestedAmountMinor: number }): Promise<ReceiptAnalysis> {
+    void input;
     return structuredClone(defaultReceipt);
   }
 }
