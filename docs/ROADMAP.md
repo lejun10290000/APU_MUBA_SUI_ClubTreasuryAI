@@ -24,17 +24,31 @@ This roadmap follows the official project stages in `docs/DEVELOPMENT_STAGES.md`
 
 - [ ] Scaffold Next.js 16 App Router + React 19 + strict TypeScript
 - [ ] Use pnpm and commit `pnpm-lock.yaml`
+- [ ] Pin Node runtime with `.nvmrc` or `.node-version`
+- [ ] Add `packageManager` to `package.json` to lock pnpm major/version
 - [ ] Configure Tailwind CSS 4
+- [ ] Add base shared UI primitives/layout shell
 - [ ] Add `@mysten/sui` v2 and `@mysten/dapp-kit-react`
 - [ ] Add Zod + React Hook Form
 - [ ] Add Vitest + React Testing Library + Playwright
-- [ ] Add lint/format/typecheck/test/build scripts
+- [ ] Add lint/format/typecheck/test/e2e/build scripts
 - [ ] Create application directory boundaries
-- [ ] Add environment validation
+- [ ] Add centralized environment/config validation module
+- [ ] Prevent feature code from reading scattered `process.env` directly
 - [ ] Default application to `AI_MODE=mock`
-- [ ] Add minimal health page/route
+- [ ] Ensure mock mode requires no Gemini key and makes zero Gemini calls
+- [ ] Add `AIService` interface boundary without live Gemini implementation
+- [ ] Add mock-safe AI adapter/placeholders for future UI development
+- [ ] Add Sui and Supabase service/module boundaries without live business integration
+- [ ] Add deterministic fixture directories for sample budget, claim, and AI responses
+- [ ] Add domain money utility conventions using integer/minor units only
+- [ ] Add minimal home/health page or route
+- [ ] Add app-wide `loading`, `not-found`, and `error` boundaries
+- [ ] Add at least one smoke test for home/health route
 - [ ] Add GitHub Actions CI
-- [ ] Update README setup instructions
+- [ ] Force CI to run in mock AI mode without `GEMINI_API_KEY`
+- [ ] Update README with clone/install/env/run/test/build quick-start
+- [ ] Verify a fresh teammate setup from README
 
 ## Stage 2 — Core UI and deterministic domain rules — NOT STARTED
 
@@ -74,10 +88,8 @@ This roadmap follows the official project stages in `docs/DEVELOPMENT_STAGES.md`
 ## Stage 4 — Gemini AI layer — NOT STARTED
 
 - [ ] Add official `@google/genai` SDK
-- [ ] Add `AIService` interface
-- [ ] Add `MockAIService`
+- [ ] Add `AIService` live implementation using `GeminiAIService`
 - [ ] Add deterministic AI fixtures
-- [ ] Add `GeminiAIService`
 - [ ] Define structured budget schema
 - [ ] Build natural-language budget parser
 - [ ] Define structured receipt schema
