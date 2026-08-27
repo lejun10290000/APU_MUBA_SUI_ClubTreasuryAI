@@ -11,7 +11,7 @@ This roadmap is ordered by demo importance. Finish the end-to-end path before ad
 - [x] Add contribution guide
 - [x] Add .gitignore and .env.example
 - [x] Add project specification
-- [ ] Finalize technical stack
+- [x] Finalize technical stack
 - [ ] Add all official team members
 
 ## Phase 1 — Frontend Skeleton
@@ -26,7 +26,7 @@ This roadmap is ordered by demo importance. Finish the end-to-end path before ad
 
 ## Phase 2 — Sui Foundation
 
-- [ ] Select wallet integration approach
+- [x] Select wallet integration approach
 - [ ] Connect Sui wallet on testnet
 - [ ] Create Move package structure
 - [ ] Design treasury object/state
@@ -88,7 +88,7 @@ This roadmap is ordered by demo importance. Finish the end-to-end path before ad
 - [ ] Add setup/install instructions
 - [ ] Add all team members
 - [ ] Confirm AI tool declaration
-- [ ] Add architecture documentation
+- [x] Add architecture documentation
 - [ ] Add screenshots
 - [ ] Add live demo URL
 - [ ] Record 3–5 minute video
