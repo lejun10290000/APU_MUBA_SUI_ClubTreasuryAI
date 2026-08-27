@@ -23,11 +23,32 @@ Small documentation fixes may go directly to `main` if the team agrees.
 
 Read:
 
-1. `README.md`
+1. `docs/PROJECT_STATUS.md`
 2. `AGENTS.md`
-3. `HACKATHON_REQUIREMENTS.md`
-4. `docs/PROJECT_SPEC.md`
-5. `docs/ROADMAP.md`
+3. `README.md`
+4. `HACKATHON_REQUIREMENTS.md`
+5. `docs/PROJECT_SPEC.md`
+6. `docs/ROADMAP.md`
+7. `docs/TECH_STACK.md`
+8. `docs/ARCHITECTURE.md`
+
+Also check recent commits and open pull requests before choosing work.
+
+## Required Project Status Handoff
+
+`docs/PROJECT_STATUS.md` is the shared handoff for teammates and coding agents.
+
+Every development pull request or direct commit must:
+
+- update the current snapshot
+- record what became genuinely complete
+- keep missing and blocked work accurate
+- define the next smallest demo-critical task
+- add verification results to the pull request
+- add a recent-development entry
+- update matching roadmap checkboxes
+
+Do not merge development work with a stale project-status file. This requirement prevents separate contributors or agents from duplicating work or assuming planned features already exist.
 
 ## Commit Guidelines
 
@@ -61,6 +82,8 @@ A PR should explain:
 - whether it affects the demo flow
 - whether new environment variables were added
 - whether documentation needs updating
+- how `docs/PROJECT_STATUS.md` and `docs/ROADMAP.md` were updated
+- verification commands and results
 
 ## Coding Priorities
 
