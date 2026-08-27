@@ -1,0 +1,8 @@
+{
+  "merchant": "Campus Print Shop",
+  "amountMinor": 7500,
+  "currency": "USDC",
+  "categorySuggestion": "Marketing",
+  "needsReview": false,
+  "reasons": ["Synthetic fixture for mock development only"]
+}

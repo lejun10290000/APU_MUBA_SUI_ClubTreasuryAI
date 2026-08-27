@@ -4,115 +4,221 @@ AI-powered programmable treasury for university clubs, built on Sui.
 
 ## Project Overview
 
-ClubTreasury AI helps university club treasurers manage budgets, reimbursement requests, approvals, and payouts in one workflow. The treasurer describes budget rules in natural language, AI converts them into structured spending rules, club members later submit reimbursement or payment requests with receipts, AI checks each request against the rules, and a human treasurer approves the final action before Sui executes the stablecoin payment.
+ClubTreasury AI helps university club treasurers manage budgets, reimbursement requests, approvals, and payouts in one workflow. AI helps interpret natural-language budgets and receipt evidence, deterministic code enforces hard financial rules, a human treasurer makes the final approval, and Sui will execute the approved stablecoin payment.
 
 ## Target User
 
-Primary target user: university club treasurers and finance committee members.
+University club treasurers and finance committee members.
 
 ## Problem
 
-University clubs often manage event budgets, receipts, reimbursement requests, approvals, and bank transfers through spreadsheets, chat messages, and manual processes. This makes it difficult to enforce spending rules, track remaining budgets, detect duplicate claims, and maintain a clear payment history.
+University clubs often manage event budgets, receipts, reimbursement requests, approvals, and transfers through spreadsheets and chat. That makes remaining budgets, spending-rule enforcement, duplicate claims, and audit history difficult to manage reliably.
 
-## Solution
+## Core Workflow
 
-ClubTreasury AI combines AI-assisted financial review with programmable payments on Sui.
-
-Core workflow:
-
-1. Treasurer creates an event or club treasury.
-2. Treasurer deposits stablecoins into the Sui treasury.
+1. Treasurer creates an event/club treasury.
+2. Treasurer funds it with testnet stablecoin.
 3. Treasurer describes the budget in natural language.
-4. Gemini (or deterministic mock AI during normal development) converts the instruction into structured categories and spending rules.
+4. Gemini, or deterministic mock AI during normal development, returns structured budget data.
 5. Treasurer reviews and confirms the budget.
-6. Club members submit reimbursement/payment requests with receipt evidence.
-7. Gemini or the mock AI adapter extracts useful receipt facts and suggests a category; deterministic TypeScript checks hard financial rules and the system returns Approve / Review / Reject with concise reasons.
-8. Treasurer makes the final decision.
-9. If approved, Sui executes the stablecoin payout.
-10. The dashboard updates only after successful on-chain confirmation.
+6. Member submits a reimbursement/payment request with receipt evidence.
+7. AI extracts/suggests facts; deterministic TypeScript checks hard rules.
+8. App recommends Approve / Review / Reject with concise reasons.
+9. Treasurer makes the final decision.
+10. Sui executes the approved testnet stablecoin payout.
+11. Dashboard updates only after successful on-chain confirmation.
 
-## AI Responsibilities
+## AI vs Deterministic Rules
 
-- Natural-language budget creation
-- Receipt/invoice information extraction
-- Expense categorization
-- Ambiguity/suspicious-evidence hints
-- Concise recommendation reasons
+Gemini may interpret unstructured language, extract receipt facts, suggest categories, and highlight ambiguity. Gemini is **not** authoritative for arithmetic, remaining budget, duplicate receipt hashes, payout authorization, wallet signing, or Sui transaction execution.
 
-Hard financial checks such as arithmetic, category balances, duplicate receipt hashes, and payout authorization are not delegated to Gemini. AI does not silently transfer funds in the MVP. A human treasurer remains in the approval loop.
-
-## Sui Responsibilities
-
-- Hold treasury funds
-- Enforce meaningful payout/treasury rules in Move
-- Execute approved stablecoin payments
-- Provide verifiable transaction history
-- Support real on-chain payment execution
+The MVP keeps a human treasurer in the final approval loop.
 
 ## Hackathon Tracks
 
 ### Sui Track 01 — Payments & Stablecoins
 
-ClubTreasury AI is a programmable treasury and reimbursement system for university clubs. The project focuses on stablecoin money management, controlled payouts, budget enforcement, and a real payment workflow.
+Focus: programmable treasury, stablecoin management, reimbursement/payout workflow, spending controls, and real Sui execution.
 
 ### Sui Track 02 — AI × Sui
 
-AI solves the operational problem of understanding budget instructions and reviewing real-world payment evidence. Sui is integral because the approved financial action is executed on-chain rather than being a separate demo-only blockchain feature.
-
-## MVP Scope
-
-The hackathon MVP should prioritize one complete end-to-end demo:
-
-1. Connect Sui wallet
-2. Create one club/event treasury
-3. Generate a budget with AI from natural-language instructions
-4. Confirm the budget
-5. Submit a reimbursement/payment request
-6. Upload a receipt
-7. Run AI analysis
-8. Show Approve / Review / Reject recommendation
-9. Treasurer approves
-10. Execute Sui testnet payment
-11. Update budget and show transaction result
-
-Do not prioritize extra features until this full workflow works reliably.
+Focus: useful AI for budget/receipt understanding, deterministic financial safety, human approval, and Sui as the integral payment execution layer.
 
 ## Current Development Stage
 
-The authoritative current stage is always recorded in `docs/PROJECT_STATUS.md`.
+**Stage 2 — Core UI and deterministic domain rules — CURRENT**
 
-Every coding agent must read `AGENTS.md`, `docs/PROJECT_STATUS.md`, `docs/DEVELOPMENT_STAGES.md`, and `docs/AI_USAGE_POLICY.md` before development, then print the current stage/status/completed stages/next task before editing anything.
-
-The project uses these official stages:
+Completed:
 
 - Stage 0 — Planning and repository setup
 - Stage 1 — Application foundation
-- Stage 2 — Core UI and deterministic domain rules
-- Stage 3 — Sui foundation and Move treasury
-- Stage 4 — Gemini AI layer
-- Stage 5 — Claim and receipt workflow integration
-- Stage 6 — Human approval and on-chain payment
-- Stage 7 — Demo hardening and deployment
-- Stage 8 — Submission and pitch
 
-See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
+Read `docs/PROJECT_STATUS.md` for the authoritative current task before coding.
 
-## AI Cost-Control Policy
+Every coding agent must first read `AGENTS.md`, `docs/PROJECT_STATUS.md`, `docs/DEVELOPMENT_STAGES.md`, and `docs/AI_USAGE_POLICY.md`, then show the current stage/status/completed stages/next task before editing.
 
-The product AI provider is the **Google Gemini Developer API** using the official `@google/genai` SDK. The default MVP model is `gemini-2.5-flash`.
+## Stage 1 Foundation
 
-Normal development must default to:
+The repository now includes:
+
+- Next.js 16 App Router + React 19 + strict TypeScript
+- Node `24.16.0` pinned in `.nvmrc` and `.node-version`
+- pnpm `10.15.1` pinned in `package.json`
+- committed `pnpm-lock.yaml`
+- Tailwind CSS 4
+- Sui TypeScript SDK + dApp Kit React packages
+- Zod + React Hook Form
+- Vitest + React Testing Library + Playwright
+- centralized environment validation
+- `AIService` + deterministic `MockAIService`
+- Sui and Supabase module boundaries
+- integer/minor-unit money helpers
+- deterministic AI fixtures
+- health homepage + `/api/health`
+- loading/error/not-found boundaries
+- GitHub Actions CI
+- unit and browser smoke tests
+
+Stage 1 CI has verified frozen dependency install, lint, typecheck, unit tests, production build, Chromium setup, and Playwright smoke testing without a Gemini API key.
+
+## Developer Quick Start
+
+### 1. Clone
+
+```bash
+git clone https://github.com/lejun10290000/APU_MUBA_SUI_ClubTreasuryAI.git
+cd APU_MUBA_SUI_ClubTreasuryAI
+```
+
+### 2. Use the pinned runtime
+
+Recommended:
+
+```bash
+nvm use
+```
+
+The project expects Node `24.16.0` and pnpm `10.15.1`.
+
+Install the pinned pnpm version if needed:
+
+```bash
+npm install --global pnpm@10.15.1
+```
+
+### 3. Install dependencies
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+### 4. Create local environment file
+
+```bash
+cp .env.example .env.local
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+For Stage 1/2 normal development, keep:
 
 ```text
 AI_MODE=mock
 GEMINI_LIVE_REQUESTS_ENABLED=false
 ```
 
-Mock mode must make zero Gemini API calls. Use it for routine UI work, unit tests, CI, normal Playwright runs, Sui/Move development, repeated local testing, and most demo rehearsals.
+**No Gemini API key is required for normal Stage 1/2 development.**
 
-Live Gemini may be enabled only for explicit integration/quality checks, small fixture validation, official demo-video recording, final regression checks, and the live hackathon demo. Never claim a mock response is a live Gemini result.
+### 5. Run
 
-See `docs/AI_USAGE_POLICY.md` for the authoritative rules.
+```bash
+pnpm dev
+```
+
+Open `http://localhost:3000`.
+
+Health endpoint:
+
+```text
+http://localhost:3000/api/health
+```
+
+### 6. Verify before pushing
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e:smoke
+```
+
+The first Playwright run on a new machine may require browser installation:
+
+```bash
+pnpm exec playwright install chromium
+```
+
+## Common Scripts
+
+```bash
+pnpm dev             # local development
+pnpm lint            # ESLint
+pnpm format          # formatting check
+pnpm format:write    # format files
+pnpm typecheck       # TypeScript check
+pnpm test            # unit tests
+pnpm test:e2e        # all Playwright tests
+pnpm test:e2e:smoke  # foundation smoke test
+pnpm build           # production build
+pnpm start           # run production build
+```
+
+## AI Cost-Control Policy
+
+Committed/default development mode:
+
+```text
+AI_MODE=mock
+GEMINI_LIVE_REQUESTS_ENABLED=false
+```
+
+Mock mode must make **zero Gemini API calls**. Use it for routine UI work, CI, tests, Sui/Move development, and most rehearsals.
+
+Live Gemini is reserved for Stage 4+ explicit integration/quality validation and later official demo needs. See `docs/AI_USAGE_POLICY.md`.
+
+## Environment Safety
+
+Never commit:
+
+- `.env` or `.env.local`
+- Gemini/Supabase API keys
+- wallet private keys
+- seed phrases
+- passwords or tokens
+
+Use `.env.example` only as a placeholder template.
+
+## Technology Stack
+
+- Runtime: Node.js 24 LTS
+- Package manager: pnpm
+- App: Next.js 16 App Router, React 19, strict TypeScript
+- UI: Tailwind CSS 4
+- Validation/forms: Zod + React Hook Form
+- Product AI planned for Stage 4: Google Gemini Developer API using `@google/genai`, default `gemini-2.5-flash`
+- Normal development AI: deterministic mock-first `AIService`
+- Database/storage later: Supabase PostgreSQL + private Storage
+- Blockchain: Sui Testnet, Move, `@mysten/sui`, `@mysten/dapp-kit-react`
+- Payment asset: native Sui Testnet USDC
+- Testing: Vitest, React Testing Library, Playwright, later `sui move test`
+- CI: GitHub Actions
+
+See `docs/TECH_STACK.md` for architecture details.
 
 ## Sui Testnet Deployment
 
@@ -123,88 +229,36 @@ See `docs/AI_USAGE_POLICY.md` for the authoritative rules.
 - Treasury Object ID: TBD
 - Other deployed object/address IDs: TBD
 
-These values must be updated after deployment.
+Do not invent IDs before deployment.
 
-## Repository Documentation
+## Important Documentation
 
-Important files for teammates and coding agents:
-
-- `AGENTS.md` — mandatory project and coding-agent rules
-- `HACKATHON_REQUIREMENTS.md` — official submission and pitch requirements
-- `CONTRIBUTING.md` — team workflow and Git contribution rules
-- `docs/PROJECT_SPEC.md` — detailed product specification
-- `docs/PROJECT_STATUS.md` — live current stage, completed work, blockers, and exact next task
-- `docs/DEVELOPMENT_STAGES.md` — official Stage 0–8 plan and exit criteria
-- `docs/ROADMAP.md` — detailed task checklist aligned to the stages
-- `docs/AI_USAGE_POLICY.md` — Gemini vs mock usage/billing policy
-- `docs/ARCHITECTURE.md` — technical architecture
-- `docs/TECH_STACK.md` — finalized MVP technologies and implementation boundaries
-- `docs/DEMO_PLAN.md` — demo flow and backup plan
-
-## Start Here for Development
-
-Before starting any work:
-
-1. Read `docs/PROJECT_STATUS.md` and `docs/DEVELOPMENT_STAGES.md`.
-2. Read `AGENTS.md` and `docs/AI_USAGE_POLICY.md`.
-3. Read the remaining required project docs.
-4. Check recent commits and open pull requests.
-5. Print the current stage/status/completed stages/next task.
-6. Only then begin the exact next task.
-
-Every development pull request or direct commit must update project status, roadmap, and stage status if it changed. A feature is not complete while the handoff is stale.
-
-## Technology Stack
-
-The hackathon MVP stack is finalized:
-
-- Runtime/tooling: Node.js 24 LTS, pnpm, strict TypeScript
-- Full-stack app: Next.js 16 App Router and React 19
-- UI: Tailwind CSS 4, shadcn/ui, Lucide icons
-- Validation/forms: Zod and React Hook Form
-- Backend/API: Next.js Route Handlers and server-only modules
-- Database/storage: Supabase PostgreSQL and a private Supabase Storage bucket
-- AI: Google Gemini Developer API, `@google/genai`, default `gemini-2.5-flash`
-- AI development: mock-first `AIService` architecture to control API usage/cost
-- Blockchain: Sui Testnet, Move, `@mysten/sui` v2, and `@mysten/dapp-kit-react`
-- Payment asset: native Circle-issued Sui Testnet USDC
-- Hosting: Vercel and Supabase
-- Testing: Vitest, React Testing Library, Playwright, and `sui move test`
-- CI: GitHub Actions
-
-See `docs/TECH_STACK.md` for the full decision and `docs/AI_USAGE_POLICY.md` for AI billing rules.
-
-## Setup / Installation
-
-Installation instructions will be updated as Stage 1 implementation begins.
-
-```bash
-git clone https://github.com/lejun10290000/APU_MUBA_SUI_ClubTreasuryAI.git
-cd APU_MUBA_SUI_ClubTreasuryAI
-```
-
-Further dependency and environment setup: TBD.
-
-## Environment Variables
-
-Never commit real keys, passwords, wallet private keys, or seed phrases.
-
-Use `.env.example` as the template and keep local secrets in `.env.local`.
+- `AGENTS.md` — mandatory coding-agent/project rules
+- `HACKATHON_REQUIREMENTS.md` — official submission/pitch requirements
+- `CONTRIBUTING.md` — collaboration workflow
+- `docs/PROJECT_STATUS.md` — current stage, completed work, blockers, next task
+- `docs/DEVELOPMENT_STAGES.md` — Stage 0–8 scope/exit criteria
+- `docs/ROADMAP.md` — task checklist
+- `docs/PROJECT_SPEC.md` — product requirements
+- `docs/AI_USAGE_POLICY.md` — Gemini/mock billing rules
+- `docs/ARCHITECTURE.md` — architecture
+- `docs/TECH_STACK.md` — stack decisions
+- `docs/DEMO_PLAN.md` — demo flow
 
 ## AI Tools Used During Development
 
-The hackathon requires declaration of every AI tool used. Keep this section updated throughout development.
+The hackathon requires declaration of every AI development tool used.
 
 Currently declared:
 
-- ChatGPT — ideation, project planning, architecture discussion, documentation assistance
-- OpenAI Codex — coding assistance, implementation, debugging, and repository work (when used)
+- ChatGPT — ideation, planning, architecture, documentation, repository assistance
+- OpenAI Codex — coding assistance, implementation, debugging, repository work when used
 
 Product AI provider:
 
-- Google Gemini Developer API — budget parsing and receipt/image analysis when live AI mode is explicitly enabled
+- Google Gemini Developer API — planned live budget parsing and receipt/image analysis when explicitly enabled in later stages
 
-Add every other AI tool used by any team member before submission.
+Add every other AI tool used by any teammate before submission.
 
 ## Team Members
 
@@ -214,10 +268,6 @@ Add all official team members before submission.
 |---|---|---|---|
 | TBD | TBD | TBD | TBD |
 
-## Submission Status
+## Submission
 
-See `HACKATHON_REQUIREMENTS.md` for the full checklist.
-
-## Important Development Rule
-
-This project is for MUBA Blockchain Hackathon 2026. Development and commit history must comply with the official hackathon period and originality requirements. Do not copy in pre-existing private/proprietary project code or old codebases.
+See `HACKATHON_REQUIREMENTS.md` for the full official checklist. The repository must remain public, source/commit history clear, AI tools declared, testnet IDs recorded after deployment, and the final 3–5 minute demo video linked before submission.

@@ -1,0 +1,11 @@
+{
+  "currency": "USDC",
+  "categories": [
+    { "name": "Food", "amountMinor": 30000 },
+    { "name": "Marketing", "amountMinor": 20000 },
+    { "name": "Venue", "amountMinor": 25000 },
+    { "name": "Prizes", "amountMinor": 15000 },
+    { "name": "Emergency", "amountMinor": 10000 }
+  ],
+  "notes": ["Synthetic fixture for mock development only"]
+}

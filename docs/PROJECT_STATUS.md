@@ -2,27 +2,27 @@
 
 This file is the **single source of truth for current implementation status, current development stage, blockers, and next task**.
 
-Every teammate and coding agent must read this file before starting work. Every development change must update this file in the same PR/commit.
+Every teammate and coding agent must read this file before starting work and update it in the same PR/commit as development changes.
 
 ## Current Snapshot
 
 - Last updated: **28 August 2026 (MYT)**
 - Default branch: `main`
-- **Current stage: Stage 1 — Application foundation**
+- **Current stage: Stage 2 — Core UI and deterministic domain rules**
 - Stage status: **CURRENT**
-- Completed stages: **Stage 0 — Planning and repository setup**
-- Latest completed milestone: **Stage 1 foundation requirements strengthened before implementation**
-- Active implementation work: **None yet**
-- Current blockers: **None for Stage 1 scaffolding**
-- Demo readiness: **Planning complete; no executable application yet**
+- Completed stages: **Stage 0 — Planning and repository setup; Stage 1 — Application foundation**
+- Latest completed milestone: **Stage 1 application foundation implemented and verified in CI**
+- Active implementation work: **None after Stage 1 handoff**
+- Current blockers: **None for Stage 2 mock-data UI/domain work**
+- Demo readiness: **Executable application foundation exists; business workflow is not implemented yet**
 
 ## Stage Progress
 
 | Stage | Name | Status |
 |---|---|---|
 | 0 | Planning and repository setup | COMPLETE |
-| 1 | Application foundation | CURRENT |
-| 2 | Core UI and deterministic domain rules | NOT STARTED |
+| 1 | Application foundation | COMPLETE |
+| 2 | Core UI and deterministic domain rules | CURRENT |
 | 3 | Sui foundation and Move treasury | NOT STARTED |
 | 4 | Gemini AI layer | NOT STARTED |
 | 5 | Claim and receipt workflow integration | NOT STARTED |
@@ -34,190 +34,160 @@ See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
 
 ## Completed
 
+### Stage 0
+
 - project concept, target user, and dual-track positioning
-- hackathon requirements/submission checklist
-- product specification and MVP boundaries
-- architecture and on-chain/off-chain boundaries
-- demo scenario/rehearsal plan
-- technical stack
-- Sui SDK v2/new dApp Kit selection
-- native Sui Testnet USDC selection
-- secret-safe environment template
-- project status/agent handoff process
-- AI provider changed to Google Gemini Developer API
-- mock-first Gemini usage/billing policy
-- future development split into official stages
-- mandatory agent rule to show current stage before development
-- strengthened Stage 1 foundation requirements for reproducibility, service boundaries, config safety, money handling, smoke testing, and teammate onboarding
+- hackathon requirements and submission checklist
+- product specification, architecture, roadmap, demo plan, and team/agent workflow
+- Gemini provider decision plus mock-first AI billing policy
+
+### Stage 1
+
+- Next.js 16 App Router + React 19 + strict TypeScript application scaffold
+- Node `24.16.0` pinned via `.nvmrc` and `.node-version`
+- pnpm `10.15.1` pinned via `packageManager`
+- committed `pnpm-lock.yaml` and frozen-lockfile CI install
+- Tailwind CSS 4 base styling and application shell
+- `@mysten/sui` v2 and `@mysten/dapp-kit-react` dependencies installed
+- Zod + React Hook Form dependencies installed
+- Vitest + React Testing Library + Playwright configured
+- lint, format, typecheck, test, e2e, build scripts
+- centralized Zod environment validation in `src/config/env.ts`
+- mock-first `AIService` boundary and deterministic `MockAIService`
+- Stage 1 intentionally has no live Gemini implementation
+- Sui and Supabase module/service boundaries created without live business integration
+- deterministic AI fixtures created under `tests/fixtures/ai/`
+- integer/minor-unit money helpers created in `src/domain/money.ts`
+- health homepage and `/api/health` route
+- base loading, error, and not-found UI
+- unit tests for money rules and mock AI schema outputs
+- Playwright home/health smoke test
+- GitHub Actions CI runs with `AI_MODE=mock`, no Gemini key, and frozen lockfile
+- CI verification passed: install, lint, typecheck, unit tests, production build, Chromium install, smoke test
 
 ## Not Yet Implemented
 
-- Next.js application scaffold
-- dependency manifest/lockfile
-- pinned Node/pnpm project metadata
-- frontend pages/reusable UI
-- centralized runtime configuration module
-- base error/loading/not-found boundaries
-- deterministic financial schemas/rules
-- integer/minor-unit money utilities
-- AI/Sui/Supabase service boundaries in code
-- deterministic mock fixtures in code
-- Supabase migrations/private receipt bucket
-- Gemini SDK integration and live Gemini calls
-- Sui wallet connection
-- Move package/tests
-- treasury creation/deposit/budget confirmation/payout
-- integrated claim/human-approval workflow
-- CI
-- smoke/e2e tests
+- real product dashboard/business pages
+- complete shared treasury/budget/claim domain schemas and deterministic rules
+- real Sui wallet connection
+- Move package and contract tests
+- treasury creation/funding/budget confirmation/payout
+- `@google/genai` live Gemini implementation
+- live budget/receipt AI analysis
+- Supabase migrations and private receipt bucket
+- integrated claim + human approval flow
 - Sui Testnet deployment
-- live demo/screenshots/video
+- live demo URL, screenshots, and video
 
-Do not describe anything above as working until real code and verification exist.
+Do not describe these as working until real code and verification exist.
 
 ## Next Recommended Task
 
-### Stage 1 task: Scaffold the strengthened application foundation
+### Stage 2 task: Build the mock-data product shell and deterministic financial domain
 
-Create the implementation foundation specified in `docs/TECH_STACK.md` and `docs/DEVELOPMENT_STAGES.md` without adding business features yet.
+Implement Stage 2 without live Gemini, live Supabase, Move, or real Sui transactions.
 
-Required deliverables:
+Required priorities:
 
-1. Scaffold Next.js 16 App Router with React 19 and strict TypeScript.
-2. Use pnpm and commit `pnpm-lock.yaml`.
-3. Pin Node/pnpm versions with `.nvmrc` or `.node-version` and `packageManager` in `package.json`.
-4. Configure Tailwind CSS 4 and a minimal shared layout/UI foundation.
-5. Add current `@mysten/sui` v2 and `@mysten/dapp-kit-react` packages.
-6. Add Zod, React Hook Form, Vitest, React Testing Library, and Playwright.
-7. Add lint, format, typecheck, unit-test, e2e-test, and build scripts.
-8. Create the application directory boundaries documented in `docs/TECH_STACK.md`.
-9. Add one centralized validated config/environment module.
-10. Default to `AI_MODE=mock`; Stage 1 must not require or call Gemini.
-11. Create an `AIService` interface plus mock-safe structure only; do not implement live Gemini behavior yet.
-12. Create placeholder/module boundaries for Sui and Supabase without live business integration.
-13. Add deterministic fixtures for sample budget, claim, and AI responses.
-14. Add domain money conventions/utilities based on integer/minor units; do not use JS floating point for authoritative money values.
-15. Add minimal home/health route proving the app builds/runs.
-16. Add base `loading`, `not-found`, and `error` boundaries.
-17. Add at least one smoke test for the home/health path.
-18. Add GitHub Actions for install, lint, typecheck, unit tests, and build.
-19. CI must run in mock mode and pass with no Gemini key.
-20. Update README with a fresh-clone developer quick-start.
-21. Update this file, `docs/DEVELOPMENT_STAGES.md`, and `docs/ROADMAP.md` in the same PR when implementation status changes.
+1. Build the main navigation/application shell for treasurer/member workflow.
+2. Add landing/login shell and treasurer dashboard shell.
+3. Add treasury/event creation UI.
+4. Add budget creation form plus editable structured preview using deterministic mock data.
+5. Add claim submission form and claim review UI shell.
+6. Add transaction/history UI shell using clearly labeled mock data.
+7. Define shared Zod schemas for treasury, budget categories, claims, and statuses.
+8. Extend integer/minor-unit money helpers for validation and safe totals.
+9. Add deterministic budget-total/category-remaining checks.
+10. Add receipt/request amount comparison helpers.
+11. Add exact/similar duplicate helper rules that do not require AI.
+12. Unit-test all hard financial/domain rules.
+13. Keep all AI behavior mocked and all blockchain actions clearly non-live until their later stages.
+14. Update status, stages, roadmap, and README when Stage 2 changes become real.
 
-Acceptance criteria:
+### Stage 2 exit criteria
 
-- a new teammate can clone and follow README without asking for hidden setup steps
-- clean `pnpm install --frozen-lockfile`
-- pinned Node/pnpm metadata exists
-- lint passes
-- typecheck passes
-- unit tests pass
-- production build passes
-- Playwright config loads
-- smoke test passes
-- CI passes without `GEMINI_API_KEY`
-- default AI mode is mock and makes zero Gemini requests
-- configuration is centralized/validated
-- AI/Sui/Supabase boundaries exist without premature live integrations
-- money representation uses integer/minor units for authoritative values
-- base error/loading/not-found UX exists
-- no secrets or `.env.local` committed
-- no fake Sui package IDs/transaction digests/deployment claims
-- no Stage 2+ business feature is prematurely marked complete
-
-Non-goals for Stage 1:
-
-- no Move business logic
-- no live Supabase project setup
-- no live Gemini API calls
-- no treasury/claim business UI beyond minimal shared shell
-- no Sui Testnet deployment
+- main product flow is navigable with clearly labeled mock/demo data
+- hard financial rules are deterministic and covered by unit tests
+- no JavaScript floating-point values are used as authoritative money values
+- no UI claims live Gemini, Supabase persistence, wallet signing, or on-chain payment before those integrations exist
+- lint, typecheck, tests, build, and smoke CI continue to pass
 
 ## Locked MVP Decisions
 
 Do not change without explicit team approval:
 
-- Target user: university club treasurers and finance committee members
-- AI is advisory; treasurer approves the final payment
-- Sui performs real testnet stablecoin custody/payment execution
-- Payment asset: native Sui Testnet USDC
-- Frontend/backend: one Next.js application
-- AI provider: Google Gemini Developer API
-- Default model: `gemini-2.5-flash`
-- Official JS SDK: `@google/genai`
-- Normal development AI mode: `mock`
-- Database/storage: Supabase PostgreSQL + private Storage
-- Blockchain packages: `@mysten/sui` v2 + `@mysten/dapp-kit-react`
-- Raw receipts remain private/off-chain
-- authoritative money values use integer/minor-unit semantics, not floating-point arithmetic
-- optional features wait until core demo is stable
-
-See `docs/TECH_STACK.md`, `docs/ARCHITECTURE.md`, and `docs/AI_USAGE_POLICY.md`.
+- target user: university club treasurers and finance committee members
+- AI is advisory; treasurer approves final payment
+- Sui performs real testnet stablecoin custody/payment execution in later stages
+- payment asset: native Sui Testnet USDC
+- one Next.js application for frontend/server API
+- product AI provider: Google Gemini Developer API
+- default planned Gemini model: `gemini-2.5-flash`
+- official Gemini SDK when Stage 4 begins: `@google/genai`
+- normal development AI mode: `mock`
+- database/storage later: Supabase PostgreSQL + private Storage
+- blockchain packages: `@mysten/sui` v2 + `@mysten/dapp-kit-react`
+- raw receipts remain private/off-chain
+- authoritative money values use integer/minor-unit semantics
+- optional features wait until the core demo is stable
 
 ## External Setup Needed Later
 
-The team will eventually need:
+Not required for Stage 2, but later stages will need:
 
-- a Google Gemini API project/key for explicit live testing/demo
-- Supabase project + keys
-- private Supabase receipt bucket
-- one or more Sui wallets
+- Google Gemini API project/key for explicit live AI tests/demo
+- Supabase project + keys and private receipt bucket
+- Sui wallet(s)
 - Sui Testnet SUI for gas
-- native Sui Testnet USDC for demo
+- native Sui Testnet USDC
 
-Never place real keys/private keys/seed phrases/secrets in GitHub, docs, screenshots, or committed env files.
+Never place keys, wallet private keys, seed phrases, or secrets in GitHub.
 
 ## Mandatory Agent Startup Output
 
-Before doing development, every coding agent must first show:
+Before development, every coding agent must read this file and show the values from it:
 
 ```text
-CURRENT PROJECT STAGE: Stage 1 — Application foundation
+CURRENT PROJECT STAGE: Stage 2 — Core UI and deterministic domain rules
 STATUS: CURRENT
-COMPLETED STAGES: Stage 0 — Planning and repository setup
-NEXT TASK: Scaffold the strengthened application foundation
+COMPLETED STAGES: Stage 0; Stage 1
+NEXT TASK: Build the mock-data product shell and deterministic financial domain
 ```
-
-The values must come from this file, not memory.
 
 ## Mandatory Update Rules
 
 A task is not complete until its agent:
 
-1. updates Current Snapshot
-2. updates Stage Progress
-3. moves genuinely completed work to Completed
-4. keeps missing/blocked work accurate
-5. replaces Next Recommended Task with the next smallest demo-critical task
-6. updates matching `docs/ROADMAP.md` items
-7. updates `docs/DEVELOPMENT_STAGES.md` if stage status changed
-8. records verification commands/results
-9. adds a Recent Development Log entry
-10. updates README/architecture/tech stack/env docs when affected
-11. never claims live Gemini/Sui/deployment behavior without evidence
-
-If multiple agents work in parallel, check recent commits and open PRs first.
+1. updates Current Snapshot and Stage Progress
+2. moves only genuinely verified work to Completed
+3. keeps missing/blocked work accurate
+4. replaces Next Recommended Task with the next smallest demo-critical task
+5. updates matching `docs/ROADMAP.md` items
+6. updates `docs/DEVELOPMENT_STAGES.md` if stage status changes
+7. records verification commands/results
+8. adds a Recent Development Log entry
+9. updates README/architecture/tech stack/env docs when affected
+10. never claims live Gemini/Sui/deployment behavior without evidence
 
 ## Recent Development Log
 
+### 2026-08-28 — Completed Stage 1 application foundation
+
+- Status: COMPLETE
+- Pull request: #5
+- Change: Added executable Next.js foundation, pinned runtime/package manager, mock-first service boundaries, deterministic money helpers/fixtures, error/loading states, tests, health route, and CI.
+- Verification: GitHub Actions passed frozen install, lint, typecheck, unit tests, production build, Chromium installation, and Playwright smoke test with no Gemini API key.
+- Next: Stage 2 — build mock-data product shell and deterministic financial domain.
+
 ### 2026-08-28 — Strengthened Stage 1 foundation requirements
 
-- Status: Completed documentation/planning change
-- Change: Added runtime pinning, centralized config, service boundaries, mock fixtures, integer money rules, base error/loading UX, smoke testing, stronger CI, and teammate quick-start requirements.
-- Verification: documentation consistency review; no implementation falsely marked complete.
-- Next: Stage 1 — scaffold the strengthened application foundation.
+- Status: Completed planning change
+- Change: Locked reproducibility, config, service-boundary, money, testing, and onboarding requirements before implementation.
 
 ### 2026-08-28 — Switched AI plan to Gemini and added development stages
 
-- Status: Completed documentation/planning change
-- Change: Replaced OpenAI plan with Gemini, introduced mock-first AI rules, defined Stages 0–8, and required agents to show the current stage before development.
-- Next: Stage 1 — scaffold the application foundation.
-
-### 2026-08-28 — Added project-status handoff
-
-- Status: Completed
-- Change: Added live project snapshot and mandatory agent update rules.
+- Status: Completed planning change
+- Change: Introduced Gemini mock-first policy and Stages 0–8.
 
 ## Starter Prompt for a New Coding Agent
 
