@@ -90,6 +90,26 @@ The authoritative stage plan is `docs/DEVELOPMENT_STAGES.md`.
 
 A stage is complete only after its exit criteria are verified and merged to `main`.
 
+## Stage 1 Foundation Guardrails
+
+While Stage 1 is current, agents must prioritize reproducibility and boundaries over features.
+
+Required principles:
+
+- pin Node and pnpm project versions
+- keep one centralized validated config/environment module
+- default to `AI_MODE=mock`
+- Stage 1 must make zero live Gemini calls
+- create clear AI/Sui/Supabase module boundaries before live integrations
+- create deterministic mock fixtures for budget/claim/AI responses
+- use integer/minor-unit semantics for authoritative money values; do not use floating-point money arithmetic
+- add base loading, not-found, and recoverable error UI
+- add a home/health smoke test
+- CI must pass without Gemini API keys or live external services
+- README must provide a fresh-clone quick-start that another teammate can actually follow
+
+Do not add Stage 2+ business features just because scaffolding makes them easy. Complete the Stage 1 exit criteria first.
+
 ## Gemini and Mock-AI Rule
 
 The AI provider is **Google Gemini Developer API** using the official `@google/genai` SDK. The default MVP model is `gemini-2.5-flash` unless the team explicitly changes it after validation.
@@ -134,6 +154,21 @@ Do not prioritize optional features until this works reliably.
 - Keep receipts private and off-chain.
 - Never let a backend hold wallet private keys.
 - Prefer the simplest architecture that can be completed and demoed reliably.
+- Feature code should depend on internal interfaces/modules rather than vendor SDKs directly.
+- Feature code should not read scattered environment variables directly; use the centralized config module.
+
+## Money Safety Rule
+
+Authoritative monetary values must not be calculated using JavaScript floating-point arithmetic.
+
+Agents should establish and preserve integer/minor-unit money handling so that:
+
+- display strings are parsed into validated integer units
+- addition/subtraction/comparison use integer semantics
+- decimals are explicit per asset
+- TypeScript values remain compatible with later Move/Sui amounts
+
+Do not introduce `number`-based financial calculations that can create rounding ambiguity.
 
 ## Repository and Security Rules
 
@@ -184,6 +219,8 @@ A hackathon-critical feature is complete only when:
 - deterministic rules are tested where practical
 - docs/status/stages are updated
 - no secrets are committed
+
+For Stage 1 specifically, completion also requires a reproducible fresh-clone setup, pinned runtime/package-manager metadata, centralized config, mock-only AI development, smoke testing, and CI that does not depend on live external services.
 
 ## Q&A Readiness
 
