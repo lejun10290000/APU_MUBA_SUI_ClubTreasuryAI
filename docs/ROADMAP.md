@@ -1,72 +1,63 @@
 # ClubTreasury AI — Hackathon Roadmap
 
-This roadmap follows the official project stages in `docs/DEVELOPMENT_STAGES.md`. Finish each stage's demo-critical work before optional features.
+This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work before optional features.
 
 ## Stage 0 — Planning and repository setup — COMPLETE
 
-- [x] Create clean hackathon repository
-- [x] Add README
-- [x] Add AGENTS.md
-- [x] Add hackathon requirements
-- [x] Add contribution guide
-- [x] Add `.gitignore` and `.env.example`
-- [x] Add project specification
-- [x] Finalize technical stack
-- [x] Add architecture documentation
-- [x] Add demo plan
-- [x] Add project-status/agent handoff process
-- [x] Switch AI provider plan to Gemini
-- [x] Add mock-first Gemini usage/billing policy
-- [x] Add staged-development process
+- [x] Clean hackathon repository
+- [x] README, AGENTS.md, contribution guide, hackathon requirements
+- [x] Product specification, architecture, tech stack, demo plan
+- [x] Gemini mock-first billing policy
+- [x] Staged-development + project-status handoff process
 - [ ] Add all official team members
 
-## Stage 1 — Application foundation — CURRENT
+## Stage 1 — Application foundation — COMPLETE
 
-- [ ] Scaffold Next.js 16 App Router + React 19 + strict TypeScript
-- [ ] Use pnpm and commit `pnpm-lock.yaml`
-- [ ] Pin Node runtime with `.nvmrc` or `.node-version`
-- [ ] Add `packageManager` to `package.json` to lock pnpm major/version
-- [ ] Configure Tailwind CSS 4
-- [ ] Add base shared UI primitives/layout shell
-- [ ] Add `@mysten/sui` v2 and `@mysten/dapp-kit-react`
-- [ ] Add Zod + React Hook Form
-- [ ] Add Vitest + React Testing Library + Playwright
-- [ ] Add lint/format/typecheck/test/e2e/build scripts
-- [ ] Create application directory boundaries
-- [ ] Add centralized environment/config validation module
-- [ ] Prevent feature code from reading scattered `process.env` directly
-- [ ] Default application to `AI_MODE=mock`
-- [ ] Ensure mock mode requires no Gemini key and makes zero Gemini calls
-- [ ] Add `AIService` interface boundary without live Gemini implementation
-- [ ] Add mock-safe AI adapter/placeholders for future UI development
-- [ ] Add Sui and Supabase service/module boundaries without live business integration
-- [ ] Add deterministic fixture directories for sample budget, claim, and AI responses
-- [ ] Add domain money utility conventions using integer/minor units only
-- [ ] Add minimal home/health page or route
-- [ ] Add app-wide `loading`, `not-found`, and `error` boundaries
-- [ ] Add at least one smoke test for home/health route
-- [ ] Add GitHub Actions CI
-- [ ] Force CI to run in mock AI mode without `GEMINI_API_KEY`
-- [ ] Update README with clone/install/env/run/test/build quick-start
-- [ ] Verify a fresh teammate setup from README
+- [x] Scaffold Next.js 16 App Router + React 19 + strict TypeScript
+- [x] Use pnpm and commit `pnpm-lock.yaml`
+- [x] Pin Node runtime in `.nvmrc` and `.node-version`
+- [x] Pin pnpm with `packageManager`
+- [x] Configure Tailwind CSS 4 and base app shell
+- [x] Add `@mysten/sui` v2 and `@mysten/dapp-kit-react`
+- [x] Add Zod + React Hook Form
+- [x] Add Vitest + React Testing Library + Playwright
+- [x] Add lint/format/typecheck/test/e2e/build scripts
+- [x] Create application directory/service boundaries
+- [x] Add centralized environment/config validation
+- [x] Default application to `AI_MODE=mock`
+- [x] Ensure Stage 1 needs no Gemini key and makes no live Gemini calls
+- [x] Add `AIService` + deterministic `MockAIService`
+- [x] Add Sui/Supabase module boundaries without live business integration
+- [x] Add deterministic AI fixtures
+- [x] Add integer/minor-unit money helpers
+- [x] Add health homepage and `/api/health`
+- [x] Add loading/not-found/error boundaries
+- [x] Add unit tests and Playwright smoke test
+- [x] Add GitHub Actions CI
+- [x] CI uses frozen lockfile and mock AI mode without Gemini key
+- [x] Verify lint, typecheck, unit tests, build, Chromium install, smoke test
+- [x] Update README quick-start
 
-## Stage 2 — Core UI and deterministic domain rules — NOT STARTED
+## Stage 2 — Core UI and deterministic domain rules — CURRENT
 
 - [ ] Landing/login shell
 - [ ] Treasurer dashboard shell
 - [ ] Treasury/event creation UI
-- [ ] Budget creation interface
-- [ ] Editable budget preview
+- [ ] Budget creation form
+- [ ] Editable structured budget preview
 - [ ] Claim submission form
 - [ ] Claim review/approval UI shell
 - [ ] Transaction/history UI shell
-- [ ] Shared Zod schemas
+- [ ] Shared Zod treasury/budget/claim/status schemas
 - [ ] Positive amount/currency validation
+- [ ] Safe integer/minor-unit totals
 - [ ] Budget-total validation
 - [ ] Category-remaining checks
 - [ ] Receipt/request amount comparison
-- [ ] Duplicate/similar-claim helpers
+- [ ] Exact/similar duplicate helpers
 - [ ] Unit tests for hard financial rules
+- [ ] Clearly label all mock/demo data
+- [ ] Keep CI green
 
 ## Stage 3 — Sui foundation and Move treasury — NOT STARTED
 
@@ -78,75 +69,60 @@ This roadmap follows the official project stages in `docs/DEVELOPMENT_STAGES.md`
 - [ ] Implement deposit/funding flow
 - [ ] Implement confirmed category allocation state
 - [ ] Implement approved payout flow
-- [ ] Re-check remaining category amount on-chain
+- [ ] Re-check category remaining on-chain
 - [ ] Emit payout events
-- [ ] Add Move tests
-- [ ] Add transaction error handling
+- [ ] Add Move tests + transaction error handling
 - [ ] Deploy package to Sui Testnet
 - [ ] Record real package/object IDs in README
 
 ## Stage 4 — Gemini AI layer — NOT STARTED
 
 - [ ] Add official `@google/genai` SDK
-- [ ] Add `AIService` live implementation using `GeminiAIService`
-- [ ] Add deterministic AI fixtures
-- [ ] Define structured budget schema
+- [ ] Add live `GeminiAIService` behind existing `AIService`
+- [ ] Define structured budget output
 - [ ] Build natural-language budget parser
-- [ ] Define structured receipt schema
+- [ ] Define structured receipt output
 - [ ] Build receipt/image extraction
-- [ ] Add category suggestion
-- [ ] Add concise evidence/recommendation reasons
-- [ ] Validate all AI output server-side
+- [ ] Add category suggestion + concise reasons
+- [ ] Validate all model output server-side
 - [ ] Enforce `docs/AI_USAGE_POLICY.md`
-- [ ] Verify live Gemini only with small explicit fixture set
+- [ ] Verify live Gemini with small explicit fixture set only
 
 ## Stage 5 — Claim and receipt workflow integration — NOT STARTED
 
 - [ ] Create Supabase migrations
 - [ ] Configure private receipt bucket
-- [ ] Secure receipt upload
-- [ ] Hash receipt bytes
-- [ ] Persist claims
-- [ ] Persist AI review results
-- [ ] Exact duplicate check
-- [ ] Similar-claim check
+- [ ] Secure receipt upload + hash receipt bytes
+- [ ] Persist claims and AI review results
+- [ ] Exact/similar duplicate checks
 - [ ] Run mock/live AI through shared adapter
 - [ ] Apply deterministic budget checks
-- [ ] Return Approve / Review / Reject recommendation
-- [ ] Show understandable reasons
+- [ ] Return Approve / Review / Reject with understandable reasons
 - [ ] Manual Review fallback when AI fails
 
 ## Stage 6 — Human approval and on-chain payment — NOT STARTED
 
-- [ ] Treasurer review screen works with real claim data
-- [ ] Approve action
-- [ ] Reject action
-- [ ] Approved-unpaid state
+- [ ] Real treasurer review with claim data
+- [ ] Approve/reject actions + approved-unpaid state
 - [ ] Build Sui payout transaction
-- [ ] Treasurer signs/confirms transaction
+- [ ] Treasurer wallet signs/confirms
 - [ ] Move payout re-checks category budget
 - [ ] Execute Testnet USDC payout
 - [ ] Handle transaction finality/status
-- [ ] Update claim only after success
-- [ ] Update remaining budget only after success
-- [ ] Show transaction digest/explorer reference
+- [ ] Update claim/budget only after success
+- [ ] Show transaction digest/explorer link
 - [ ] Add idempotent synchronization/retry protection
 
 ## Stage 7 — Demo hardening and deployment — NOT STARTED
 
 - [ ] Deploy Next.js app
 - [ ] Configure demo Supabase project
-- [ ] Prepare Testnet SUI for gas
-- [ ] Prepare Testnet USDC
+- [ ] Prepare Testnet SUI + Testnet USDC
 - [ ] Seed clean demo scenario
-- [ ] Prepare sample budget instruction
-- [ ] Prepare synthetic sample receipt
-- [ ] Test complete flow repeatedly
-- [ ] Handle Gemini failure gracefully
-- [ ] Handle wallet rejection gracefully
-- [ ] Handle Sui transaction failure gracefully
+- [ ] Prepare sample budget + synthetic receipt
+- [ ] Rehearse complete flow repeatedly
+- [ ] Handle Gemini/wallet/Sui failures gracefully
 - [ ] Improve loading/error states
-- [ ] Make demo reliable on presentation laptop
 - [ ] Prepare backup screenshots/video
 - [ ] Verify no secrets in Git history
 
@@ -154,43 +130,38 @@ This roadmap follows the official project stages in `docs/DEVELOPMENT_STAGES.md`
 
 ### Submission
 
-- [ ] Complete README
+- [ ] Complete final README
 - [ ] Add real Sui Testnet IDs
-- [ ] Add setup/install instructions
+- [ ] Add final setup/install instructions
 - [ ] Add all team members
-- [ ] Confirm declaration of every AI development tool used
-- [ ] Document Gemini as product AI provider
-- [ ] Add screenshots
-- [ ] Add live demo URL
-- [ ] Record 3–5 minute demo video
-- [ ] Upload YouTube/Loom video
-- [ ] Add video link
-- [ ] Verify public repository
+- [ ] Confirm every AI development tool declaration
+- [ ] Document Gemini product AI
+- [ ] Add screenshots + live demo URL
+- [ ] Record/upload 3–5 minute YouTube/Loom video
+- [ ] Verify public repo + no secrets
 - [ ] Submit Devfolio before 5 Sep 2026, 11:59 PM MYT
 
 ### Payments & Stablecoins pitch
 
 - [ ] 5-minute script
-- [ ] Emphasize real club treasury workflow
-- [ ] Emphasize stablecoin management/payout
+- [ ] Emphasize real club treasury + stablecoin management/payout
 - [ ] Show actual Sui transaction
-- [ ] Prepare likely Q&A
+- [ ] Prepare Q&A
 
 ### AI × Sui pitch
 
 - [ ] 5-minute script
 - [ ] Emphasize Gemini budget/receipt understanding
-- [ ] Explain deterministic financial checks
-- [ ] Explain why Sui is integral
+- [ ] Explain deterministic financial checks + why Sui is integral
 - [ ] Show AI -> human approval -> Sui execution
-- [ ] Prepare likely Q&A
+- [ ] Prepare Q&A
 
-## Optional Features — Only If Core Demo Is Stable
+## Optional — Only If Core Demo Is Stable
 
 - [ ] zkLogin
 - [ ] sponsored transactions
-- [ ] Programmable Transaction Blocks for more complex actions
-- [ ] Walrus/MemWal if it adds real value
+- [ ] advanced PTBs
+- [ ] Walrus/MemWal
 - [ ] multi-signature/dual approval
 - [ ] multi-club support
 - [ ] notifications
@@ -198,6 +169,4 @@ This roadmap follows the official project stages in `docs/DEVELOPMENT_STAGES.md`
 
 ## Team Rule
 
-If an optional feature risks the core demo, skip it. A polished working end-to-end flow is more valuable than many partially working features.
-
-Every coding agent must read `docs/PROJECT_STATUS.md` and `docs/DEVELOPMENT_STAGES.md`, show the current stage before coding, and update project status + roadmap when work changes.
+If an optional feature risks the core demo, skip it. Every coding agent must show the current stage before coding and update project status + roadmap after work changes.
