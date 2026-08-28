@@ -8,13 +8,13 @@ Every teammate and coding agent must read this file before starting work and upd
 
 - Last updated: **28 August 2026 (MYT)**
 - Default branch: `main`
-- **Current stage: Stage 2 — Core UI and deterministic domain rules**
+- **Current stage: Stage 3 — Sui foundation and Move treasury**
 - Stage status: **CURRENT**
-- Completed stages: **Stage 0 — Planning and repository setup; Stage 1 — Application foundation**
-- Latest completed milestone: **Stage 2 mock treasury/event creation flow implemented and locally verified**
-- Active implementation work: **None after the treasury-creation handoff**
-- Current blockers: **None for Stage 2 mock-data UI/domain work**
-- Demo readiness: **Landing-to-dashboard and session-only treasury setup are navigable; budget-category setup, claim actions, persistence, wallet, and payment execution are not implemented yet**
+- Completed stages: **Stage 0 — Planning and repository setup; Stage 1 — Application foundation; Stage 2 — Core UI and deterministic domain rules**
+- Latest completed milestone: **Full Stage 2 mock treasury -> budget -> claim -> review -> human decision -> history workflow implemented and verified**
+- Active implementation work: **None after the Stage 2 completion handoff**
+- Current blockers: **None for starting local Stage 3 Move package work**
+- Demo readiness: **The full mock product workflow is navigable and clearly labeled; persistence, wallet signing, Move execution, Sui payouts, and live AI remain intentionally unimplemented**
 
 ## Stage Progress
 
@@ -22,8 +22,8 @@ Every teammate and coding agent must read this file before starting work and upd
 | ----- | -------------------------------------- | ----------- |
 | 0     | Planning and repository setup          | COMPLETE    |
 | 1     | Application foundation                 | COMPLETE    |
-| 2     | Core UI and deterministic domain rules | CURRENT     |
-| 3     | Sui foundation and Move treasury       | NOT STARTED |
+| 2     | Core UI and deterministic domain rules | COMPLETE    |
+| 3     | Sui foundation and Move treasury       | CURRENT     |
 | 4     | Gemini AI layer                        | NOT STARTED |
 | 5     | Claim and receipt workflow integration | NOT STARTED |
 | 6     | Human approval and on-chain payment    | NOT STARTED |
@@ -96,18 +96,42 @@ See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
 - path-aware desktop and mobile dashboard navigation
 - unit and browser coverage for valid and invalid treasury setup paths
 
+### Stage 2 — Budget and claim workflow
+
+- editable category budget builder with add/remove controls and responsive structured preview
+- deterministic balanced, under-allocated, and over-allocated states
+- mock confirmation only when category totals equal the treasury total exactly
+- claim submission form with member, merchant, category, requested amount, typed receipt amount, and receipt reference
+- deterministic receipt/request amount comparison
+- exact duplicate detection by normalized receipt reference
+- similar duplicate detection by normalized merchant and exact amount
+- category-remaining validation and advisory Approve / Review / Reject recommendation
+- explicit human approve/reject demo decision with approved-unpaid safety state
+- transaction/history shell that never invents a Sui digest or payment result
+- session-only navigation across treasury, budget, claim, review, and history screens
+
+### Stage 2 — Completion verification
+
+- targeted formatting check passed
+- lint and strict TypeScript checks passed
+- 45 unit tests cover money, schemas, budget totals, category remaining, receipt comparison, duplicate detection, workflow builders, and human decision state
+- six Playwright smoke tests cover the product shell, treasury validation, full workflow, exact duplicate rejection, and mobile overflow
+- production build passed with all Stage 2 routes
+- desktop and 390 px visual inspection passed with zero browser console errors or warnings
+- Stage 2 exit criteria are verified
+
 ## Not Yet Implemented
 
+- real authentication and user accounts
 - treasury editing UI
-- budget-category creation and editable structured preview
-- receipt/request amount comparison and duplicate-claim helper rules
+- real receipt file upload or storage
 - real Sui wallet connection
 - Move package and contract tests
-- treasury creation/funding/budget confirmation/payout
+- real treasury creation/funding/budget confirmation/payout
 - `@google/genai` live Gemini implementation
 - live budget/receipt AI analysis
 - Supabase migrations and private receipt bucket
-- integrated claim + human approval flow
+- persistent claim + human approval integration
 - Sui Testnet deployment
 - live demo URL, screenshots, and video
 
@@ -115,28 +139,28 @@ Do not describe these as working until real code and verification exist.
 
 ## Next Recommended Task
 
-### Stage 2 task: Build budget-category creation and editable structured preview
+### Stage 3 task: Scaffold and test the Move treasury foundation
 
-Extend the session-only treasury flow with a deterministic mock budget editor without live Gemini, Supabase, wallet, Move, or Sui transactions.
+Create the first reviewable Sui Move package without adding fake deployment IDs or claiming Testnet execution.
 
 Required priorities:
 
-1. Continue from the validated treasury total stored by the session-only setup flow.
-2. Add accessible category name and allocation inputs using React Hook Form and shared Zod schemas.
-3. Convert every display amount into safe integer minor units; never use floating point values for authoritative totals.
-4. Show an editable structured preview with allocated, unallocated, and over-allocated states.
-5. Reuse deterministic `checkBudgetTotal` validation and require a balanced preview before mock confirmation.
-6. Keep all data session-only and clearly label that Gemini parsing, persistence, wallet funding, and on-chain confirmation are absent.
-7. Add unit/component/browser coverage for balanced, under-allocated, over-allocated, duplicate-name, and invalid-amount paths.
-8. Update status, roadmap, and README with the next smallest Stage 2 task.
+1. Verify the installed Sui CLI/toolchain and current official Move package conventions.
+2. Create the Move package structure in a clearly named repository directory.
+3. Model the treasury object/state and treasurer admin capability.
+4. Keep native Sui Testnet USDC as the locked payment asset direction without inventing deployed object IDs.
+5. Add Move tests for creation, ownership/admin authorization, and invalid access.
+6. Document how the Move state maps to the existing Stage 2 TypeScript domain.
+7. Run `sui move test` plus all existing application checks.
+8. Update status, roadmap, architecture, and README with verified results and the next smallest Stage 3 task.
 
-### Stage 2 exit criteria
+### Stage 2 completion evidence
 
-- main product flow is navigable with clearly labeled mock/demo data
-- hard financial rules are deterministic and covered by unit tests
-- no JavaScript floating-point values are used as authoritative money values
-- no UI claims live Gemini, Supabase persistence, wallet signing, or on-chain payment before those integrations exist
-- lint, typecheck, tests, build, and smoke CI continue to pass
+- full mock product flow is navigable with clearly labeled mock/demo data: **VERIFIED**
+- hard financial rules are deterministic and covered by unit tests: **VERIFIED**
+- authoritative financial input and arithmetic use integer/minor-unit values: **VERIFIED**
+- UI makes no false live Gemini, persistence, wallet, or Sui payout claims: **VERIFIED**
+- formatting, lint, typecheck, unit tests, build, smoke tests, and responsive visual QA pass: **VERIFIED**
 
 ## Locked MVP Decisions
 
@@ -174,10 +198,10 @@ Never place keys, wallet private keys, seed phrases, or secrets in GitHub.
 Before development, every coding agent must read this file and show the values from it:
 
 ```text
-CURRENT PROJECT STAGE: Stage 2 — Core UI and deterministic domain rules
+CURRENT PROJECT STAGE: Stage 3 — Sui foundation and Move treasury
 STATUS: CURRENT
-COMPLETED STAGES: Stage 0; Stage 1
-NEXT TASK: Build budget-category creation and an editable balanced-budget preview
+COMPLETED STAGES: Stage 0; Stage 1; Stage 2
+NEXT TASK: Scaffold the Move package and test the treasury object plus treasurer admin capability
 ```
 
 ## Mandatory Update Rules
@@ -196,6 +220,14 @@ A task is not complete until its agent:
 10. never claims live Gemini/Sui/deployment behavior without evidence
 
 ## Recent Development Log
+
+### 2026-08-28 — Completed Stage 2 core mock workflow and deterministic rules
+
+- Status: Stage 2 COMPLETE; Stage 3 CURRENT
+- Change: Added the category budget editor, balanced allocation preview, claim submission, receipt comparison, exact/similar duplicate helpers, category checks, deterministic recommendation, human demo decision, transaction/history shell, and complete responsive navigation.
+- Verification: Targeted Prettier check, lint, typecheck, 45 unit tests, six Playwright smoke tests, production build, desktop/mobile visual inspection, zero horizontal mobile overflow, and zero browser console errors passed.
+- Safety: All new data is session-only; no Supabase persistence, wallet signature, Move execution, transaction digest, live Gemini call, or Sui payout is claimed.
+- Next: Scaffold the Stage 3 Move package and test the treasury object plus treasurer admin capability.
 
 ### 2026-08-28 — Added mock treasury/event creation flow
 

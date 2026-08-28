@@ -65,7 +65,7 @@ Verified exit criteria:
 - CI passes without `GEMINI_API_KEY`
 - no live Gemini/Supabase/Sui business integration is falsely claimed
 
-## Stage 2 — Core UI and deterministic domain rules — CURRENT
+## Stage 2 — Core UI and deterministic domain rules — COMPLETE
 
 Goal: create the main club-treasury user experience with mock/demo data and implement hard financial rules before live AI or blockchain integration.
 
@@ -87,6 +87,18 @@ Required work:
 - unit tests for all hard financial rules
 - clearly labeled mock/demo data only
 
+Implemented:
+
+- responsive landing, demo access, dashboard, and path-aware navigation
+- session-only treasury/event setup with safe USDC minor-unit parsing
+- category budget editor with balanced/under/over allocation preview
+- mock claim submission with typed receipt evidence
+- deterministic receipt amount, duplicate, and category-remaining checks
+- advisory Approve / Review / Reject recommendation with human final decision
+- transaction/history shell that does not invent Sui evidence
+- shared Zod schemas and deterministic session builders
+- complete unit and browser coverage for Stage 2 hard rules and navigation
+
 Exit criteria:
 
 - main product workflow is navigable end to end with mock data
@@ -95,7 +107,16 @@ Exit criteria:
 - no UI claims live Gemini, persistence, wallet signing, or Sui payout before those exist
 - CI remains green
 
-## Stage 3 — Sui foundation and Move treasury — NOT STARTED
+Verified exit criteria:
+
+- the full mock workflow navigates treasury -> budget -> claim -> review -> human decision -> history
+- hard financial rules are deterministic and covered by 45 unit tests
+- authoritative input parsing and arithmetic use integer/minor-unit values
+- every screen labels mock/session-only data and absent live integrations
+- formatting, lint, typecheck, unit tests, production build, and six Playwright smoke tests pass
+- desktop and 390 px visual checks pass without horizontal overflow or browser console errors
+
+## Stage 3 — Sui foundation and Move treasury — CURRENT
 
 Goal: make Sui integral to custody, authorization, and payout enforcement.
 

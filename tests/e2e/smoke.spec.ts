@@ -8,7 +8,7 @@ test("Stage 2 product shell navigates from landing to treasurer dashboard", asyn
   await expect(
     page.getByRole("heading", { name: /Club funds, clearly governed/i }),
   ).toBeVisible();
-  await expect(page.getByText(/Stage 2 preview · mock data/i)).toBeVisible();
+  await expect(page.getByText(/Stage 2 complete · mock data/i)).toBeVisible();
 
   await page.getByRole("link", { name: "Open demo workspace" }).click();
   await expect(page).toHaveURL(/\/login$/);
@@ -30,7 +30,7 @@ test("Stage 2 product shell navigates from landing to treasurer dashboard", asyn
   expect(response.ok()).toBeTruthy();
   await expect(response.json()).resolves.toMatchObject({
     ok: true,
-    stage: 2,
+    stage: 3,
     aiMode: "mock",
   });
 });
@@ -87,4 +87,95 @@ test("treasurer creates a validated session-only treasury preview", async ({
     page.getByText("Orientation Night 2026 · 1250.50 USDC"),
   ).toBeVisible();
   await expect(page.getByText(/Session-only preview/i)).toBeVisible();
+});
+
+test("Stage 2 mock workflow runs from treasury through human claim decision", async ({
+  page,
+}) => {
+  await page.goto("/dashboard/treasury/new");
+  await page
+    .getByLabel("Event or treasury name")
+    .fill("Orientation Night 2026");
+  await page.getByLabel("Total budget").fill("1000.00");
+  await page.getByRole("button", { name: "Create demo treasury" }).click();
+  await page.getByRole("link", { name: "Build budget" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Build the category budget" }),
+  ).toBeVisible();
+  await page.getByLabel("Allocation", { exact: true }).last().fill("150.00");
+  await expect(page.getByText("Under allocated")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Confirm mock budget" }),
+  ).toBeDisabled();
+  await page.getByLabel("Allocation", { exact: true }).last().fill("200.00");
+  await expect(page.getByText("Balanced")).toBeVisible();
+  await page.getByRole("button", { name: "Confirm mock budget" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Submit a demo claim" }),
+  ).toBeVisible();
+  await page.getByLabel("Member name").fill("Aina Rahman");
+  await page.getByLabel("Merchant").fill("Campus Bookstore");
+  await page.getByLabel("Expense description").fill("Workshop stationery");
+  await page.getByLabel("Budget category").selectOption("venue-1");
+  await page.getByLabel("Requested amount").fill("75.00");
+  await page.getByLabel("Receipt amount").fill("75.00");
+  await page.getByLabel("Receipt reference").fill("BOOK-NEW-104");
+  await page.getByRole("button", { name: "Run deterministic review" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Review the claim" }),
+  ).toBeVisible();
+  await expect(page.getByText("Rules suggest approve")).toBeVisible();
+  await expect(page.getByText("Exact amount match")).toBeVisible();
+  await page.getByRole("button", { name: "Approve as demo" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Activity and transaction history" }),
+  ).toBeVisible();
+  await expect(page.getByText("Claim approved as demo")).toBeVisible();
+  await expect(
+    page.getByText(/No database row, wallet signature/i),
+  ).toBeVisible();
+});
+
+test("deterministic review rejects an exact receipt duplicate", async ({
+  page,
+}) => {
+  await page.goto("/dashboard/claims/new");
+  await page.getByLabel("Member name").fill("Demo Member");
+  await page.getByLabel("Merchant").fill("Campus Print Shop");
+  await page.getByLabel("Expense description").fill("Duplicate banner print");
+  await page.getByLabel("Budget category").selectOption("marketing");
+  await page.getByLabel("Requested amount").fill("75.00");
+  await page.getByLabel("Receipt amount").fill("75.00");
+  await page.getByLabel("Receipt reference").fill("RCP-PRINT-001");
+  await page.getByRole("button", { name: "Run deterministic review" }).click();
+
+  await expect(page.getByText("Rules suggest reject")).toBeVisible();
+  await expect(
+    page.getByText("Matching receipt reference found"),
+  ).toBeVisible();
+});
+
+test("remaining Stage 2 pages avoid mobile horizontal overflow", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  for (const path of [
+    "/dashboard/budget",
+    "/dashboard/claims/new",
+    "/dashboard/claims/review",
+    "/dashboard/history",
+  ]) {
+    await page.goto(path);
+    const horizontalOverflow = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth,
+    );
+    expect(horizontalOverflow, `${path} should not overflow`).toBe(false);
+  }
 });

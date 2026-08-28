@@ -56,8 +56,8 @@ export default function Home() {
               </Link>
             </div>
             <p className="mt-5 flex items-center gap-2 text-xs text-white/42">
-              <span className="size-1.5 rounded-full bg-amber-400" /> Stage 2
-              preview · mock data · no wallet or live funds
+              <span className="size-1.5 rounded-full bg-emerald-400" /> Stage 2
+              complete · mock data · no wallet or live funds
             </p>
           </div>
 

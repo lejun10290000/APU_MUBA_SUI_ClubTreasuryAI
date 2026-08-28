@@ -3,6 +3,7 @@ import {
   claimSchema,
   treasurySchema,
 } from "@/src/domain/schemas";
+import { demoClaimRecordSchema } from "@/src/domain/demo-workflow";
 
 export const demoTreasury = treasurySchema.parse({
   id: "treasury-web3-workshop",
@@ -37,7 +38,7 @@ export const demoBudget = budgetSchema.parse({
   ],
 });
 
-export const demoClaims = [
+export const demoClaims = demoClaimRecordSchema.array().parse([
   {
     claim: claimSchema.parse({
       id: "claim-printing",
@@ -52,6 +53,7 @@ export const demoClaims = [
       recommendation: "approve",
     }),
     merchant: "Campus Print Shop",
+    receiptReference: "RCP-PRINT-001",
     submittedLabel: "12 min ago",
   },
   {
@@ -68,6 +70,7 @@ export const demoClaims = [
       recommendation: null,
     }),
     merchant: "Receipt pending",
+    receiptReference: null,
     submittedLabel: "1 hr ago",
   },
   {
@@ -84,9 +87,10 @@ export const demoClaims = [
       recommendation: "review",
     }),
     merchant: "QuickPrint KL",
+    receiptReference: "RCP-TAGS-019",
     submittedLabel: "Yesterday",
   },
-];
+]);
 
 export const demoActivity = [
   {

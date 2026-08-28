@@ -5,7 +5,7 @@ export function GET() {
   return NextResponse.json({
     ok: true,
     service: "clubtreasury-ai",
-    stage: 2,
+    stage: 3,
     aiMode: publicConfig.aiMode,
     suiNetwork: publicConfig.suiNetwork,
   });
