@@ -132,10 +132,15 @@ The package at `move/club_treasury` currently provides:
 - an opaque, non-sensitive `external_reference` for mapping to the off-chain treasury record
 - a `metadata_revision` counter
 - a minimal privileged metadata update that checks the capability, treasury ID, and transaction sender
+- an internal `Balance<Asset>` initialized to zero
+- a permissionless deposit operation that consumes a positive `Coin<Asset>` into custody
+- a read-only `u64` balance getter for exact native coin base units
 
-`TreasurerCap` intentionally does not have the `store` ability. Arbitrary modules cannot publicly transfer it, and privileged calls additionally require the transaction sender to match the stored treasurer address. The generic phantom asset parameter establishes the coin-type boundary that later Stage 3 work will instantiate for native Circle-issued Sui Testnet USDC; no coin balance or custody is claimed yet.
+`TreasurerCap` intentionally does not have the `store` ability. Arbitrary modules cannot publicly transfer it, and privileged calls additionally require the transaction sender to match the stored treasurer address. Depositing is permissionless and does not grant or alter withdrawal authority. The generic phantom asset parameter makes `Treasury<A>` accept only `Coin<A>` at compile time, establishing the coin-type boundary that later Stage 3 work will instantiate for verified native Circle-issued Sui Testnet USDC.
 
-Four Move tests verify treasury creation, successful admin use, unauthorized-sender rejection, and mismatched-capability rejection.
+Seven Move tests verify treasury creation with zero custody, successful admin use, unauthorized-sender rejection, mismatched-capability rejection, exact single-deposit accounting, exact accumulation, and zero-value deposit rejection.
+
+Custody amounts are Move `u64` native coin base units. The contract does not assume that the Stage 2 two-decimal demo display scale matches the real USDC on-chain decimal scale; asset metadata must supply the verified display conversion during later integration.
 
 ### Stage 2 TypeScript mapping
 
@@ -144,7 +149,7 @@ Four Move tests verify treasury creation, successful admin use, unauthorized-sen
 | `Treasury.id` demo/application identifier | `external_reference: vector<u8>`                | Store only an opaque mapping reference on-chain; display metadata remains off-chain.                        |
 | `Treasury.name`                           | Not duplicated on-chain                         | UI/display concern.                                                                                         |
 | `Treasury.currency = "USDC"`              | `Treasury<phantom Asset>` type parameter        | Later instantiate with the native Sui Testnet USDC coin type.                                               |
-| `Treasury.totalBudgetMinor`               | Not implemented in this foundation              | Later custody/allocation work must use Move `u64` minor units consistent with TypeScript integer semantics. |
+| `Treasury.totalBudgetMinor`               | Not duplicated as a budget allocation yet       | `Balance<Asset>` tracks custody in native `u64` base units; confirmed budget allocation remains later work. |
 | `Treasury.status`                         | Not duplicated yet                              | Workflow state remains off-chain until an on-chain invariant requires it.                                   |
 | Treasurer authority                       | Owned `TreasurerCap` + stored treasurer address | Move enforces privileged access; the UI does not grant authority.                                           |
 
@@ -159,14 +164,13 @@ Move       -> treasury identity, ownership/authorization, later custody and payo
 
 The Move package must still add:
 
-- native Testnet USDC funding/custody
 - confirmed category allocations/remaining amounts
 - payout restricted by the admin capability
 - payout-time category-remaining enforcement
 - payout events
 - transaction error handling and Testnet deployment evidence
 
-Only after those pieces are implemented and verified will Sui provide the full planned custody, authorization, payout-time budget enforcement, and stablecoin transfer behavior.
+Local generic custody and deposit accounting are now verified. Only after the remaining pieces are implemented, deployed, and exercised with the verified Testnet USDC type will Sui provide the full planned authorization, payout-time budget enforcement, and stablecoin transfer behavior.
 
 ## Claim Decision Pipeline
 

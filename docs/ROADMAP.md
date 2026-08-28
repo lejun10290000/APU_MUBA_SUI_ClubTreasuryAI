@@ -67,7 +67,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Design the minimal shared treasury object/state
 - [x] Implement and test the treasurer admin capability
 - [x] Document the Stage 2 TypeScript-to-Move responsibility mapping
-- [ ] Implement deposit/funding flow
+- [x] Implement and test generic deposit/funding custody
 - [ ] Implement confirmed category allocation state
 - [ ] Implement approved payout flow
 - [ ] Re-check category remaining on-chain
