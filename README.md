@@ -46,12 +46,13 @@ Focus: useful AI for budget/receipt understanding, deterministic financial safet
 
 ## Current Development Stage
 
-**Stage 2 — Core UI and deterministic domain rules — CURRENT**
+**Stage 3 — Sui foundation and Move treasury — CURRENT**
 
 Completed:
 
 - Stage 0 — Planning and repository setup
 - Stage 1 — Application foundation
+- Stage 2 — Core UI and deterministic domain rules
 
 Read `docs/PROJECT_STATUS.md` for the authoritative current task before coding.
 
@@ -81,7 +82,7 @@ The repository now includes:
 
 Stage 1 CI has verified frozen dependency install, lint, typecheck, unit tests, production build, Chromium setup, and Playwright smoke testing without a Gemini API key.
 
-## Stage 2 Progress
+## Stage 2 — Complete
 
 The Stage 2 domain foundation now includes:
 
@@ -108,7 +109,21 @@ The Stage 2 mock treasury setup now includes:
 - explicit no-persistence, no-wallet, and no-on-chain safety labels
 - unit and browser coverage for valid and invalid setup paths
 
-The next recommended task is budget-category creation with an editable structured preview and deterministic balanced-budget validation. Live Gemini, Supabase persistence, wallet signing, and Sui payouts remain intentionally unimplemented.
+The completed Stage 2 workflow also includes:
+
+- an editable category budget builder with balanced, under-allocated, and over-allocated states
+- deterministic confirmation that categories equal the treasury total exactly
+- a mock claim submission form with typed receipt facts
+- receipt/request amount comparison
+- exact receipt-reference and similar merchant/amount duplicate helpers
+- category-remaining validation
+- advisory Approve / Review / Reject recommendations
+- explicit human approve/reject demo actions that never execute money movement
+- an audit/transaction history shell with no fake transaction digests
+- responsive navigation through treasury, budget, claims, review, and history
+- 45 unit tests and six Playwright smoke tests covering the hard rules and workflow
+
+The next recommended task is Stage 3: create the Move package structure and test the treasury object plus treasurer admin capability. Live Gemini, Supabase persistence, wallet signing, and Sui payouts remain intentionally unimplemented.
 
 ## Developer Quick Start
 

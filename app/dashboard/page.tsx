@@ -102,6 +102,60 @@ export default function DashboardPage() {
       <DemoTreasuryNotice />
 
       <section
+        aria-label="Stage 2 workflow"
+        className="mt-6 grid gap-3 md:grid-cols-3"
+      >
+        {[
+          {
+            href: "/dashboard/budget",
+            icon: "wallet" as const,
+            eyebrow: "Step 2",
+            title: "Build category budget",
+            detail: "Balance deterministic allocations.",
+          },
+          {
+            href: "/dashboard/claims/new",
+            icon: "receipt" as const,
+            eyebrow: "Step 3",
+            title: "Submit demo claim",
+            detail: "Add request and receipt facts.",
+          },
+          {
+            href: "/dashboard/history",
+            icon: "history" as const,
+            eyebrow: "Step 4",
+            title: "View mock history",
+            detail: "See decisions without fake digests.",
+          },
+        ].map((action) => (
+          <Link
+            className="group flex items-center gap-4 rounded-2xl border border-[var(--line)] bg-white p-4 shadow-[0_8px_28px_rgba(24,49,43,0.035)] transition hover:-translate-y-0.5 hover:border-emerald-200"
+            href={action.href}
+            key={action.title}
+          >
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+              <Icon className="size-5" name={action.icon} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
+                {action.eyebrow}
+              </span>
+              <span className="mt-0.5 block text-sm font-bold">
+                {action.title}
+              </span>
+              <span className="mt-0.5 block text-xs text-[var(--muted)]">
+                {action.detail}
+              </span>
+            </span>
+            <Icon
+              className="size-4 text-[var(--muted)] transition group-hover:translate-x-0.5 group-hover:text-[var(--brand)]"
+              name="arrow"
+            />
+          </Link>
+        ))}
+      </section>
+
+      <section
         aria-label="Treasury summary"
         className="mt-7 grid gap-4 md:grid-cols-3"
       >

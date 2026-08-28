@@ -6,27 +6,45 @@ import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { Icon, type IconName } from "./icon";
 
-const navigation: Array<{ href: string; icon: IconName; label: string }> = [
-  { href: "/dashboard", icon: "grid", label: "Overview" },
+const navigation: Array<{
+  href: string;
+  icon: IconName;
+  label: string;
+  match: string;
+}> = [
+  { href: "/dashboard", icon: "grid", label: "Overview", match: "/dashboard" },
   {
     href: "/dashboard/treasury/new",
     icon: "building",
     label: "Treasury",
+    match: "/dashboard/treasury",
   },
-  { href: "/dashboard#claims", icon: "receipt", label: "Claims" },
-  { href: "/dashboard#activity", icon: "history", label: "Activity" },
+  {
+    href: "/dashboard/budget",
+    icon: "wallet",
+    label: "Budget",
+    match: "/dashboard/budget",
+  },
+  {
+    href: "/dashboard/claims/new",
+    icon: "receipt",
+    label: "Claims",
+    match: "/dashboard/claims",
+  },
+  {
+    href: "/dashboard/history",
+    icon: "history",
+    label: "History",
+    match: "/dashboard/history",
+  },
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isActive = (href: string) => {
-    if (href.includes("#")) {
-      return false;
-    }
-
-    return href === "/dashboard"
-      ? pathname === href
-      : pathname.startsWith(href);
+  const isActive = (match: string) => {
+    return match === "/dashboard"
+      ? pathname === match
+      : pathname.startsWith(match);
   };
 
   return (
@@ -53,7 +71,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <nav aria-label="Treasurer navigation" className="mt-7 space-y-1.5">
           {navigation.map((item) => (
             <Link
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive(item.href) ? "bg-white !text-[var(--brand-deep)] shadow-sm" : "text-white/62 hover:bg-white/8 hover:text-white"}`}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive(item.match) ? "bg-white !text-[var(--brand-deep)] shadow-sm" : "text-white/62 hover:bg-white/8 hover:text-white"}`}
               href={item.href}
               key={item.label}
             >
@@ -103,7 +121,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           >
             {navigation.map((item) => (
               <Link
-                className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${isActive(item.href) ? "bg-[var(--brand)] text-white" : "text-[var(--muted)]"}`}
+                className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${isActive(item.match) ? "bg-[var(--brand)] text-white" : "text-[var(--muted)]"}`}
                 href={item.href}
                 key={item.label}
               >

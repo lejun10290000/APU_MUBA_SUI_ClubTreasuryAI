@@ -38,28 +38,28 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Verify lint, typecheck, unit tests, build, Chromium install, smoke test
 - [x] Update README quick-start
 
-## Stage 2 — Core UI and deterministic domain rules — CURRENT
+## Stage 2 — Core UI and deterministic domain rules — COMPLETE
 
 - [x] Landing/login shell
 - [x] Treasurer dashboard shell
 - [x] Treasury/event creation UI
-- [ ] Budget creation form
-- [ ] Editable structured budget preview
-- [ ] Claim submission form
-- [ ] Claim review/approval UI shell
-- [ ] Transaction/history UI shell
+- [x] Budget creation form
+- [x] Editable structured budget preview
+- [x] Claim submission form
+- [x] Claim review/approval UI shell
+- [x] Transaction/history UI shell
 - [x] Shared Zod treasury/budget/claim/status schemas
 - [x] Positive amount/currency validation
 - [x] Safe integer/minor-unit totals
 - [x] Budget-total validation
 - [x] Category-remaining checks
-- [ ] Receipt/request amount comparison
-- [ ] Exact/similar duplicate helpers
-- [ ] Unit tests for hard financial rules
+- [x] Receipt/request amount comparison
+- [x] Exact/similar duplicate helpers
+- [x] Unit tests for hard financial rules
 - [x] Clearly label all mock/demo data
-- [ ] Keep CI green
+- [x] Keep CI green
 
-## Stage 3 — Sui foundation and Move treasury — NOT STARTED
+## Stage 3 — Sui foundation and Move treasury — CURRENT
 
 - [x] Select wallet integration approach
 - [ ] Connect Sui wallet on Testnet

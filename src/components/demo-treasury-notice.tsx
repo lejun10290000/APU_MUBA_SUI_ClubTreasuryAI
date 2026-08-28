@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { Icon } from "./icon";
 import { formatUsdcMinor } from "@/src/domain/money";
 import { treasurySchema, type Treasury } from "@/src/domain/schemas";
@@ -49,13 +50,22 @@ export function DemoTreasuryNotice() {
           </p>
         </div>
       </div>
-      <button
-        className="self-start rounded-lg px-3 py-2 text-xs font-bold text-emerald-800 transition hover:bg-emerald-100 sm:self-center"
-        onClick={dismiss}
-        type="button"
-      >
-        Dismiss
-      </button>
+      <div className="flex shrink-0 items-center gap-2 self-start sm:self-center">
+        <button
+          className="rounded-lg px-3 py-2 text-xs font-bold text-emerald-800 transition hover:bg-emerald-100"
+          onClick={dismiss}
+          type="button"
+        >
+          Dismiss
+        </button>
+        <Link
+          className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-emerald-800"
+          href="/dashboard/budget"
+        >
+          Build budget
+          <Icon className="size-3.5" name="arrow" />
+        </Link>
+      </div>
     </section>
   );
 }

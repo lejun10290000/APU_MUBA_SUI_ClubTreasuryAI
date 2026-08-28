@@ -6,6 +6,15 @@ import { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { ZodError } from "zod";
 import { Icon } from "./icon";
+import {
+  removeDemoSessionValue,
+  writeDemoSessionValue,
+} from "./use-demo-session";
+import {
+  demoBudgetStorageKey,
+  demoClaimStorageKey,
+  demoDecisionStorageKey,
+} from "@/src/domain/demo-workflow";
 import { formatUsdcMinor, parseUsdcDisplay } from "@/src/domain/money";
 import {
   buildDemoTreasury,
@@ -43,10 +52,10 @@ export function TreasuryCreationForm() {
   const submitTreasury = (values: TreasurySetupFields) => {
     try {
       const treasury = buildDemoTreasury(values);
-      window.sessionStorage.setItem(
-        demoTreasuryStorageKey,
-        JSON.stringify(treasury),
-      );
+      writeDemoSessionValue(demoTreasuryStorageKey, treasury);
+      removeDemoSessionValue(demoBudgetStorageKey);
+      removeDemoSessionValue(demoClaimStorageKey);
+      removeDemoSessionValue(demoDecisionStorageKey);
       router.push("/dashboard");
     } catch (error) {
       if (error instanceof ZodError) {
