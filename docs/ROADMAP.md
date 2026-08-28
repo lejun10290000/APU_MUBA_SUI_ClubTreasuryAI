@@ -48,11 +48,11 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [ ] Claim submission form
 - [ ] Claim review/approval UI shell
 - [ ] Transaction/history UI shell
-- [ ] Shared Zod treasury/budget/claim/status schemas
-- [ ] Positive amount/currency validation
-- [ ] Safe integer/minor-unit totals
-- [ ] Budget-total validation
-- [ ] Category-remaining checks
+- [x] Shared Zod treasury/budget/claim/status schemas
+- [x] Positive amount/currency validation
+- [x] Safe integer/minor-unit totals
+- [x] Budget-total validation
+- [x] Category-remaining checks
 - [ ] Receipt/request amount comparison
 - [ ] Exact/similar duplicate helpers
 - [ ] Unit tests for hard financial rules
