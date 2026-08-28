@@ -11,8 +11,8 @@ Every teammate and coding agent must read this file before starting work and upd
 - **Current stage: Stage 2 — Core UI and deterministic domain rules**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0 — Planning and repository setup; Stage 1 — Application foundation**
-- Latest completed milestone: **Stage 1 application foundation implemented and verified in CI**
-- Active implementation work: **None after Stage 1 handoff**
+- Latest completed milestone: **Stage 2 shared domain schemas and foundational budget rules implemented and locally verified**
+- Active implementation work: **None after the Stage 2 domain-rules handoff**
 - Current blockers: **None for Stage 2 mock-data UI/domain work**
 - Demo readiness: **Executable application foundation exists; business workflow is not implemented yet**
 
@@ -65,10 +65,20 @@ See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
 - GitHub Actions CI runs with `AI_MODE=mock`, no Gemini key, and frozen lockfile
 - CI verification passed: install, lint, typecheck, unit tests, production build, Chromium install, smoke test
 
+### Stage 2 — Domain foundation
+
+- shared Zod schemas for treasury, budget categories, budgets, claims, statuses, recommendations, currency, and minor-unit amounts
+- positive and non-negative safe-integer minor-unit validation
+- duplicate budget category ID/name validation
+- deterministic balanced/under-allocated/over-allocated budget-total checks
+- deterministic category-remaining and sufficient-balance checks
+- unit tests for the new schemas and financial rules
+- no live Gemini, Supabase, wallet, or Sui transaction behavior introduced
+
 ## Not Yet Implemented
 
 - real product dashboard/business pages
-- complete shared treasury/budget/claim domain schemas and deterministic rules
+- receipt/request amount comparison and duplicate-claim helper rules
 - real Sui wallet connection
 - Move package and contract tests
 - treasury creation/funding/budget confirmation/payout
@@ -83,26 +93,20 @@ Do not describe these as working until real code and verification exist.
 
 ## Next Recommended Task
 
-### Stage 2 task: Build the mock-data product shell and deterministic financial domain
+### Stage 2 task: Build the landing/login and treasurer dashboard shell
 
-Implement Stage 2 without live Gemini, live Supabase, Move, or real Sui transactions.
+Create the first navigable mock-data product experience without live Gemini, live Supabase, Move, or real Sui transactions.
 
 Required priorities:
 
 1. Build the main navigation/application shell for treasurer/member workflow.
 2. Add landing/login shell and treasurer dashboard shell.
-3. Add treasury/event creation UI.
-4. Add budget creation form plus editable structured preview using deterministic mock data.
-5. Add claim submission form and claim review UI shell.
-6. Add transaction/history UI shell using clearly labeled mock data.
-7. Define shared Zod schemas for treasury, budget categories, claims, and statuses.
-8. Extend integer/minor-unit money helpers for validation and safe totals.
-9. Add deterministic budget-total/category-remaining checks.
-10. Add receipt/request amount comparison helpers.
-11. Add exact/similar duplicate helper rules that do not require AI.
-12. Unit-test all hard financial/domain rules.
-13. Keep all AI behavior mocked and all blockchain actions clearly non-live until their later stages.
-14. Update status, stages, roadmap, and README when Stage 2 changes become real.
+3. Use clearly labeled mock/demo treasury, balance, claim, and activity summaries.
+4. Keep the shell responsive and establish reusable navigation/layout components.
+5. Preserve the new shared domain schemas and deterministic money boundaries.
+6. Keep all AI behavior mocked and all blockchain actions clearly non-live until their later stages.
+7. Add or update smoke coverage for the new navigation.
+8. Update status, roadmap, and README with the next smallest Stage 2 task.
 
 ### Stage 2 exit criteria
 
@@ -151,7 +155,7 @@ Before development, every coding agent must read this file and show the values f
 CURRENT PROJECT STAGE: Stage 2 — Core UI and deterministic domain rules
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1
-NEXT TASK: Build the mock-data product shell and deterministic financial domain
+NEXT TASK: Build the landing/login and treasurer dashboard shell with clearly labeled mock data
 ```
 
 ## Mandatory Update Rules
@@ -170,6 +174,13 @@ A task is not complete until its agent:
 10. never claims live Gemini/Sui/deployment behavior without evidence
 
 ## Recent Development Log
+
+### 2026-08-28 — Added Stage 2 shared domain schemas and budget rules
+
+- Status: Completed implementation, ready for review
+- Change: Added treasury/budget/claim/status Zod schemas, safe positive minor-unit validation, budget-total checks, category-remaining checks, and deterministic unit tests.
+- Verification: Frozen dependency install, targeted Prettier check, lint, typecheck, 18 unit tests, and production build passed. Repository-wide `pnpm format` still reports pre-existing formatting drift outside this change.
+- Next: Build the landing/login and treasurer dashboard shell with clearly labeled mock data.
 
 ### 2026-08-28 — Completed Stage 1 application foundation
 

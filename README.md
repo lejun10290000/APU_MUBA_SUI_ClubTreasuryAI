@@ -81,6 +81,17 @@ The repository now includes:
 
 Stage 1 CI has verified frozen dependency install, lint, typecheck, unit tests, production build, Chromium setup, and Playwright smoke testing without a Gemini API key.
 
+## Stage 2 Progress
+
+The Stage 2 domain foundation now includes:
+
+- shared Zod schemas for treasuries, budgets, categories, claims, statuses, and USDC minor-unit amounts
+- positive safe-integer amount and currency validation
+- deterministic budget-total and category-remaining checks
+- unit tests for the new schemas and financial rules
+
+The next recommended task is the landing/login and treasurer dashboard shell using clearly labeled mock data. Live Gemini, Supabase persistence, wallet signing, and Sui payouts remain intentionally unimplemented.
+
 ## Developer Quick Start
 
 ### 1. Clone
