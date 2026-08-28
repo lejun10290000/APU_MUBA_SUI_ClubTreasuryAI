@@ -1,16 +1,34 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { Icon, type IconName } from "./icon";
 
 const navigation: Array<{ href: string; icon: IconName; label: string }> = [
   { href: "/dashboard", icon: "grid", label: "Overview" },
-  { href: "/dashboard#treasury", icon: "building", label: "Treasury" },
+  {
+    href: "/dashboard/treasury/new",
+    icon: "building",
+    label: "Treasury",
+  },
   { href: "/dashboard#claims", icon: "receipt", label: "Claims" },
   { href: "/dashboard#activity", icon: "history", label: "Activity" },
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isActive = (href: string) => {
+    if (href.includes("#")) {
+      return false;
+    }
+
+    return href === "/dashboard"
+      ? pathname === href
+      : pathname.startsWith(href);
+  };
+
   return (
     <div className="min-h-screen bg-[var(--canvas)] text-[var(--ink)] lg:grid lg:grid-cols-[256px_1fr]">
       <aside className="hidden min-h-screen flex-col bg-[var(--brand-deep)] px-5 py-6 text-white lg:flex">
@@ -33,9 +51,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           </div>
         </div>
         <nav aria-label="Treasurer navigation" className="mt-7 space-y-1.5">
-          {navigation.map((item, index) => (
+          {navigation.map((item) => (
             <Link
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${index === 0 ? "bg-white !text-[var(--brand-deep)] shadow-sm" : "text-white/62 hover:bg-white/8 hover:text-white"}`}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive(item.href) ? "bg-white !text-[var(--brand-deep)] shadow-sm" : "text-white/62 hover:bg-white/8 hover:text-white"}`}
               href={item.href}
               key={item.label}
             >
@@ -83,9 +101,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             aria-label="Mobile treasurer navigation"
             className="flex gap-1 overflow-x-auto border-t border-[var(--line)] px-4 py-2 lg:hidden"
           >
-            {navigation.map((item, index) => (
+            {navigation.map((item) => (
               <Link
-                className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${index === 0 ? "bg-[var(--brand)] text-white" : "text-[var(--muted)]"}`}
+                className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${isActive(item.href) ? "bg-[var(--brand)] text-white" : "text-[var(--muted)]"}`}
                 href={item.href}
                 key={item.label}
               >

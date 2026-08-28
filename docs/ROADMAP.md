@@ -42,7 +42,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 
 - [x] Landing/login shell
 - [x] Treasurer dashboard shell
-- [ ] Treasury/event creation UI
+- [x] Treasury/event creation UI
 - [ ] Budget creation form
 - [ ] Editable structured budget preview
 - [ ] Claim submission form

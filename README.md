@@ -98,7 +98,17 @@ The Stage 2 product shell now includes:
 - treasury balance, budget-category, claim-queue, activity, and safety-boundary views
 - browser smoke coverage for landing-to-dashboard navigation and mobile layout
 
-The next recommended task is the mock treasury/event creation UI with safe minor-unit validation. Live Gemini, Supabase persistence, wallet signing, and Sui payouts remain intentionally unimplemented.
+The Stage 2 mock treasury setup now includes:
+
+- an accessible React Hook Form event/treasury creation page
+- exact USDC display parsing into safe integer minor units
+- shared Zod validation with recoverable field errors
+- a live local preview with demo-draft status
+- a schema-validated session-only dashboard handoff
+- explicit no-persistence, no-wallet, and no-on-chain safety labels
+- unit and browser coverage for valid and invalid setup paths
+
+The next recommended task is budget-category creation with an editable structured preview and deterministic balanced-budget validation. Live Gemini, Supabase persistence, wallet signing, and Sui payouts remain intentionally unimplemented.
 
 ## Developer Quick Start
 
@@ -284,8 +294,8 @@ Add every other AI tool used by any teammate before submission.
 Add all official team members before submission.
 
 | Name | Role | University/Organization | GitHub |
-|---|---|---|---|
-| TBD | TBD | TBD | TBD |
+| ---- | ---- | ----------------------- | ------ |
+| TBD  | TBD  | TBD                     | TBD    |
 
 ## Submission
 
