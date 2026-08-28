@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { DemoTreasuryNotice } from "@/src/components/demo-treasury-notice";
 import { Icon, type IconName } from "@/src/components/icon";
 import {
   calculateCategoryRemaining,
@@ -80,11 +82,24 @@ export default function DashboardPage() {
             Here is the mock treasury snapshot for APU Blockchain Club.
           </p>
         </div>
-        <div className="rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-xs text-[var(--muted)]">
-          <span className="font-semibold text-[var(--ink)]">Stage 2 shell</span>{" "}
-          · refreshed from fixtures
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-xs text-[var(--muted)]">
+            <span className="font-semibold text-[var(--ink)]">
+              Stage 2 shell
+            </span>{" "}
+            · refreshed from fixtures
+          </div>
+          <Link
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-xs font-bold text-white shadow-[0_8px_20px_rgba(29,91,79,0.16)] transition hover:-translate-y-0.5 hover:bg-[var(--brand-deep)]"
+            href="/dashboard/treasury/new"
+          >
+            Create demo treasury
+            <Icon className="size-3.5" name="arrow" />
+          </Link>
         </div>
       </section>
+
+      <DemoTreasuryNotice />
 
       <section
         aria-label="Treasury summary"
