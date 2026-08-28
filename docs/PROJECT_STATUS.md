@@ -11,10 +11,10 @@ Every teammate and coding agent must read this file before starting work and upd
 - **Current stage: Stage 3 — Sui foundation and Move treasury**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0 — Planning and repository setup; Stage 1 — Application foundation; Stage 2 — Core UI and deterministic domain rules**
-- Latest completed milestone: **Full Stage 2 mock treasury -> budget -> claim -> review -> human decision -> history workflow implemented and verified**
-- Active implementation work: **None after the Stage 2 completion handoff**
-- Current blockers: **None for starting local Stage 3 Move package work**
-- Demo readiness: **The full mock product workflow is navigable and clearly labeled; persistence, wallet signing, Move execution, Sui payouts, and live AI remain intentionally unimplemented**
+- Latest completed milestone: **First Stage 3 Move treasury object and treasurer-capability foundation implemented with four passing Move tests**
+- Active implementation work: **`stage3/move-treasury-foundation` is ready for review; no later Stage 3 task has started**
+- Current blockers: **None after review; contributors need a compatible Sui CLI to run Move verification**
+- Demo readiness: **The full mock product workflow is navigable and the local Move authorization foundation is verified; funding, wallet signing, Testnet deployment, Sui payouts, persistence, and live AI remain intentionally unimplemented**
 
 ## Stage Progress
 
@@ -120,14 +120,26 @@ See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
 - desktop and 390 px visual inspection passed with zero browser console errors or warnings
 - Stage 2 exit criteria are verified
 
+### Stage 3 — Move treasury authorization foundation
+
+- Move 2024 package created at `move/club_treasury`
+- shared `Treasury<phantom Asset>` object with treasurer address, opaque external reference, and metadata revision
+- address-owned `TreasurerCap<phantom Asset>` bound to one treasury object ID and treasurer
+- capability omits `store`, preventing arbitrary public transfer outside the defining module
+- privileged metadata update verifies capability/treasury binding and transaction sender
+- phantom asset type preserves the native Sui Testnet USDC direction without claiming custody
+- Stage 2 TypeScript-to-Move responsibility mapping documented in `docs/ARCHITECTURE.md`
+- Sui CLI `1.78.1-722ac4fcf484` compiled the package and passed all four Move tests
+- no package was deployed and no package ID, object ID, transaction digest, balance, or real USDC custody is claimed
+
 ## Not Yet Implemented
 
 - real authentication and user accounts
 - treasury editing UI
 - real receipt file upload or storage
 - real Sui wallet connection
-- Move package and contract tests
-- real treasury creation/funding/budget confirmation/payout
+- Move funding/custody, category allocation, payout, event, and remaining authorization tests
+- real treasury funding/budget confirmation/payout
 - `@google/genai` live Gemini implementation
 - live budget/receipt AI analysis
 - Supabase migrations and private receipt bucket
@@ -139,20 +151,19 @@ Do not describe these as working until real code and verification exist.
 
 ## Next Recommended Task
 
-### Stage 3 task: Scaffold and test the Move treasury foundation
+### Stage 3 task: Implement and test treasury funding custody
 
-Create the first reviewable Sui Move package without adding fake deployment IDs or claiming Testnet execution.
+Extend the verified Move foundation with the next smallest reviewable contract task. Do not add payout behavior or deploy yet.
 
 Required priorities:
 
-1. Verify the installed Sui CLI/toolchain and current official Move package conventions.
-2. Create the Move package structure in a clearly named repository directory.
-3. Model the treasury object/state and treasurer admin capability.
-4. Keep native Sui Testnet USDC as the locked payment asset direction without inventing deployed object IDs.
-5. Add Move tests for creation, ownership/admin authorization, and invalid access.
-6. Document how the Move state maps to the existing Stage 2 TypeScript domain.
-7. Run `sui move test` plus all existing application checks.
-8. Update status, roadmap, architecture, and README with verified results and the next smallest Stage 3 task.
+1. Confirm the exact native Sui Testnet USDC type/dependency strategy without inventing deployment evidence.
+2. Add generic coin funding/custody state that can be instantiated with the intended USDC type.
+3. Add a deposit entry point that accepts funds without granting payout authority.
+4. Preserve integer/minor-unit compatibility with the Stage 2 TypeScript domain.
+5. Add deterministic Move tests for successful funding, balance accounting, wrong-asset/type safety, and invalid amounts where applicable.
+6. Keep payout, category allocation, wallet UI integration, and Testnet deployment out of this task.
+7. Run `sui move test` plus all existing application checks and update the handoff documents.
 
 ### Stage 2 completion evidence
 
@@ -201,7 +212,7 @@ Before development, every coding agent must read this file and show the values f
 CURRENT PROJECT STAGE: Stage 3 — Sui foundation and Move treasury
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2
-NEXT TASK: Scaffold the Move package and test the treasury object plus treasurer admin capability
+NEXT TASK: Implement and test the treasury deposit/funding custody foundation
 ```
 
 ## Mandatory Update Rules
@@ -220,6 +231,14 @@ A task is not complete until its agent:
 10. never claims live Gemini/Sui/deployment behavior without evidence
 
 ## Recent Development Log
+
+### 2026-08-28 — Added Stage 3 Move treasury authorization foundation
+
+- Status: Stage 3 remains CURRENT; first foundation task complete and awaiting review
+- Change: Added the Move 2024 package, shared generic treasury object, module-controlled treasurer capability, privileged metadata mutation, and TypeScript-to-Move mapping.
+- Verification: Sui CLI `1.78.1-722ac4fcf484`; `sui move test` passed 4/4 tests; application verification recorded in the pull request.
+- Safety: No Testnet deployment, package/object ID, transaction digest, wallet key, real balance, or USDC custody claim was added.
+- Next: Implement and test generic treasury deposit/funding custody without payout or deployment.
 
 ### 2026-08-28 — Completed Stage 2 core mock workflow and deterministic rules
 
