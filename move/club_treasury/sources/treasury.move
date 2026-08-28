@@ -1,6 +1,8 @@
 module club_treasury::treasury;
 
 use std::vector;
+use sui::balance::{Self, Balance};
+use sui::coin::{Self, Coin};
 use sui::object::{Self, ID, UID};
 use sui::transfer;
 use sui::tx_context::{Self, TxContext};
@@ -8,6 +10,7 @@ use sui::tx_context::{Self, TxContext};
 const ENotTreasurer: u64 = 0;
 const ECapabilityMismatch: u64 = 1;
 const EEmptyExternalReference: u64 = 2;
+const EZeroDeposit: u64 = 3;
 
 /// Shared on-chain identity and authorization state for one club/event treasury.
 /// `Asset` keeps the treasury type-bound to its eventual payment coin; the MVP
@@ -17,6 +20,7 @@ public struct Treasury<phantom Asset> has key {
     treasurer: address,
     external_reference: vector<u8>,
     metadata_revision: u64,
+    funds: Balance<Asset>,
 }
 
 /// An address-owned, module-controlled capability for privileged treasury work.
@@ -38,6 +42,7 @@ public fun create<Asset>(external_reference: vector<u8>, ctx: &mut TxContext) {
         treasurer,
         external_reference,
         metadata_revision: 0,
+        funds: balance::zero(),
     };
     let treasury_id = object::id(&treasury);
     let cap = TreasurerCap<Asset> {
@@ -62,6 +67,13 @@ public fun set_external_reference<Asset>(
 
     treasury.external_reference = external_reference;
     treasury.metadata_revision = treasury.metadata_revision + 1;
+}
+
+/// Moves a positive amount of the treasury's exact asset type into custody.
+/// Deposits are permissionless and do not grant or alter withdrawal authority.
+public fun deposit<Asset>(treasury: &mut Treasury<Asset>, payment: Coin<Asset>) {
+    assert!(coin::value(&payment) > 0, EZeroDeposit);
+    balance::join(&mut treasury.funds, coin::into_balance(payment));
 }
 
 fun assert_authorized<Asset>(
@@ -90,6 +102,11 @@ public fun external_reference<Asset>(treasury: &Treasury<Asset>): &vector<u8> {
 
 public fun metadata_revision<Asset>(treasury: &Treasury<Asset>): u64 {
     treasury.metadata_revision
+}
+
+/// Returns the exact native base-unit amount currently held by the treasury.
+public fun balance<Asset>(treasury: &Treasury<Asset>): u64 {
+    balance::value(&treasury.funds)
 }
 
 public fun cap_treasury_id<Asset>(cap: &TreasurerCap<Asset>): ID {

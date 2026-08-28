@@ -2,6 +2,7 @@
 module club_treasury::treasury_tests;
 
 use club_treasury::treasury::{Self, TreasurerCap, Treasury};
+use sui::coin;
 use sui::test_scenario;
 
 const ADMIN: address = @0xA11CE;
@@ -24,9 +25,68 @@ fun creates_treasury_and_admin_capability() {
     assert!(treasury::cap_treasurer(&cap) == ADMIN, 2);
     assert!(treasury::external_reference(&treasury) == &b"demo-web3-workshop", 3);
     assert!(treasury::metadata_revision(&treasury) == 0, 4);
+    assert!(treasury::balance(&treasury) == 0, 5);
 
     test_scenario::return_shared(treasury);
     test_scenario::return_to_sender(&scenario, cap);
+    test_scenario::end(scenario);
+}
+
+#[test]
+fun one_deposit_increases_balance_by_exact_base_units() {
+    let mut scenario = test_scenario::begin(ADMIN);
+
+    treasury::create<MockUsdc>(b"demo-funded-once", test_scenario::ctx(&mut scenario));
+
+    test_scenario::next_tx(&mut scenario, ATTACKER);
+    let mut treasury = test_scenario::take_shared<Treasury<MockUsdc>>(&scenario);
+    let payment = coin::mint_for_testing<MockUsdc>(12_345, test_scenario::ctx(&mut scenario));
+
+    treasury::deposit(&mut treasury, payment);
+
+    assert!(treasury::balance(&treasury) == 12_345, 0);
+
+    test_scenario::return_shared(treasury);
+    test_scenario::end(scenario);
+}
+
+#[test]
+fun multiple_deposits_accumulate_exactly() {
+    let mut scenario = test_scenario::begin(ADMIN);
+
+    treasury::create<MockUsdc>(b"demo-funded-twice", test_scenario::ctx(&mut scenario));
+
+    test_scenario::next_tx(&mut scenario, ADMIN);
+    let mut treasury = test_scenario::take_shared<Treasury<MockUsdc>>(&scenario);
+    let first_payment = coin::mint_for_testing<MockUsdc>(10_001, test_scenario::ctx(&mut scenario));
+    treasury::deposit(&mut treasury, first_payment);
+    test_scenario::return_shared(treasury);
+
+    test_scenario::next_tx(&mut scenario, ATTACKER);
+    let mut treasury = test_scenario::take_shared<Treasury<MockUsdc>>(&scenario);
+    let second_payment = coin::mint_for_testing<MockUsdc>(20_002, test_scenario::ctx(&mut scenario));
+    treasury::deposit(&mut treasury, second_payment);
+
+    assert!(treasury::balance(&treasury) == 30_003, 0);
+
+    test_scenario::return_shared(treasury);
+    test_scenario::end(scenario);
+}
+
+#[test]
+#[expected_failure(abort_code = 3, location = club_treasury::treasury)]
+fun zero_value_deposit_is_rejected() {
+    let mut scenario = test_scenario::begin(ADMIN);
+
+    treasury::create<MockUsdc>(b"demo-zero-rejected", test_scenario::ctx(&mut scenario));
+
+    test_scenario::next_tx(&mut scenario, ADMIN);
+    let mut treasury = test_scenario::take_shared<Treasury<MockUsdc>>(&scenario);
+    let zero_payment = coin::mint_for_testing<MockUsdc>(0, test_scenario::ctx(&mut scenario));
+
+    treasury::deposit(&mut treasury, zero_payment);
+
+    test_scenario::return_shared(treasury);
     test_scenario::end(scenario);
 }
 

@@ -132,11 +132,14 @@ The first Stage 3 Move foundation now includes:
 - a treasurer-owned, module-controlled `TreasurerCap<phantom Asset>`
 - capability binding to one treasury object ID and treasurer address
 - an opaque off-chain `external_reference` plus metadata revision
-- four passing Move tests for creation, authorized use, unauthorized access, and mismatched capability use
+- a typed internal `Balance<Asset>` initialized to zero
+- permissionless deposits of positive `Coin<Asset>` values into treasury custody
+- exact `u64` native base-unit balance accounting
+- seven passing Move tests covering creation, authorization, deposits, accumulation, and zero-value rejection
 
-The phantom asset parameter preserves the intended native Sui Testnet USDC direction without claiming real custody. Funding, category allocations, payouts, wallet integration, Testnet deployment, package/object IDs, Gemini, and Supabase remain unimplemented.
+The phantom asset parameter statically requires a treasury and its deposits to use the same coin type, preserving the intended native Sui Testnet USDC direction. This is verified local generic Move logic only: no real Testnet USDC has been deposited, no wallet is connected, and no Testnet package/object ID or transaction digest exists. Category allocations, payouts, wallet integration, deployment, Gemini, and Supabase remain unimplemented.
 
-The next recommended task remains within Stage 3: implement and test the treasury deposit/funding custody foundation without deploying or inventing Sui evidence.
+The next recommended task remains within Stage 3: implement and test the minimum confirmed category-allocation state without adding payouts or deployment.
 
 ## Developer Quick Start
 

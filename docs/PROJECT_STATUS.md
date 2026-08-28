@@ -6,15 +6,15 @@ Every teammate and coding agent must read this file before starting work and upd
 
 ## Current Snapshot
 
-- Last updated: **28 August 2026 (MYT)**
+- Last updated: **29 August 2026 (MYT)**
 - Default branch: `main`
 - **Current stage: Stage 3 — Sui foundation and Move treasury**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0 — Planning and repository setup; Stage 1 — Application foundation; Stage 2 — Core UI and deterministic domain rules**
-- Latest completed milestone: **First Stage 3 Move treasury object and treasurer-capability foundation implemented with four passing Move tests**
-- Active implementation work: **`stage3/move-treasury-foundation` is ready for review; no later Stage 3 task has started**
+- Latest completed milestone: **Generic Move treasury custody and permissionless deposit foundation implemented with seven passing Move tests**
+- Active implementation work: **`stage3/treasury-funding-foundation` is ready for review; no later Stage 3 task has started**
 - Current blockers: **None after review; contributors need a compatible Sui CLI to run Move verification**
-- Demo readiness: **The full mock product workflow is navigable and the local Move authorization foundation is verified; funding, wallet signing, Testnet deployment, Sui payouts, persistence, and live AI remain intentionally unimplemented**
+- Demo readiness: **The full mock product workflow is navigable and local generic Move authorization/custody logic is verified; no real Testnet USDC, wallet signing, deployment, payout, persistence, or live AI exists yet**
 
 ## Stage Progress
 
@@ -127,10 +127,22 @@ See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
 - address-owned `TreasurerCap<phantom Asset>` bound to one treasury object ID and treasurer
 - capability omits `store`, preventing arbitrary public transfer outside the defining module
 - privileged metadata update verifies capability/treasury binding and transaction sender
-- phantom asset type preserves the native Sui Testnet USDC direction without claiming custody
+- phantom asset type preserves the native Sui Testnet USDC direction without claiming real Testnet custody
 - Stage 2 TypeScript-to-Move responsibility mapping documented in `docs/ARCHITECTURE.md`
-- Sui CLI `1.78.1-722ac4fcf484` compiled the package and passed all four Move tests
-- no package was deployed and no package ID, object ID, transaction digest, balance, or real USDC custody is claimed
+- Sui CLI `1.78.1-722ac4fcf484` compiled the package and passed all four original authorization tests
+- no package was deployed and no package ID, object ID, transaction digest, deployed balance, or real USDC custody is claimed
+
+### Stage 3 — Generic treasury funding foundation
+
+- `Treasury<phantom Asset>` now owns a typed `Balance<Asset>` initialized to zero
+- read-only balance access returns the exact native coin base-unit amount as `u64`
+- permissionless `deposit<Asset>` consumes a positive `Coin<Asset>` into treasury custody
+- deposits do not grant or modify treasurer authority and no withdrawal/payout path exists
+- Move generic type safety prevents `Treasury<A>` from accepting `Coin<B>`
+- zero-value deposits abort deterministically
+- seven Move tests pass, including zero balance, exact single deposit, exact accumulation, zero rejection, and all prior authorization cases
+- on-chain amounts remain native coin base units; no assumption is made about real USDC decimal scale
+- no real Testnet USDC deposit, wallet connection, deployment, package/object ID, or transaction digest is claimed
 
 ## Not Yet Implemented
 
@@ -138,8 +150,8 @@ See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
 - treasury editing UI
 - real receipt file upload or storage
 - real Sui wallet connection
-- Move funding/custody, category allocation, payout, event, and remaining authorization tests
-- real treasury funding/budget confirmation/payout
+- Move category allocation, payout, event, and remaining authorization tests
+- real Testnet treasury creation/funding/budget confirmation/payout
 - `@google/genai` live Gemini implementation
 - live budget/receipt AI analysis
 - Supabase migrations and private receipt bucket
@@ -151,19 +163,18 @@ Do not describe these as working until real code and verification exist.
 
 ## Next Recommended Task
 
-### Stage 3 task: Implement and test treasury funding custody
+### Stage 3 task: Implement and test confirmed category-allocation state
 
-Extend the verified Move foundation with the next smallest reviewable contract task. Do not add payout behavior or deploy yet.
+Extend the verified authorization and custody foundation with the next smallest reviewable contract task. Do not add payout behavior or deploy yet.
 
 Required priorities:
 
-1. Confirm the exact native Sui Testnet USDC type/dependency strategy without inventing deployment evidence.
-2. Add generic coin funding/custody state that can be instantiated with the intended USDC type.
-3. Add a deposit entry point that accepts funds without granting payout authority.
-4. Preserve integer/minor-unit compatibility with the Stage 2 TypeScript domain.
-5. Add deterministic Move tests for successful funding, balance accounting, wrong-asset/type safety, and invalid amounts where applicable.
-6. Keep payout, category allocation, wallet UI integration, and Testnet deployment out of this task.
-7. Run `sui move test` plus all existing application checks and update the handoff documents.
+1. Model the minimum confirmed category allocation and remaining-amount state in native `u64` base units.
+2. Require the matching treasurer capability and transaction sender to confirm or update privileged allocation state.
+3. Preserve deterministic uniqueness and total-allocation invariants without implementing payouts.
+4. Keep wallet UI integration, Testnet deployment, payout events, and fund release out of this task.
+5. Add focused Move tests for valid allocation setup and invalid authorization/allocation cases.
+6. Run `sui move test` plus all existing application checks and update the handoff documents.
 
 ### Stage 2 completion evidence
 
@@ -212,7 +223,7 @@ Before development, every coding agent must read this file and show the values f
 CURRENT PROJECT STAGE: Stage 3 — Sui foundation and Move treasury
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2
-NEXT TASK: Implement and test the treasury deposit/funding custody foundation
+NEXT TASK: Implement and test confirmed category-allocation state
 ```
 
 ## Mandatory Update Rules
@@ -231,6 +242,14 @@ A task is not complete until its agent:
 10. never claims live Gemini/Sui/deployment behavior without evidence
 
 ## Recent Development Log
+
+### 2026-08-29 — Added generic Stage 3 treasury funding foundation
+
+- Status: Stage 3 remains CURRENT; generic custody/deposit task complete and awaiting review
+- Change: Added typed `Balance<Asset>` custody, exact `u64` balance access, permissionless positive `Coin<Asset>` deposits, and focused funding tests.
+- Verification: Sui CLI `1.78.1-722ac4fcf484`; `sui move test` passed 7/7 tests; frozen install, lint, typecheck, 45 application unit tests, and production build passed.
+- Safety: No real Testnet USDC, wallet connection, withdrawal, payout, category allocation, deployment, package/object ID, or transaction digest was added or claimed.
+- Next: Implement and test the minimum confirmed category-allocation state without payout or deployment.
 
 ### 2026-08-28 — Added Stage 3 Move treasury authorization foundation
 
