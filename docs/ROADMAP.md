@@ -63,15 +63,17 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 
 - [x] Select wallet integration approach
 - [ ] Connect Sui wallet on Testnet
-- [ ] Create Move package structure
-- [ ] Design treasury object/state
-- [ ] Implement treasurer admin capability
+- [x] Create Move package structure
+- [x] Design the minimal shared treasury object/state
+- [x] Implement and test the treasurer admin capability
+- [x] Document the Stage 2 TypeScript-to-Move responsibility mapping
 - [ ] Implement deposit/funding flow
 - [ ] Implement confirmed category allocation state
 - [ ] Implement approved payout flow
 - [ ] Re-check category remaining on-chain
 - [ ] Emit payout events
-- [ ] Add Move tests + transaction error handling
+- [x] Add Move tests for creation and authorization boundaries
+- [ ] Add transaction error handling
 - [ ] Deploy package to Sui Testnet
 - [ ] Record real package/object IDs in README
 

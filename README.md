@@ -123,7 +123,20 @@ The completed Stage 2 workflow also includes:
 - responsive navigation through treasury, budget, claims, review, and history
 - 45 unit tests and six Playwright smoke tests covering the hard rules and workflow
 
-The next recommended task is Stage 3: create the Move package structure and test the treasury object plus treasurer admin capability. Live Gemini, Supabase persistence, wallet signing, and Sui payouts remain intentionally unimplemented.
+## Stage 3 — Current Foundation
+
+The first Stage 3 Move foundation now includes:
+
+- a Move 2024 package at `move/club_treasury`
+- a shared `Treasury<phantom Asset>` object for one club/event treasury
+- a treasurer-owned, module-controlled `TreasurerCap<phantom Asset>`
+- capability binding to one treasury object ID and treasurer address
+- an opaque off-chain `external_reference` plus metadata revision
+- four passing Move tests for creation, authorized use, unauthorized access, and mismatched capability use
+
+The phantom asset parameter preserves the intended native Sui Testnet USDC direction without claiming real custody. Funding, category allocations, payouts, wallet integration, Testnet deployment, package/object IDs, Gemini, and Supabase remain unimplemented.
+
+The next recommended task remains within Stage 3: implement and test the treasury deposit/funding custody foundation without deploying or inventing Sui evidence.
 
 ## Developer Quick Start
 
@@ -199,6 +212,13 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm test:e2e:smoke
+```
+
+Verify the current Move foundation separately with a compatible Sui CLI:
+
+```bash
+cd move/club_treasury
+sui move test
 ```
 
 The first Playwright run on a new machine may require browser installation:

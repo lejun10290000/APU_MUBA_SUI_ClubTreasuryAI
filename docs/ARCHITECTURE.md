@@ -122,17 +122,51 @@ Selected testnet USDC coin type:
 
 ## Move Object Model
 
-The MVP Move package should provide:
+### Verified Stage 3 foundation
 
-- shared `Treasury<USDC>` object
-- treasurer-owned admin capability
-- deposit/funding entry point
+The package at `move/club_treasury` currently provides:
+
+- a shared `Treasury<phantom Asset>` object
+- a `TreasurerCap<phantom Asset>` owned by the creating treasurer
+- explicit binding from the capability to one treasury object ID and treasurer address
+- an opaque, non-sensitive `external_reference` for mapping to the off-chain treasury record
+- a `metadata_revision` counter
+- a minimal privileged metadata update that checks the capability, treasury ID, and transaction sender
+
+`TreasurerCap` intentionally does not have the `store` ability. Arbitrary modules cannot publicly transfer it, and privileged calls additionally require the transaction sender to match the stored treasurer address. The generic phantom asset parameter establishes the coin-type boundary that later Stage 3 work will instantiate for native Circle-issued Sui Testnet USDC; no coin balance or custody is claimed yet.
+
+Four Move tests verify treasury creation, successful admin use, unauthorized-sender rejection, and mismatched-capability rejection.
+
+### Stage 2 TypeScript mapping
+
+| Stage 2 TypeScript field/responsibility   | Stage 3 Move representation                     | Boundary                                                                                                    |
+| ----------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `Treasury.id` demo/application identifier | `external_reference: vector<u8>`                | Store only an opaque mapping reference on-chain; display metadata remains off-chain.                        |
+| `Treasury.name`                           | Not duplicated on-chain                         | UI/display concern.                                                                                         |
+| `Treasury.currency = "USDC"`              | `Treasury<phantom Asset>` type parameter        | Later instantiate with the native Sui Testnet USDC coin type.                                               |
+| `Treasury.totalBudgetMinor`               | Not implemented in this foundation              | Later custody/allocation work must use Move `u64` minor units consistent with TypeScript integer semantics. |
+| `Treasury.status`                         | Not duplicated yet                              | Workflow state remains off-chain until an on-chain invariant requires it.                                   |
+| Treasurer authority                       | Owned `TreasurerCap` + stored treasurer address | Move enforces privileged access; the UI does not grant authority.                                           |
+
+The responsibility split remains:
+
+```text
+TypeScript -> UI, schemas, session/persistence workflow, deterministic off-chain validation
+Move       -> treasury identity, ownership/authorization, later custody and payout enforcement
+```
+
+### Remaining Stage 3 work
+
+The Move package must still add:
+
+- native Testnet USDC funding/custody
 - confirmed category allocations/remaining amounts
-- payout entry point restricted by admin capability
-- on-chain check that payout does not exceed category remaining amount
-- payout event with useful reference/recipient/amount/remaining data
+- payout restricted by the admin capability
+- payout-time category-remaining enforcement
+- payout events
+- transaction error handling and Testnet deployment evidence
 
-Sui therefore provides real custody, authorization, payout-time budget enforcement, and stablecoin transfer.
+Only after those pieces are implemented and verified will Sui provide the full planned custody, authorization, payout-time budget enforcement, and stablecoin transfer behavior.
 
 ## Claim Decision Pipeline
 
