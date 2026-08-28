@@ -90,7 +90,15 @@ The Stage 2 domain foundation now includes:
 - deterministic budget-total and category-remaining checks
 - unit tests for the new schemas and financial rules
 
-The next recommended task is the landing/login and treasurer dashboard shell using clearly labeled mock data. Live Gemini, Supabase persistence, wallet signing, and Sui payouts remain intentionally unimplemented.
+The Stage 2 product shell now includes:
+
+- responsive landing and demo-access pages
+- reusable desktop and mobile treasurer navigation
+- schema-validated mock dashboard fixtures
+- treasury balance, budget-category, claim-queue, activity, and safety-boundary views
+- browser smoke coverage for landing-to-dashboard navigation and mobile layout
+
+The next recommended task is the mock treasury/event creation UI with safe minor-unit validation. Live Gemini, Supabase persistence, wallet signing, and Sui payouts remain intentionally unimplemented.
 
 ## Developer Quick Start
 
