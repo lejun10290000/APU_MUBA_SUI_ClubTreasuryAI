@@ -40,8 +40,8 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 
 ## Stage 2 — Core UI and deterministic domain rules — CURRENT
 
-- [ ] Landing/login shell
-- [ ] Treasurer dashboard shell
+- [x] Landing/login shell
+- [x] Treasurer dashboard shell
 - [ ] Treasury/event creation UI
 - [ ] Budget creation form
 - [ ] Editable structured budget preview
@@ -56,7 +56,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [ ] Receipt/request amount comparison
 - [ ] Exact/similar duplicate helpers
 - [ ] Unit tests for hard financial rules
-- [ ] Clearly label all mock/demo data
+- [x] Clearly label all mock/demo data
 - [ ] Keep CI green
 
 ## Stage 3 — Sui foundation and Move treasury — NOT STARTED

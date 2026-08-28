@@ -3,12 +3,15 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "ClubTreasury AI",
-  description: "AI-powered programmable treasury for university clubs on Sui.",
+  description:
+    "AI-assisted programmable treasury for university clubs, built on Sui.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html data-scroll-behavior="smooth" lang="en">
       <body>{children}</body>
     </html>
   );

@@ -26,6 +26,9 @@ Thumbs.db
 
 # Test / coverage
 coverage/
+playwright-report/
+test-results/
+.playwright-cli/
 
 # Temporary files
 *.tmp
