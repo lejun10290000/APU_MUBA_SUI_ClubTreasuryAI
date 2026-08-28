@@ -2,6 +2,7 @@ module club_treasury::treasury;
 
 use std::vector;
 use sui::balance::{Self, Balance};
+use sui::coin::{Self, Coin};
 use sui::object::{Self, ID, UID};
 use sui::transfer;
 use sui::tx_context::{Self, TxContext};
@@ -9,6 +10,7 @@ use sui::tx_context::{Self, TxContext};
 const ENotTreasurer: u64 = 0;
 const ECapabilityMismatch: u64 = 1;
 const EEmptyExternalReference: u64 = 2;
+const EZeroDeposit: u64 = 3;
 
 /// Shared on-chain identity and authorization state for one club/event treasury.
 /// `Asset` keeps the treasury type-bound to its eventual payment coin; the MVP
@@ -65,6 +67,13 @@ public fun set_external_reference<Asset>(
 
     treasury.external_reference = external_reference;
     treasury.metadata_revision = treasury.metadata_revision + 1;
+}
+
+/// Moves a positive amount of the treasury's exact asset type into custody.
+/// Deposits are permissionless and do not grant or alter withdrawal authority.
+public fun deposit<Asset>(treasury: &mut Treasury<Asset>, payment: Coin<Asset>) {
+    assert!(coin::value(&payment) > 0, EZeroDeposit);
+    balance::join(&mut treasury.funds, coin::into_balance(payment));
 }
 
 fun assert_authorized<Asset>(
