@@ -140,14 +140,21 @@ The package at `move/club_treasury` currently provides:
 - treasurer-capability authorization for confirming all categories in one call
 - exact equality between total confirmed allocation and current custody balance
 - a post-confirmation deposit lock that preserves the custody/allocation invariant
+- a payout operation restricted by the matching capability and stored treasurer sender
+- exact confirmed-category lookup and `remaining` enforcement in native `u64` base units
+- exact `Coin<Asset>` extraction from custody and direct transfer to a non-zero recipient
+- unchanged original allocation values with selected-category and custody decrements
+- pre/post `sum(category_remaining) == custody balance` invariant checks
+- a typed payout event containing deterministic public payout evidence
+- distinct abort boundaries for invalid payout and defensive invariant failures
 
 `TreasurerCap` intentionally does not have the `store` ability. Arbitrary modules cannot publicly transfer it, and privileged calls additionally require the transaction sender to match the stored treasurer address. Depositing is permissionless and does not grant or alter withdrawal authority. The generic phantom asset parameter makes `Treasury<A>` accept only `Coin<A>` at compile time, establishing the coin-type boundary that later Stage 3 work will instantiate for verified native Circle-issued Sui Testnet USDC.
 
-Nineteen Move tests verify treasury creation, authorization, custody, exact allocation confirmation, `remaining = allocated`, duplicate/empty/zero/length/total validation, one-time confirmation, and post-confirmation deposit rejection.
+Thirty-one Move tests verify treasury creation, authorization, custody, exact allocation confirmation, payout authorization, exact typed coin delivery, category/custody decrements, unchanged allocation, repeated and cross-category payouts, event count, and hardened failure boundaries.
 
 Custody amounts are Move `u64` native coin base units. The contract does not assume that the Stage 2 two-decimal demo display scale matches the real USDC on-chain decimal scale; asset metadata must supply the verified display conversion during later integration.
 
-Category references are opaque bytes rather than display names. Confirmation is intentionally one-time in this foundation, exposes only read-only indexed getters, and blocks later deposits so `custody balance == total confirmed allocation` remains true before payout logic is added.
+Category references are opaque bytes rather than display names. Confirmation is intentionally one-time and blocks later deposits. Each payout preserves `custody balance == total category remaining`; the only deliberate corruption helper is compiled under `#[test_only]` and exposes no production mutation path.
 
 ### Stage 2 TypeScript mapping
 
@@ -164,19 +171,19 @@ The responsibility split remains:
 
 ```text
 TypeScript -> UI, schemas, session/persistence workflow, deterministic off-chain validation
-Move       -> treasury identity, ownership/authorization, later custody and payout enforcement
+Move       -> treasury identity, ownership/authorization, custody and payout enforcement
 ```
 
 ### Remaining Stage 3 work
 
-The Move package must still add:
+The application and deployment work must still add:
 
-- payout restricted by the admin capability
-- payout-time category-remaining enforcement
-- payout events
-- transaction error handling and Testnet deployment evidence
+- browser wallet connection on Sui Testnet
+- typed transaction construction for create, fund, confirm allocations, and payout
+- application transaction error/finality handling
+- Testnet deployment and real package/object/transaction evidence
 
-Local generic custody, deposit accounting, and confirmed category allocation are now verified. No withdrawal or payout path exists yet. Only after the remaining pieces are implemented, deployed, and exercised with the verified Testnet USDC type will Sui provide the full planned payout-time budget enforcement and stablecoin transfer behavior.
+Local generic custody, allocation, and payout enforcement are now verified. The installed Move test scenario verifies successful event count but does not expose typed event payload deserialization; event fields compile and execute in successful payout tests. Only after wallet integration, deployment, and exercise with the verified Testnet USDC type may the project claim a real stablecoin payout.
 
 ## Claim Decision Pipeline
 

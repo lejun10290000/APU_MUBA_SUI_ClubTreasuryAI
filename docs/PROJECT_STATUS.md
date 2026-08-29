@@ -11,10 +11,10 @@ Every teammate and coding agent must read this file before starting work and upd
 - **Current stage: Stage 3 — Sui foundation and Move treasury**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0 — Planning and repository setup; Stage 1 — Application foundation; Stage 2 — Core UI and deterministic domain rules**
-- Latest completed milestone: **One-time confirmed Move category-allocation state implemented with nineteen passing Move tests**
-- Active implementation work: **`stage3/category-allocation-foundation` is ready for review; no later Stage 3 task has started**
+- Latest completed milestone: **Authorized Move payout, category-remaining enforcement, payout event, and hardened abort boundaries implemented with thirty-one passing Move tests**
+- Active implementation work: **`stage3/payout-foundation` is ready for review; wallet and TypeScript transaction integration have not started**
 - Current blockers: **None after review; contributors need a compatible Sui CLI to run Move verification**
-- Demo readiness: **The full mock product workflow is navigable and local generic Move authorization, custody, and category-allocation logic is verified; no payout, real Testnet USDC transaction, wallet signing, deployment, persistence, or live AI exists yet**
+- Demo readiness: **The full mock product workflow is navigable and local generic Move authorization, custody, allocation, and payout enforcement are verified; no browser wallet signing, TypeScript transaction integration, real Testnet USDC transaction, deployment, persistence, or live AI exists yet**
 
 ## Stage Progress
 
@@ -157,7 +157,23 @@ See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
 - deposits are rejected after confirmation to preserve `custody balance == total confirmed allocation`
 - only read-only indexed category getters are exposed; no mutable invariant-bypassing reference exists
 - nineteen Move tests pass, including all prior authorization/funding cases and the complete allocation invariant matrix
-- no payout, withdrawal, wallet connection, Testnet deployment, real USDC transaction, package/object ID, or transaction digest exists
+- this allocation milestone was subsequently extended by the authorized payout foundation documented below
+
+### Stage 3 — Authorized payout foundation
+
+- payout requires the matching `TreasurerCap<Asset>` and transaction sender stored on the treasury
+- the category must already be confirmed and is located by its exact opaque byte reference
+- payout amounts must be positive and recipients must be non-zero addresses
+- the selected category must have sufficient `remaining` and custody must be sufficient
+- `sum(category_remaining) == treasury custody balance` is checked before and after every payout
+- successful payout decrements only the selected category `remaining` and custody; original `allocated` values never decrease
+- `coin::take` creates the exact typed `Coin<Asset>` amount and transfers it directly to the recipient
+- every successful payout emits typed public evidence with treasury ID, category reference, recipient, amount, category remaining, and treasury balance
+- distinct aborts cover unconfirmed allocation, missing category, zero payout, invalid recipient, insufficient remaining/custody, and accounting corruption
+- thirty-one Move tests pass, including all nineteen prior tests and payout success/failure, exact transfer, event-count, and invariant cases
+- the installed test framework exposes emitted-event count but not typed event payload deserialization; payload fields are compiled and exercised but not directly decoded in tests
+- no production invariant-bypass mutation exists; the corruption helper is `#[test_only]`
+- no browser wallet, TypeScript transaction builder, Testnet deployment, real USDC payout, package/object ID, or transaction digest exists
 
 ## Not Yet Implemented
 
@@ -165,7 +181,7 @@ See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
 - treasury editing UI
 - real receipt file upload or storage
 - real Sui wallet connection
-- Move payout, event, category-remaining enforcement, and hardened error tests
+- browser wallet connection and typed Sui transaction/integration layer
 - real Testnet treasury creation/funding/budget confirmation/payout
 - `@google/genai` live Gemini implementation
 - live budget/receipt AI analysis
@@ -178,19 +194,18 @@ Do not describe these as working until real code and verification exist.
 
 ## Next Recommended Task
 
-### Stage 3 task: Implement payout + category remaining enforcement + payout event + Move error hardening/tests
+### Stage 3 task: Connect wallet and build the typed Sui transaction/integration layer
 
-Extend the verified authorization, custody, and confirmed-allocation foundation with the remaining core Move payout behavior. Do not add wallet UI or deploy yet.
+Connect the Sui Testnet wallet in the application and build the typed integration layer for the verified Move calls. Do not deploy or fabricate package/object IDs.
 
 Required priorities:
 
-1. Add an admin-authorized payout for a confirmed category and recipient using exact native `u64` base units.
-2. Re-check category remaining and custody balance before releasing funds, then decrement both consistently.
-3. Emit a payout event with the useful opaque reference, recipient, amount, and remaining value.
-4. Harden Move abort handling for missing categories, zero/insufficient payouts, authorization, and invariant failures.
-5. Add focused success/failure tests while preserving all nineteen existing tests.
-6. Keep wallet UI integration, real Testnet USDC, and Testnet deployment out of this task.
-7. Run `sui move test` plus all existing application checks and update the handoff documents.
+1. Connect a Wallet Standard-compatible Sui wallet on Testnet through the selected dApp Kit packages.
+2. Build typed transaction constructors for treasury creation, funding, allocation confirmation, and payout.
+3. Preserve human wallet signing and never place private keys in the app or backend.
+4. Keep package/object IDs as `TBD` until a real later deployment provides evidence.
+5. Add deterministic integration/error handling without claiming a real Testnet transaction yet.
+6. Keep Gemini, Supabase, and deployment out of this task.
 
 ### Stage 2 completion evidence
 
@@ -239,7 +254,7 @@ Before development, every coding agent must read this file and show the values f
 CURRENT PROJECT STAGE: Stage 3 — Sui foundation and Move treasury
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2
-NEXT TASK: Implement payout + category remaining enforcement + payout event + Move error hardening/tests
+NEXT TASK: Connect the Sui Testnet wallet in the app and build the typed transaction/integration layer for treasury creation, funding, allocation confirmation, and payout, without deploying or fabricating package/object IDs.
 ```
 
 ## Mandatory Update Rules
@@ -258,6 +273,15 @@ A task is not complete until its agent:
 10. never claims live Gemini/Sui/deployment behavior without evidence
 
 ## Recent Development Log
+
+### 2026-08-29 — Added authorized Stage 3 payout foundation
+
+- Status: Stage 3 remains CURRENT; local generic payout foundation complete and awaiting review
+- Change: Added capability + sender-authorized payout, confirmed-category lookup, exact remaining/custody enforcement, direct typed coin transfer, payout events, distinct payout aborts, and pre/post accounting invariant checks.
+- Verification: Sui CLI `1.78.1-722ac4fcf484`; `sui move test` passed 31/31 tests; frozen install, lint, typecheck, 45 application unit tests, and production build passed.
+- Event testing: Successful tests verify emitted-event count and all resulting transfer/state values; this installed framework does not expose typed payload deserialization.
+- Safety: No unrestricted withdrawal, AI authority, browser wallet, TypeScript transaction integration, Testnet deployment, real USDC payout, package/object ID, transaction digest, Gemini, or Supabase integration was added or claimed.
+- Next: Connect the Sui Testnet wallet in the app and build the typed transaction/integration layer for treasury creation, funding, allocation confirmation, and payout, without deploying or fabricating package/object IDs.
 
 ### 2026-08-29 — Added confirmed Stage 3 category-allocation foundation
 
