@@ -69,11 +69,11 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Document the Stage 2 TypeScript-to-Move responsibility mapping
 - [x] Implement and test generic deposit/funding custody
 - [x] Implement and test confirmed category allocation state
-- [ ] Implement approved payout flow
-- [ ] Re-check category remaining on-chain
-- [ ] Emit payout events
+- [x] Implement approved payout flow
+- [x] Re-check category remaining on-chain
+- [x] Emit payout events
 - [x] Add Move tests for creation and authorization boundaries
-- [ ] Add transaction error handling
+- [x] Add Move payout abort/error handling
 - [ ] Deploy package to Sui Testnet
 - [ ] Record real package/object IDs in README
 

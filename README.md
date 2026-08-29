@@ -139,11 +139,16 @@ The first Stage 3 Move foundation now includes:
 - category `remaining` values initialized exactly to their `allocated` values
 - total confirmed allocation required to equal the treasury custody balance
 - deposits blocked after confirmation to preserve the custody/allocation invariant
-- 19 passing Move tests covering creation, authorization, funding, allocation, and failure boundaries
+- treasurer-capability and sender-authorized payouts from confirmed categories
+- exact category `remaining` and custody decrements with pre/post accounting invariant checks
+- exact typed `Coin<Asset>` transfer directly to a non-zero recipient
+- deterministic payout events with treasury, category, recipient, amount, and post-payout balances
+- hardened abort boundaries for unconfirmed, missing, zero, invalid, insufficient, and corrupt-accounting cases
+- 31 passing Move tests covering creation, authorization, funding, allocation, payout, events, and failure boundaries
 
-The phantom asset parameter statically requires a treasury and its deposits to use the same coin type, preserving the intended native Sui Testnet USDC direction. This is verified local generic Move logic only: no payout or withdrawal exists, no real Testnet USDC transaction has occurred, no wallet is connected, and no Testnet package/object ID or transaction digest exists. Wallet integration, deployment, Gemini, and Supabase remain unimplemented.
+The phantom asset parameter statically requires treasury custody and payouts to use the same coin type, preserving the intended native Sui Testnet USDC direction. This is verified local generic Move logic only: no real Testnet USDC transaction has occurred, no wallet or TypeScript transaction integration is connected, and no Testnet package/object ID or transaction digest exists. Deployment, Gemini, and Supabase remain unimplemented.
 
-The next recommended task remains within Stage 3: implement payout, category-remaining enforcement, a payout event, and focused Move error hardening/tests without starting wallet UI or deployment.
+The next recommended task remains within Stage 3: connect the Sui Testnet wallet in the app and build the typed transaction/integration layer for treasury creation, funding, allocation confirmation, and payout, without deploying or fabricating package/object IDs.
 
 ## Developer Quick Start
 
