@@ -174,16 +174,31 @@ TypeScript -> UI, schemas, session/persistence workflow, deterministic off-chain
 Move       -> treasury identity, ownership/authorization, custody and payout enforcement
 ```
 
+### Application-side Sui integration
+
+The App Router keeps wallet discovery behind a client-only dApp Kit provider. The configured network set contains only `testnet`, automatic connection is disabled, and the dashboard starts a connection request only after an explicit user action. The UI reads the public account address and advertised account chains, warns when `sui:testnet` is absent, and never treats a wallet balance as the authoritative treasury balance.
+
+`src/lib/sui/transactions.ts` deterministically constructs unsigned `Transaction` values for the four verified Move entry points. Runtime treasury, capability, source-coin, and recipient identifiers are validated inputs rather than global constants. Money values are positive `bigint` inputs checked against the `u64` maximum. The funding builder splits the exact requested value from the supplied USDC coin object; it does not select coins through RPC or treat the gas coin as USDC.
+
+The application boundary is deliberately:
+
+```text
+TypeScript builds a validated unsigned proposal
+        -> human treasurer reviews and signs in the browser wallet
+        -> Sui Testnet executes and Move enforces
+```
+
+`NEXT_PUBLIC_SUI_PACKAGE_ID` is optional and currently absent. Missing or invalid deployment configuration stops construction before a wallet request. No builder signs, executes, holds private keys, or grants AI payout authority. Until a verified deployment is configured, the UI keeps treasury transaction execution unavailable.
+
 ### Remaining Stage 3 work
 
-The application and deployment work must still add:
+The deployment work must still add:
 
-- browser wallet connection on Sui Testnet
-- typed transaction construction for create, fund, confirm allocations, and payout
-- application transaction error/finality handling
+- project-owner manual connection QA with a real Testnet browser wallet
 - Testnet deployment and real package/object/transaction evidence
+- signed transaction execution, result/finality handling, and explorer links using only verified IDs
 
-Local generic custody, allocation, and payout enforcement are now verified. The installed Move test scenario verifies successful event count but does not expose typed event payload deserialization; event fields compile and execute in successful payout tests. Only after wallet integration, deployment, and exercise with the verified Testnet USDC type may the project claim a real stablecoin payout.
+Local generic custody, allocation, payout enforcement, and application-side unsigned transaction construction are now verified. The installed Move test scenario verifies successful event count but does not expose typed event payload deserialization; event fields compile and execute in successful payout tests. Only after deployment and exercise with the verified Testnet USDC type may the project claim a real stablecoin payout.
 
 ## Claim Decision Pipeline
 

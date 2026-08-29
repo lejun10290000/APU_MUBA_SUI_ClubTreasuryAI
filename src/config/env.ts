@@ -13,10 +13,16 @@ const serverSchema = z.object({
   GEMINI_LIVE_REQUESTS_ENABLED: booleanString,
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
   NEXT_PUBLIC_SUI_NETWORK: z.enum(["testnet"]).default("testnet"),
-  NEXT_PUBLIC_SUI_RPC_URL: z.string().url().default("https://fullnode.testnet.sui.io:443"),
+  NEXT_PUBLIC_SUI_RPC_URL: z
+    .string()
+    .url()
+    .default("https://fullnode.testnet.sui.io:443"),
+  NEXT_PUBLIC_SUI_PACKAGE_ID: z.string().trim().min(1).optional(),
   NEXT_PUBLIC_SUI_USDC_COIN_TYPE: z
     .string()
-    .default("0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC"),
+    .default(
+      "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+    ),
 });
 
 const parsed = serverSchema.parse({
@@ -28,6 +34,8 @@ const parsed = serverSchema.parse({
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   NEXT_PUBLIC_SUI_NETWORK: process.env.NEXT_PUBLIC_SUI_NETWORK,
   NEXT_PUBLIC_SUI_RPC_URL: process.env.NEXT_PUBLIC_SUI_RPC_URL,
+  NEXT_PUBLIC_SUI_PACKAGE_ID:
+    process.env.NEXT_PUBLIC_SUI_PACKAGE_ID || undefined,
   NEXT_PUBLIC_SUI_USDC_COIN_TYPE: process.env.NEXT_PUBLIC_SUI_USDC_COIN_TYPE,
 });
 
@@ -48,5 +56,6 @@ export const publicConfig = {
   geminiLiveRequestsEnabled: parsed.GEMINI_LIVE_REQUESTS_ENABLED,
   suiNetwork: parsed.NEXT_PUBLIC_SUI_NETWORK,
   suiRpcUrl: parsed.NEXT_PUBLIC_SUI_RPC_URL,
+  suiPackageId: parsed.NEXT_PUBLIC_SUI_PACKAGE_ID ?? null,
   suiUsdcCoinType: parsed.NEXT_PUBLIC_SUI_USDC_COIN_TYPE,
 } as const;

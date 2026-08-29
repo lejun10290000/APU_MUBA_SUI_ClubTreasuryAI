@@ -6,15 +6,15 @@ Every teammate and coding agent must read this file before starting work and upd
 
 ## Current Snapshot
 
-- Last updated: **29 August 2026 (MYT)**
+- Last updated: **30 August 2026 (MYT)**
 - Default branch: `main`
 - **Current stage: Stage 3 — Sui foundation and Move treasury**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0 — Planning and repository setup; Stage 1 — Application foundation; Stage 2 — Core UI and deterministic domain rules**
-- Latest completed milestone: **Authorized Move payout, category-remaining enforcement, payout event, and hardened abort boundaries implemented with thirty-one passing Move tests**
-- Active implementation work: **`stage3/payout-foundation` is ready for review; wallet and TypeScript transaction integration have not started**
-- Current blockers: **None after review; contributors need a compatible Sui CLI to run Move verification**
-- Demo readiness: **The full mock product workflow is navigable and local generic Move authorization, custody, allocation, and payout enforcement are verified; no browser wallet signing, TypeScript transaction integration, real Testnet USDC transaction, deployment, persistence, or live AI exists yet**
+- Latest completed milestone: **Wallet Standard-compatible Testnet connection code, Testnet guard, and typed unsigned transaction builders for create, fund, allocation confirmation, and payout**
+- Active implementation work: **`stage3/wallet-transaction-integration` is ready for review; Stage 3 remains current**
+- Current blockers: **A verified Testnet package ID and resulting object IDs do not exist yet; real browser-wallet connection QA requires the project owner**
+- Demo readiness: **The full mock workflow, local Move enforcement, wallet connection UI, and deterministic unsigned transaction construction are verified in code and automated tests; no Move package deployment, real treasury transaction, real Testnet USDC evidence, persistence, or live AI exists yet**
 
 ## Stage Progress
 
@@ -175,13 +175,29 @@ See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
 - no production invariant-bypass mutation exists; the corruption helper is `#[test_only]`
 - no browser wallet, TypeScript transaction builder, Testnet deployment, real USDC payout, package/object ID, or transaction digest exists
 
+### Stage 3 — Wallet and typed transaction integration
+
+- Wallet Standard-compatible browser wallets are discovered through `@mysten/dapp-kit-react` `2.1.20` at a client-only provider boundary
+- wallet connection requires an explicit user action and exposes the connected public address, disconnect control, and a Sui Testnet label
+- connected accounts that do not advertise `sui:testnet` receive a wrong-network warning and cannot be presented as transaction-ready
+- missing `NEXT_PUBLIC_SUI_PACKAGE_ID` is represented as `null`; no fallback or fabricated package ID is used
+- typed `@mysten/sui` `2.27.0` transaction builders mirror Move `create`, `deposit`, `confirm_allocations`, and `payout`
+- deposits split an exact requested amount from an explicitly supplied compatible coin object before calling `deposit`
+- allocation references and exact `u64` amounts preserve input order and reject empty, duplicate, mismatched, zero, or invalid values before construction
+- transaction amounts accept positive `bigint` values only and enforce the Move `u64` range
+- application errors distinguish build validation and wallet readiness; they do not claim an on-chain abort before execution
+- the application service builds unsigned transactions only; the human browser wallet remains the sole future signer
+- package deployment is not configured, so all treasury execution controls remain unavailable and no wallet is asked to sign a treasury transaction
+- 61 application unit tests and six Playwright smoke tests pass; desktop and 390 px inspection have no horizontal overflow or browser console warnings/errors
+- automated no-extension behavior is verified; real browser-wallet connection QA remains required from the project owner
+- no Testnet package, treasury/cap object ID, transaction digest, real USDC treasury evidence, Gemini, or Supabase integration was added or claimed
+
 ## Not Yet Implemented
 
 - real authentication and user accounts
 - treasury editing UI
 - real receipt file upload or storage
-- real Sui wallet connection
-- browser wallet connection and typed Sui transaction/integration layer
+- project-owner confirmation of a real browser-wallet connection on Sui Testnet
 - real Testnet treasury creation/funding/budget confirmation/payout
 - `@google/genai` live Gemini implementation
 - live budget/receipt AI analysis
@@ -194,18 +210,18 @@ Do not describe these as working until real code and verification exist.
 
 ## Next Recommended Task
 
-### Stage 3 task: Connect wallet and build the typed Sui transaction/integration layer
+### Stage 3 task: Deploy and exercise the verified Testnet treasury flow
 
-Connect the Sui Testnet wallet in the application and build the typed integration layer for the verified Move calls. Do not deploy or fabricate package/object IDs.
+Deploy the Move package to Sui Testnet, record the real package/object identifiers, configure the app with verified deployment values, and execute a small end-to-end Testnet treasury flow with real wallet signatures and blockchain evidence.
 
 Required priorities:
 
-1. Connect a Wallet Standard-compatible Sui wallet on Testnet through the selected dApp Kit packages.
-2. Build typed transaction constructors for treasury creation, funding, allocation confirmation, and payout.
-3. Preserve human wallet signing and never place private keys in the app or backend.
-4. Keep package/object IDs as `TBD` until a real later deployment provides evidence.
-5. Add deterministic integration/error handling without claiming a real Testnet transaction yet.
-6. Keep Gemini, Supabase, and deployment out of this task.
+1. Deploy the already verified Move package to Sui Testnet with a compatible Sui CLI.
+2. Record only real package, treasury, capability, coin, and transaction identifiers produced by the flow.
+3. Configure `NEXT_PUBLIC_SUI_PACKAGE_ID` with the verified package value.
+4. Use the project owner's Testnet wallet for every explicit approval and signature; never handle its private keys or seed phrase.
+5. Execute a small create, fund, allocation-confirmation, and payout flow using real Testnet assets and preserve explorer evidence.
+6. Keep Gemini and Supabase out of this Stage 3 deployment task.
 
 ### Stage 2 completion evidence
 
@@ -254,7 +270,7 @@ Before development, every coding agent must read this file and show the values f
 CURRENT PROJECT STAGE: Stage 3 — Sui foundation and Move treasury
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2
-NEXT TASK: Connect the Sui Testnet wallet in the app and build the typed transaction/integration layer for treasury creation, funding, allocation confirmation, and payout, without deploying or fabricating package/object IDs.
+NEXT TASK: Deploy the Move package to Sui Testnet, record the real package/object identifiers, configure the app with verified deployment values, and execute a small end-to-end Testnet treasury flow with real wallet signatures and blockchain evidence.
 ```
 
 ## Mandatory Update Rules
@@ -273,6 +289,15 @@ A task is not complete until its agent:
 10. never claims live Gemini/Sui/deployment behavior without evidence
 
 ## Recent Development Log
+
+### 2026-08-30 — Added Sui Testnet wallet and typed transaction integration
+
+- Status: Stage 3 remains CURRENT; wallet and application transaction integration are complete and awaiting review.
+- Change: Added an explicit Wallet Standard-compatible connection boundary, connected-address state, Testnet-only guard, missing-deployment guard, typed unsigned create/fund/confirm/payout builders, exact `bigint`/`u64` validation, and normalized build/wallet errors.
+- Verification: Frozen install, lint, typecheck, 61/61 application unit tests, production build, and 6/6 Playwright smoke tests passed; desktop and 390 px browser inspection passed without horizontal overflow or console warnings/errors.
+- Manual boundary: Automated no-extension behavior passed; a project owner must still approve a connection-only request in their real Testnet browser wallet and verify connect/disconnect behavior.
+- Safety: No package was deployed, no treasury transaction was signed or executed, and no package/object ID, digest, real USDC movement, Gemini, Supabase, private key, or seed phrase was added or claimed.
+- Next: Deploy the Move package to Sui Testnet, record the real package/object identifiers, configure the app with verified deployment values, and execute a small end-to-end Testnet treasury flow with real wallet signatures and blockchain evidence.
 
 ### 2026-08-29 — Added authorized Stage 3 payout foundation
 

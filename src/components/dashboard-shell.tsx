@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 import { Icon, type IconName } from "./icon";
+import { SuiWalletControl } from "./sui-wallet-control";
 
 const navigation: Array<{
   href: string;
@@ -85,7 +86,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             <Icon className="size-4" name="shield" /> Safety mode
           </div>
           <p className="text-xs leading-5 text-white/55">
-            Mock data only. No wallet is connected and no funds can move.
+            Wallet connection is available on Testnet. Contract transactions
+            stay disabled until a real deployment is configured.
           </p>
         </div>
       </aside>
@@ -104,9 +106,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               AI mode: deterministic mock
             </div>
             <div className="flex items-center gap-3">
-              <span className="hidden rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 sm:inline-flex">
-                No live funds
-              </span>
+              <SuiWalletControl />
               <span className="grid size-9 place-items-center rounded-full bg-[var(--brand)] text-sm font-bold text-white">
                 YX
               </span>

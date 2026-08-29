@@ -145,10 +145,17 @@ The first Stage 3 Move foundation now includes:
 - deterministic payout events with treasury, category, recipient, amount, and post-payout balances
 - hardened abort boundaries for unconfirmed, missing, zero, invalid, insufficient, and corrupt-accounting cases
 - 31 passing Move tests covering creation, authorization, funding, allocation, payout, events, and failure boundaries
+- Wallet Standard-compatible browser-wallet discovery and explicit connection through `@mysten/dapp-kit-react` `2.1.20`
+- connected public-address display, disconnect control, and a Sui Testnet-only account guard
+- optional package deployment configuration with no fabricated fallback ID
+- typed unsigned `@mysten/sui` `2.27.0` builders for treasury creation, exact funding, allocation confirmation, and payout
+- exact positive `bigint`/`u64` validation plus deterministic object, address, reference, duplicate, and deployment errors
+- a strict human-signing boundary: the application builds proposals but never auto-signs or holds wallet secrets
+- 61 passing application unit tests and six passing Playwright smoke tests, including safe no-wallet-extension behavior
 
-The phantom asset parameter statically requires treasury custody and payouts to use the same coin type, preserving the intended native Sui Testnet USDC direction. This is verified local generic Move logic only: no real Testnet USDC transaction has occurred, no wallet or TypeScript transaction integration is connected, and no Testnet package/object ID or transaction digest exists. Deployment, Gemini, and Supabase remain unimplemented.
+The phantom asset parameter statically requires treasury custody and payouts to use the same coin type, preserving the intended native Sui Testnet USDC direction. The wallet and typed transaction integration is implemented, but real browser-wallet connection QA still requires the project owner. No package is deployed, the package ID remains unconfigured, and no treasury/cap object ID, transaction digest, or real Testnet USDC transaction exists. Treasury execution stays disabled. Gemini and Supabase remain unimplemented.
 
-The next recommended task remains within Stage 3: connect the Sui Testnet wallet in the app and build the typed transaction/integration layer for treasury creation, funding, allocation confirmation, and payout, without deploying or fabricating package/object IDs.
+The next recommended task remains within Stage 3: deploy the Move package to Sui Testnet, record the real package/object identifiers, configure the app with verified deployment values, and execute a small end-to-end Testnet treasury flow with real wallet signatures and blockchain evidence.
 
 ## Developer Quick Start
 
