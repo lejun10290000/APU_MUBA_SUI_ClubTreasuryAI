@@ -302,6 +302,16 @@ public fun accounting_invariant_holds<Asset>(treasury: &Treasury<Asset>): bool {
     total_remaining == balance::value(&treasury.funds)
 }
 
+/// Test-only state corruption used to prove the defensive invariant abort.
+#[test_only]
+public fun corrupt_category_remaining_for_testing<Asset>(
+    treasury: &mut Treasury<Asset>,
+    index: u64,
+    remaining: u64,
+) {
+    *vector::borrow_mut(&mut treasury.category_remaining, index) = remaining;
+}
+
 public fun cap_treasury_id<Asset>(cap: &TreasurerCap<Asset>): ID {
     cap.treasury_id
 }
