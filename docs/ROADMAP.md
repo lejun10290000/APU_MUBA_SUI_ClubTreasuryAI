@@ -62,7 +62,10 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 ## Stage 3 — Sui foundation and Move treasury — CURRENT
 
 - [x] Select wallet integration approach
-- [ ] Connect Sui wallet on Testnet
+- [x] Add Wallet Standard-compatible Sui Testnet connection code and network guard
+- [x] Add typed unsigned create/fund/confirm/payout transaction builders
+- [x] Add application-side wallet/build validation errors
+- [ ] Complete project-owner manual QA with a real Testnet browser wallet
 - [x] Create Move package structure
 - [x] Design the minimal shared treasury object/state
 - [x] Implement and test the treasurer admin capability

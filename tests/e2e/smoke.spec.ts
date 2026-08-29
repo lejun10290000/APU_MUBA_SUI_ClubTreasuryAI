@@ -24,7 +24,14 @@ test("Stage 2 product shell navigates from landing to treasurer dashboard", asyn
   await expect(
     page.getByRole("heading", { name: "Web3 Workshop 2026" }),
   ).toBeVisible();
-  await expect(page.getByText("No live funds")).toBeVisible();
+  await expect(page.getByText("Connect Sui wallet")).toBeVisible();
+  await page.getByText("Connect Sui wallet").click();
+  await expect(
+    page.getByText(/No compatible Sui wallet was detected/i),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Treasury transactions unavailable" }),
+  ).toBeDisabled();
 
   const response = await request.get("/api/health");
   expect(response.ok()).toBeTruthy();
