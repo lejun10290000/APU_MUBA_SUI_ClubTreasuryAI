@@ -135,23 +135,30 @@ The package at `move/club_treasury` currently provides:
 - an internal `Balance<Asset>` initialized to zero
 - a permissionless deposit operation that consumes a positive `Coin<Asset>` into custody
 - a read-only `u64` balance getter for exact native coin base units
+- one-time confirmed category state using opaque non-empty byte references
+- exact `allocated` and `remaining` `u64` values for each category
+- treasurer-capability authorization for confirming all categories in one call
+- exact equality between total confirmed allocation and current custody balance
+- a post-confirmation deposit lock that preserves the custody/allocation invariant
 
 `TreasurerCap` intentionally does not have the `store` ability. Arbitrary modules cannot publicly transfer it, and privileged calls additionally require the transaction sender to match the stored treasurer address. Depositing is permissionless and does not grant or alter withdrawal authority. The generic phantom asset parameter makes `Treasury<A>` accept only `Coin<A>` at compile time, establishing the coin-type boundary that later Stage 3 work will instantiate for verified native Circle-issued Sui Testnet USDC.
 
-Seven Move tests verify treasury creation with zero custody, successful admin use, unauthorized-sender rejection, mismatched-capability rejection, exact single-deposit accounting, exact accumulation, and zero-value deposit rejection.
+Nineteen Move tests verify treasury creation, authorization, custody, exact allocation confirmation, `remaining = allocated`, duplicate/empty/zero/length/total validation, one-time confirmation, and post-confirmation deposit rejection.
 
 Custody amounts are Move `u64` native coin base units. The contract does not assume that the Stage 2 two-decimal demo display scale matches the real USDC on-chain decimal scale; asset metadata must supply the verified display conversion during later integration.
 
+Category references are opaque bytes rather than display names. Confirmation is intentionally one-time in this foundation, exposes only read-only indexed getters, and blocks later deposits so `custody balance == total confirmed allocation` remains true before payout logic is added.
+
 ### Stage 2 TypeScript mapping
 
-| Stage 2 TypeScript field/responsibility   | Stage 3 Move representation                     | Boundary                                                                                                    |
-| ----------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `Treasury.id` demo/application identifier | `external_reference: vector<u8>`                | Store only an opaque mapping reference on-chain; display metadata remains off-chain.                        |
-| `Treasury.name`                           | Not duplicated on-chain                         | UI/display concern.                                                                                         |
-| `Treasury.currency = "USDC"`              | `Treasury<phantom Asset>` type parameter        | Later instantiate with the native Sui Testnet USDC coin type.                                               |
-| `Treasury.totalBudgetMinor`               | Not duplicated as a budget allocation yet       | `Balance<Asset>` tracks custody in native `u64` base units; confirmed budget allocation remains later work. |
-| `Treasury.status`                         | Not duplicated yet                              | Workflow state remains off-chain until an on-chain invariant requires it.                                   |
-| Treasurer authority                       | Owned `TreasurerCap` + stored treasurer address | Move enforces privileged access; the UI does not grant authority.                                           |
+| Stage 2 TypeScript field/responsibility   | Stage 3 Move representation                     | Boundary                                                                             |
+| ----------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `Treasury.id` demo/application identifier | `external_reference: vector<u8>`                | Store only an opaque mapping reference on-chain; display metadata remains off-chain. |
+| `Treasury.name`                           | Not duplicated on-chain                         | UI/display concern.                                                                  |
+| `Treasury.currency = "USDC"`              | `Treasury<phantom Asset>` type parameter        | Later instantiate with the native Sui Testnet USDC coin type.                        |
+| `Treasury.totalBudgetMinor`               | Sum of confirmed category `allocated` values    | Must exactly equal `Balance<Asset>` custody in native `u64` base units.              |
+| `Treasury.status`                         | Not duplicated yet                              | Workflow state remains off-chain until an on-chain invariant requires it.            |
+| Treasurer authority                       | Owned `TreasurerCap` + stored treasurer address | Move enforces privileged access; the UI does not grant authority.                    |
 
 The responsibility split remains:
 
@@ -164,13 +171,12 @@ Move       -> treasury identity, ownership/authorization, later custody and payo
 
 The Move package must still add:
 
-- confirmed category allocations/remaining amounts
 - payout restricted by the admin capability
 - payout-time category-remaining enforcement
 - payout events
 - transaction error handling and Testnet deployment evidence
 
-Local generic custody and deposit accounting are now verified. Only after the remaining pieces are implemented, deployed, and exercised with the verified Testnet USDC type will Sui provide the full planned authorization, payout-time budget enforcement, and stablecoin transfer behavior.
+Local generic custody, deposit accounting, and confirmed category allocation are now verified. No withdrawal or payout path exists yet. Only after the remaining pieces are implemented, deployed, and exercised with the verified Testnet USDC type will Sui provide the full planned payout-time budget enforcement and stablecoin transfer behavior.
 
 ## Claim Decision Pipeline
 
