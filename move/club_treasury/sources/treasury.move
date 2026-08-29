@@ -3,6 +3,7 @@ module club_treasury::treasury;
 use std::vector;
 use sui::balance::{Self, Balance};
 use sui::coin::{Self, Coin};
+use sui::event;
 use sui::object::{Self, ID, UID};
 use sui::transfer;
 use sui::tx_context::{Self, TxContext};
@@ -19,6 +20,13 @@ const EZeroCategoryAllocation: u64 = 8;
 const EDuplicateCategoryReference: u64 = 9;
 const EAllocationTotalMismatch: u64 = 10;
 const EDepositAfterConfirmation: u64 = 11;
+const EAllocationsNotConfirmed: u64 = 12;
+const ECategoryNotFound: u64 = 13;
+const EZeroPayout: u64 = 14;
+const EInvalidRecipient: u64 = 15;
+const EInsufficientCategoryRemaining: u64 = 16;
+const EInsufficientTreasuryCustody: u64 = 17;
+const EAccountingInvariantViolation: u64 = 18;
 
 /// Shared on-chain identity and authorization state for one club/event treasury.
 /// `Asset` keeps the treasury type-bound to its eventual payment coin; the MVP
@@ -41,6 +49,16 @@ public struct TreasurerCap<phantom Asset> has key {
     id: UID,
     treasury_id: ID,
     treasurer: address,
+}
+
+/// Public, non-sensitive evidence for a successful authorized payout.
+public struct PayoutEvent<phantom Asset> has copy, drop {
+    treasury_id: ID,
+    category_reference: vector<u8>,
+    recipient: address,
+    amount: u64,
+    category_remaining: u64,
+    treasury_balance: u64,
 }
 
 /// Creates and shares one empty treasury foundation and gives its creator the
@@ -139,6 +157,62 @@ public fun confirm_allocations<Asset>(
     treasury.allocations_confirmed = true;
 }
 
+/// Releases an exact coin amount to a recipient after re-checking treasurer
+/// authority, the confirmed category limit, custody, and accounting integrity.
+public fun payout<Asset>(
+    treasury: &mut Treasury<Asset>,
+    cap: &TreasurerCap<Asset>,
+    category_reference: vector<u8>,
+    recipient: address,
+    amount: u64,
+    ctx: &mut TxContext,
+) {
+    assert_authorized(treasury, cap, ctx);
+    assert!(treasury.allocations_confirmed, EAllocationsNotConfirmed);
+
+    let category_index = find_category_index(&treasury.category_references, &category_reference);
+    assert!(amount > 0, EZeroPayout);
+    assert!(recipient != @0x0, EInvalidRecipient);
+    assert!(accounting_invariant_holds(treasury), EAccountingInvariantViolation);
+
+    let remaining = *vector::borrow(&treasury.category_remaining, category_index);
+    assert!(remaining >= amount, EInsufficientCategoryRemaining);
+
+    let custody = balance::value(&treasury.funds);
+    assert!(custody >= amount, EInsufficientTreasuryCustody);
+
+    let remaining_after = remaining - amount;
+    *vector::borrow_mut(&mut treasury.category_remaining, category_index) = remaining_after;
+    let payout_coin = coin::take(&mut treasury.funds, amount, ctx);
+
+    assert!(accounting_invariant_holds(treasury), EAccountingInvariantViolation);
+    let custody_after = balance::value(&treasury.funds);
+
+    event::emit(PayoutEvent<Asset> {
+        treasury_id: object::id(treasury),
+        category_reference,
+        recipient,
+        amount,
+        category_remaining: remaining_after,
+        treasury_balance: custody_after,
+    });
+    transfer::public_transfer(payout_coin, recipient);
+}
+
+fun find_category_index(
+    references: &vector<vector<u8>>,
+    candidate: &vector<u8>,
+): u64 {
+    let mut index = 0;
+    while (index < vector::length(references)) {
+        if (vector::borrow(references, index) == candidate) {
+            return index
+        };
+        index = index + 1;
+    };
+    abort ECategoryNotFound
+}
+
 fun contains_reference(references: &vector<vector<u8>>, candidate: &vector<u8>): bool {
     let mut index = 0;
     while (index < vector::length(references)) {
@@ -201,6 +275,31 @@ public fun category_allocated_at<Asset>(treasury: &Treasury<Asset>, index: u64):
 
 public fun category_remaining_at<Asset>(treasury: &Treasury<Asset>, index: u64): u64 {
     *vector::borrow(&treasury.category_remaining, index)
+}
+
+/// Returns whether category accounting exactly matches the typed custody balance.
+public fun accounting_invariant_holds<Asset>(treasury: &Treasury<Asset>): bool {
+    let category_count = vector::length(&treasury.category_references);
+    if (
+        category_count != vector::length(&treasury.category_allocated)
+            || category_count != vector::length(&treasury.category_remaining)
+    ) {
+        return false
+    };
+
+    let mut index = 0;
+    let mut total_remaining = 0;
+    while (index < category_count) {
+        let allocated = *vector::borrow(&treasury.category_allocated, index);
+        let remaining = *vector::borrow(&treasury.category_remaining, index);
+        if (remaining > allocated) {
+            return false
+        };
+        total_remaining = total_remaining + remaining;
+        index = index + 1;
+    };
+
+    total_remaining == balance::value(&treasury.funds)
 }
 
 public fun cap_treasury_id<Asset>(cap: &TreasurerCap<Asset>): ID {
