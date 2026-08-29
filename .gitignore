@@ -33,6 +33,7 @@ test-results/
 # Temporary files
 *.tmp
 *.temp
+*.tsbuildinfo
 
 # Local blockchain / wallet secrets
 *.key
