@@ -135,11 +135,15 @@ The first Stage 3 Move foundation now includes:
 - a typed internal `Balance<Asset>` initialized to zero
 - permissionless deposits of positive `Coin<Asset>` values into treasury custody
 - exact `u64` native base-unit balance accounting
-- seven passing Move tests covering creation, authorization, deposits, accumulation, and zero-value rejection
+- one-time treasurer-authorized confirmation of opaque category IDs and exact allocations
+- category `remaining` values initialized exactly to their `allocated` values
+- total confirmed allocation required to equal the treasury custody balance
+- deposits blocked after confirmation to preserve the custody/allocation invariant
+- 19 passing Move tests covering creation, authorization, funding, allocation, and failure boundaries
 
-The phantom asset parameter statically requires a treasury and its deposits to use the same coin type, preserving the intended native Sui Testnet USDC direction. This is verified local generic Move logic only: no real Testnet USDC has been deposited, no wallet is connected, and no Testnet package/object ID or transaction digest exists. Category allocations, payouts, wallet integration, deployment, Gemini, and Supabase remain unimplemented.
+The phantom asset parameter statically requires a treasury and its deposits to use the same coin type, preserving the intended native Sui Testnet USDC direction. This is verified local generic Move logic only: no payout or withdrawal exists, no real Testnet USDC transaction has occurred, no wallet is connected, and no Testnet package/object ID or transaction digest exists. Wallet integration, deployment, Gemini, and Supabase remain unimplemented.
 
-The next recommended task remains within Stage 3: implement and test the minimum confirmed category-allocation state without adding payouts or deployment.
+The next recommended task remains within Stage 3: implement payout, category-remaining enforcement, a payout event, and focused Move error hardening/tests without starting wallet UI or deployment.
 
 ## Developer Quick Start
 

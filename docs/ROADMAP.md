@@ -68,7 +68,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Implement and test the treasurer admin capability
 - [x] Document the Stage 2 TypeScript-to-Move responsibility mapping
 - [x] Implement and test generic deposit/funding custody
-- [ ] Implement confirmed category allocation state
+- [x] Implement and test confirmed category allocation state
 - [ ] Implement approved payout flow
 - [ ] Re-check category remaining on-chain
 - [ ] Emit payout events
