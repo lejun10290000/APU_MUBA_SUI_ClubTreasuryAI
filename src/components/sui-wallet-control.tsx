@@ -9,7 +9,10 @@ import {
   useWallets,
 } from "@mysten/dapp-kit-react";
 import { useState } from "react";
-import { isSuiDeploymentConfigured } from "@/src/lib/sui/config";
+import {
+  isDeploymentReady,
+  suiDeploymentConfig,
+} from "@/src/lib/sui/deployment";
 import {
   getWalletErrorMessage,
   isTestnetAccount,
@@ -83,7 +86,7 @@ export function SuiWalletControl() {
             </p>
           )}
           <p className="mt-3 text-xs leading-5 text-[var(--muted)]">
-            {isSuiDeploymentConfigured
+            {isDeploymentReady(suiDeploymentConfig)
               ? "Contract package configured. Transaction controls remain locked until a supported form requests an explicit signature."
               : "Contract package not deployed. Transaction controls are safely disabled."}
           </p>
