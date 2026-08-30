@@ -13,74 +13,55 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 
 ## Stage 1 — Application foundation — COMPLETE
 
-- [x] Scaffold Next.js 16 App Router + React 19 + strict TypeScript
-- [x] Use pnpm and commit `pnpm-lock.yaml`
-- [x] Pin Node runtime in `.nvmrc` and `.node-version`
-- [x] Pin pnpm with `packageManager`
-- [x] Configure Tailwind CSS 4 and base app shell
-- [x] Add `@mysten/sui` v2 and `@mysten/dapp-kit-react`
-- [x] Add Zod + React Hook Form
-- [x] Add Vitest + React Testing Library + Playwright
-- [x] Add lint/format/typecheck/test/e2e/build scripts
-- [x] Create application directory/service boundaries
-- [x] Add centralized environment/config validation
-- [x] Default application to `AI_MODE=mock`
-- [x] Ensure Stage 1 needs no Gemini key and makes no live Gemini calls
-- [x] Add `AIService` + deterministic `MockAIService`
-- [x] Add Sui/Supabase module boundaries without live business integration
-- [x] Add deterministic AI fixtures
-- [x] Add integer/minor-unit money helpers
-- [x] Add health homepage and `/api/health`
-- [x] Add loading/not-found/error boundaries
-- [x] Add unit tests and Playwright smoke test
-- [x] Add GitHub Actions CI
-- [x] CI uses frozen lockfile and mock AI mode without Gemini key
-- [x] Verify lint, typecheck, unit tests, build, Chromium install, smoke test
-- [x] Update README quick-start
+- [x] Next.js / React / strict TypeScript foundation
+- [x] pnpm lockfile and pinned runtime/tooling
+- [x] Tailwind, Zod, React Hook Form, Sui SDK/dApp Kit
+- [x] Vitest, RTL, Playwright, CI
+- [x] centralized environment validation
+- [x] mock-first AI service boundary
+- [x] Sui/Supabase service boundaries
+- [x] deterministic fixtures and integer/minor-unit money helpers
+- [x] health/loading/error foundations
+- [x] verification suite and CI
 
 ## Stage 2 — Core UI and deterministic domain rules — COMPLETE
 
-- [x] Landing/login shell
-- [x] Treasurer dashboard shell
+- [x] Landing/login/dashboard shell
 - [x] Treasury/event creation UI
-- [x] Budget creation form
-- [x] Editable structured budget preview
-- [x] Claim submission form
-- [x] Claim review/approval UI shell
-- [x] Transaction/history UI shell
-- [x] Shared Zod treasury/budget/claim/status schemas
-- [x] Positive amount/currency validation
+- [x] Editable category budget workflow
+- [x] Claim submission/review/history shell
+- [x] Shared Zod schemas
 - [x] Safe integer/minor-unit totals
-- [x] Budget-total validation
-- [x] Category-remaining checks
-- [x] Receipt/request amount comparison
+- [x] Budget/category checks
+- [x] Receipt/request comparison
 - [x] Exact/similar duplicate helpers
-- [x] Unit tests for hard financial rules
-- [x] Clearly label all mock/demo data
-- [x] Keep CI green
+- [x] Advisory recommendation + human decision flow
+- [x] Unit/browser coverage
+- [x] Clearly labeled mock/demo data
 
-## Stage 3 — Sui foundation and Move treasury — CURRENT
+## Stage 3 — Sui foundation and Move treasury — COMPLETE
 
-- [x] Select wallet integration approach
-- [x] Add Wallet Standard-compatible Sui Testnet connection code and network guard
-- [x] Add typed unsigned create/fund/confirm/payout transaction builders
-- [x] Add application-side wallet/build validation errors
-- [ ] Complete project-owner manual QA with a real Testnet browser wallet
-- [x] Create Move package structure
-- [x] Design the minimal shared treasury object/state
-- [x] Implement and test the treasurer admin capability
-- [x] Document the Stage 2 TypeScript-to-Move responsibility mapping
-- [x] Implement and test generic deposit/funding custody
-- [x] Implement and test confirmed category allocation state
-- [x] Implement approved payout flow
-- [x] Re-check category remaining on-chain
-- [x] Emit payout events
-- [x] Add Move tests for creation and authorization boundaries
-- [x] Add Move payout abort/error handling
-- [ ] Deploy package to Sui Testnet
-- [ ] Record real package/object IDs in README
+- [x] Wallet Standard-compatible Sui Testnet connection and network guard
+- [x] Typed create/fund/confirm/payout transaction builders
+- [x] Wallet/build/execution/finality error handling
+- [x] Project-owner manual QA with a real Testnet browser wallet
+- [x] Move package structure
+- [x] Shared treasury object/state
+- [x] Treasurer capability authorization
+- [x] Generic deposit/funding custody
+- [x] Confirmed category allocation state
+- [x] Approved payout flow
+- [x] On-chain category remaining / custody invariant checks
+- [x] Typed payout events
+- [x] 31/31 Move tests
+- [x] Deploy package to Sui Testnet
+- [x] Record verified package, Treasury, TreasurerCap, UpgradeCap and publish digest
+- [x] Load native Circle Testnet USDC metadata/owned coin data
+- [x] Real create → fund 1.00 USDC → allocate 1.00 USDC → payout 0.10 USDC flow
+- [x] Confirm all four transaction evidence links
+- [x] Refresh treasury and verify 0.90 USDC remaining
 
-## Stage 4 — Gemini AI layer — NOT STARTED
+## Stage 4 — Gemini AI layer — CURRENT
 
 - [ ] Add official `@google/genai` SDK
 - [ ] Add live `GeminiAIService` behind existing `AIService`
@@ -109,7 +90,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 
 - [ ] Real treasurer review with claim data
 - [ ] Approve/reject actions + approved-unpaid state
-- [ ] Build Sui payout transaction
+- [ ] Connect claim approval to Sui payout transaction
 - [ ] Treasurer wallet signs/confirms
 - [ ] Move payout re-checks category budget
 - [ ] Execute Testnet USDC payout
@@ -136,11 +117,11 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 ### Submission
 
 - [ ] Complete final README
-- [ ] Add real Sui Testnet IDs
+- [x] Add real Sui Testnet package/object deployment IDs
 - [ ] Add final setup/install instructions
 - [ ] Add all team members
 - [ ] Confirm every AI development tool declaration
-- [ ] Document Gemini product AI
+- [ ] Document implemented Gemini product AI
 - [ ] Add screenshots + live demo URL
 - [ ] Record/upload 3–5 minute YouTube/Loom video
 - [ ] Verify public repo + no secrets
@@ -150,7 +131,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 
 - [ ] 5-minute script
 - [ ] Emphasize real club treasury + stablecoin management/payout
-- [ ] Show actual Sui transaction
+- [x] Real Sui Testnet payout evidence available
 - [ ] Prepare Q&A
 
 ### AI × Sui pitch
@@ -158,7 +139,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [ ] 5-minute script
 - [ ] Emphasize Gemini budget/receipt understanding
 - [ ] Explain deterministic financial checks + why Sui is integral
-- [ ] Show AI -> human approval -> Sui execution
+- [ ] Show AI → human approval → Sui execution
 - [ ] Prepare Q&A
 
 ## Optional — Only If Core Demo Is Stable
