@@ -38,6 +38,12 @@ const navigation: Array<{
     label: "History",
     match: "/dashboard/history",
   },
+  {
+    href: "/dashboard/testnet",
+    icon: "shield",
+    label: "Testnet demo",
+    match: "/dashboard/testnet",
+  },
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
