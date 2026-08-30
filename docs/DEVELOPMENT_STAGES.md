@@ -9,20 +9,6 @@ This file defines the official implementation stages for the hackathon project. 
 - `NOT STARTED` — no implementation should be claimed yet.
 - `BLOCKED` — work cannot continue until the listed blocker is resolved.
 
-## Mandatory agent startup rule
-
-Before any development, every Codex/AI coding agent must first output:
-
-```text
-CURRENT PROJECT STAGE: Stage X — <name>
-STATUS: <CURRENT / BLOCKED>
-COMPLETED STAGES: <list>
-NEXT TASK: <exact task from docs/PROJECT_STATUS.md>
-FILES I WILL READ FIRST: AGENTS.md, docs/PROJECT_STATUS.md, docs/DEVELOPMENT_STAGES.md
-```
-
-The agent must read the required docs and check recent commits/open PRs before editing.
-
 ## Stage 0 — Planning and repository setup — COMPLETE
 
 Goal: create a clean hackathon repository and lock the project concept, requirements, architecture, AI cost policy, and team/agent workflow.
@@ -31,113 +17,52 @@ Exit criteria: planning docs exist, hackathon requirements are recorded, and imp
 
 ## Stage 1 — Application foundation — COMPLETE
 
-Goal: create a reproducible, testable, teammate-friendly application scaffold without business features.
+Goal: create a reproducible, testable application scaffold without business features.
 
-Implemented:
-
-- Next.js 16 App Router + React 19 + strict TypeScript
-- Node `24.16.0` pinned with `.nvmrc` and `.node-version`
-- pnpm `10.15.1` pinned with committed `pnpm-lock.yaml`
-- Tailwind CSS 4 base app shell
-- Sui SDK/dApp Kit dependencies
-- Zod + React Hook Form dependencies
-- Vitest + React Testing Library + Playwright
-- lint/format/typecheck/test/e2e/build scripts
-- centralized validated environment/config module
-- default `AI_MODE=mock` and zero live Gemini dependency for Stage 1
-- `AIService` + `MockAIService` boundary
-- Sui and Supabase module boundaries without premature live integration
-- deterministic AI fixtures
-- integer/minor-unit money helpers
-- health homepage + `/api/health`
-- loading/error/not-found boundaries
-- GitHub Actions CI with frozen-lockfile install
-- unit tests and Playwright smoke test
-
-Verified exit criteria:
-
-- frozen pnpm install passes
-- lint passes
-- typecheck passes
-- unit tests pass
-- production build passes
-- Playwright configuration and Chromium smoke test pass
-- CI passes without `GEMINI_API_KEY`
-- no live Gemini/Supabase/Sui business integration is falsely claimed
+Verified exit criteria include frozen dependency install, lint, strict typecheck, unit tests, production build, Playwright smoke, CI without Gemini credentials, centralized environment validation, mock-first AI service boundaries, Sui/Supabase boundaries, and integer/minor-unit money helpers.
 
 ## Stage 2 — Core UI and deterministic domain rules — COMPLETE
 
-Goal: create the main club-treasury user experience with mock/demo data and implement hard financial rules before live AI or blockchain integration.
+Goal: create the main club-treasury UX with mock/demo data and implement hard financial rules before live AI or blockchain integration.
 
-Required work:
+Verified exit criteria include the navigable mock workflow, safe integer/minor-unit money handling, budget-total/category-remaining rules, receipt comparison, exact/similar duplicate helpers, advisory recommendations, human decisions, and automated/browser coverage without fake Sui evidence.
 
-- landing/login shell
-- treasurer dashboard shell
-- treasury/event setup UI
-- budget creation form and editable structured preview
-- claim submission form
-- claim review/approval UI shell
-- transaction/history UI shell
-- shared Zod schemas for treasury, budget, claims, and statuses
-- deterministic positive amount/currency validation
-- safe integer/minor-unit money totals
-- budget-total and category-remaining checks
-- receipt/request amount comparison
-- exact/similar duplicate helpers
-- unit tests for all hard financial rules
-- clearly labeled mock/demo data only
-
-Implemented:
-
-- responsive landing, demo access, dashboard, and path-aware navigation
-- session-only treasury/event setup with safe USDC minor-unit parsing
-- category budget editor with balanced/under/over allocation preview
-- mock claim submission with typed receipt evidence
-- deterministic receipt amount, duplicate, and category-remaining checks
-- advisory Approve / Review / Reject recommendation with human final decision
-- transaction/history shell that does not invent Sui evidence
-- shared Zod schemas and deterministic session builders
-- complete unit and browser coverage for Stage 2 hard rules and navigation
-
-Exit criteria:
-
-- main product workflow is navigable end to end with mock data
-- hard financial rules are deterministic and tested
-- authoritative money remains integer/minor-unit based
-- no UI claims live Gemini, persistence, wallet signing, or Sui payout before those exist
-- CI remains green
-
-Verified exit criteria:
-
-- the full mock workflow navigates treasury -> budget -> claim -> review -> human decision -> history
-- hard financial rules are deterministic and covered by 45 unit tests
-- authoritative input parsing and arithmetic use integer/minor-unit values
-- every screen labels mock/session-only data and absent live integrations
-- formatting, lint, typecheck, unit tests, production build, and six Playwright smoke tests pass
-- desktop and 390 px visual checks pass without horizontal overflow or browser console errors
-
-## Stage 3 — Sui foundation and Move treasury — CURRENT
+## Stage 3 — Sui foundation and Move treasury — COMPLETE
 
 Goal: make Sui integral to custody, authorization, and payout enforcement.
 
-Required work:
+Implemented and verified:
 
-- connect Sui wallet on Testnet
-- Move package and tests
-- treasury object/state
-- treasurer admin capability
-- deposit/funding entry point
-- category allocation state
-- approved payout entry point
-- on-chain category-remaining check
-- payout event
-- transaction error handling
-- deploy to Sui Testnet
-- record real package/object IDs
+- Sui Testnet wallet connection and network guard
+- Move package and 31/31 Move tests
+- shared `Treasury<Asset>` state
+- address-owned `TreasurerCap<Asset>` authorization
+- generic typed funding/deposit custody
+- one-time exact category allocation confirmation
+- category `allocated` / `remaining` state
+- treasurer-authorized payout with category/custody invariant checks
+- typed payout event
+- application transaction/error/finality handling
+- real Sui Testnet package deployment
+- native Circle Testnet USDC integration
+- real browser-wallet signing
+- real package, treasury, capability, and publish identifiers
+- real create → fund → allocate → payout flow
+- confirmed explorer evidence for all four app transactions
+- post-payout treasury refresh proving `1.00 USDC → 0.90 USDC` remaining after a `0.10 USDC` payout
 
-Exit criteria: a treasurer can fund a Testnet treasury and execute a verified test payout with real Sui evidence.
+Verified deployment:
 
-## Stage 4 — Gemini AI layer — NOT STARTED
+```text
+Package: 0xfbb2f939d484b6179f555a6cef8093faa749001184d84adb980de6d88c0e1d4f
+Treasury: 0x8971fa3e32994b81396122c3e3b1a4b054c3e3799714f5c2206dd037054319e4
+TreasurerCap: 0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7
+Publish digest: DdQQEcGD8FWmAde2rziBDjwua5CjcwRUtfN4p2Lkoeb
+```
+
+Exit criteria: **VERIFIED** — a treasurer funded a real Testnet treasury and executed a verified test payout with public Sui evidence.
+
+## Stage 4 — Gemini AI layer — CURRENT
 
 Goal: add Gemini for unstructured budget and receipt understanding while keeping routine development mock-first.
 
@@ -175,13 +100,13 @@ Exit criteria: a member submits a claim/receipt and the treasurer receives a val
 
 ## Stage 6 — Human approval and on-chain payment — NOT STARTED
 
-Goal: complete the AI -> human -> Sui financial flow.
+Goal: connect persisted claim approval to the already verified Sui payout foundation.
 
 Required work:
 
 - approve/reject actions
 - approved-unpaid state
-- Sui transaction construction
+- claim-linked Sui transaction construction
 - wallet confirmation/signature
 - Move payout re-check
 - Testnet USDC payout
@@ -196,36 +121,13 @@ Exit criteria: the full core payment workflow works end to end and AI cannot byp
 
 Goal: make the live demo reliable under hackathon conditions.
 
-Required work:
-
-- deploy web app
-- configure demo Supabase project
-- prepare Testnet SUI + test USDC
-- seed clean demo scenario
-- sample budget + synthetic receipt
-- repeated full-flow rehearsals
-- Gemini/wallet/Sui failure handling
-- loading/error polish
-- backup screenshots/video
-- verify no secrets in Git history
-
-Exit criteria: the team can repeatedly perform the demo and has a backup path.
+Required work includes web deployment, demo persistence/storage setup, clean Testnet assets, seeded scenario, repeated full-flow rehearsals, failure handling, loading/error polish, backup screenshots/video, and secret-history verification.
 
 ## Stage 8 — Submission and pitch — NOT STARTED
 
 Goal: satisfy all official requirements and optimize both Sui pitches.
 
-Required work:
-
-- final README + real Sui Testnet IDs + setup instructions + team members
-- complete AI-tool declaration
-- screenshots + live demo URL
-- 3–5 minute YouTube/Loom demo video
-- Devfolio submission before deadline
-- Payments & Stablecoins 5-minute pitch + Q&A
-- AI × Sui 5-minute pitch + Q&A
-
-Exit criteria: Devfolio submission is complete and both pitches are rehearsed.
+Required work includes final README/team/AI disclosures, real Sui IDs, screenshots/live URL, 3–5 minute video, Devfolio submission, and rehearsed Payments & Stablecoins plus AI × Sui pitches.
 
 ## Stage update rule
 
@@ -234,8 +136,6 @@ A stage may be marked `COMPLETE` only when its exit criteria have been verified.
 Every development PR/commit must update:
 
 1. `docs/PROJECT_STATUS.md`
-2. `docs/DEVELOPMENT_STAGES.md` if stage status changed
+2. this file if stage status changed
 3. `docs/ROADMAP.md`
 4. affected setup/architecture docs
-
-The next agent must always be able to determine the current stage without asking a teammate.

@@ -8,7 +8,9 @@ test("Stage 2 product shell navigates from landing to treasurer dashboard", asyn
   await expect(
     page.getByRole("heading", { name: /Club funds, clearly governed/i }),
   ).toBeVisible();
-  await expect(page.getByText(/Stage 2 complete · mock data/i)).toBeVisible();
+  await expect(
+    page.getByText(/Stage 3 complete · verified Sui Testnet treasury flow/i),
+  ).toBeVisible();
 
   await page.getByRole("link", { name: "Open demo workspace" }).click();
   await expect(page).toHaveURL(/\/login$/);
@@ -185,4 +187,22 @@ test("remaining Stage 2 pages avoid mobile horizontal overflow", async ({
     );
     expect(horizontalOverflow, `${path} should not overflow`).toBe(false);
   }
+});
+
+test("Testnet demo exposes explicit actions behind the deployment gate", async ({
+  page,
+}) => {
+  await page.goto("/dashboard/testnet");
+  await expect(
+    page.getByRole("heading", { name: "Sui Testnet treasury demo" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/Nothing is submitted automatically/i),
+  ).toBeVisible();
+  await expect(page.getByText(/Deployment gate active/i)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Create treasury · sign once" }),
+  ).toBeDisabled();
+  await expect(page.getByText("Not created yet")).toHaveCount(2);
+  await expect(page.getByText("Not submitted")).toHaveCount(4);
 });

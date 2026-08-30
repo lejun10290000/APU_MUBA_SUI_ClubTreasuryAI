@@ -1,20 +1,18 @@
 # ClubTreasury AI — Project Status and Agent Handoff
 
-This file is the **single source of truth for current implementation status, current development stage, blockers, and next task**.
-
-Every teammate and coding agent must read this file before starting work and update it in the same PR/commit as development changes.
+This file is the **single source of truth for current implementation status, blockers, and next task**.
 
 ## Current Snapshot
 
 - Last updated: **30 August 2026 (MYT)**
 - Default branch: `main`
-- **Current stage: Stage 3 — Sui foundation and Move treasury**
+- **Current stage: Stage 4 — Gemini AI layer**
 - Stage status: **CURRENT**
-- Completed stages: **Stage 0 — Planning and repository setup; Stage 1 — Application foundation; Stage 2 — Core UI and deterministic domain rules**
-- Latest completed milestone: **Wallet Standard-compatible Testnet connection code, Testnet guard, and typed unsigned transaction builders for create, fund, allocation confirmation, and payout**
-- Active implementation work: **`stage3/wallet-transaction-integration` is ready for review; Stage 3 remains current**
-- Current blockers: **A verified Testnet package ID and resulting object IDs do not exist yet; real browser-wallet connection QA requires the project owner**
-- Demo readiness: **The full mock workflow, local Move enforcement, wallet connection UI, and deterministic unsigned transaction construction are verified in code and automated tests; no Move package deployment, real treasury transaction, real Testnet USDC evidence, persistence, or live AI exists yet**
+- Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3**
+- Latest completed milestone: **Verified Sui Testnet treasury deployment and real create → fund → allocate → payout flow using native Circle Testnet USDC**
+- Active implementation branch awaiting final review/merge: **`stage3/testnet-deployment-e2e`**
+- Current blockers: **None for Stage 3. Stage 4 requires implementation of the Gemini adapter and explicit owner-controlled live API configuration.**
+- Demo readiness: **Mock product workflow is complete; Sui Testnet wallet signing, Move treasury enforcement, real native Testnet USDC custody, allocation, payout, explorer evidence, and post-payout object-state verification are working. Live Gemini, claim persistence/private receipt upload, and deployed web hosting remain later-stage work.**
 
 ## Stage Progress
 
@@ -23,370 +21,170 @@ Every teammate and coding agent must read this file before starting work and upd
 | 0     | Planning and repository setup          | COMPLETE    |
 | 1     | Application foundation                 | COMPLETE    |
 | 2     | Core UI and deterministic domain rules | COMPLETE    |
-| 3     | Sui foundation and Move treasury       | CURRENT     |
-| 4     | Gemini AI layer                        | NOT STARTED |
+| 3     | Sui foundation and Move treasury       | COMPLETE    |
+| 4     | Gemini AI layer                        | CURRENT     |
 | 5     | Claim and receipt workflow integration | NOT STARTED |
 | 6     | Human approval and on-chain payment    | NOT STARTED |
 | 7     | Demo hardening and deployment          | NOT STARTED |
 | 8     | Submission and pitch                   | NOT STARTED |
 
-See `docs/DEVELOPMENT_STAGES.md` for exact scope and exit criteria.
+## Stage 3 — Verified Complete
 
-## Completed
+### Move / Sui foundation
 
-### Stage 0
+- Move 2024 package at `move/club_treasury`
+- generic shared `Treasury<Asset>` custody object
+- address-owned `TreasurerCap<Asset>` bound to one treasury and treasurer
+- typed `Balance<Asset>` custody
+- permissionless positive deposits before confirmation
+- one-time exact category allocations
+- category `allocated` and `remaining` accounting
+- post-confirmation deposit lock
+- treasurer/capability-authorized payout
+- exact category lookup and `remaining` enforcement
+- pre/post `sum(category_remaining) == custody balance` invariant checks
+- exact typed coin payout to non-zero recipient
+- typed public `PayoutEvent`
+- hardened abort/error boundaries
+- **31/31 Move tests passing** with Sui CLI `1.78.1-722ac4fcf484`
 
-- project concept, target user, and dual-track positioning
-- hackathon requirements and submission checklist
-- product specification, architecture, roadmap, demo plan, and team/agent workflow
-- Gemini provider decision plus mock-first AI billing policy
+### Browser wallet / transaction execution
 
-### Stage 1
+- Wallet Standard-compatible Sui wallet discovery
+- explicit connect/disconnect
+- Sui Testnet-only network guard
+- typed `@mysten/sui` transaction builders for create/fund/allocate/payout
+- exact `bigint`/`u64` validation
+- one explicit wallet approval per action
+- signed transaction execution through the configured Sui Testnet client
+- wait-for-confirmation before the UI reports success
+- real coin metadata / wallet-owned USDC reads
+- public object IDs and explorer evidence stored only after confirmed Testnet responses
+- no private keys, seed phrases, or wallet secrets stored by the app
 
-- Next.js 16 App Router + React 19 + strict TypeScript application scaffold
-- Node `24.16.0` pinned via `.nvmrc` and `.node-version`
-- pnpm `10.15.1` pinned via `packageManager`
-- committed `pnpm-lock.yaml` and frozen-lockfile CI install
-- Tailwind CSS 4 base styling and application shell
-- `@mysten/sui` v2 and `@mysten/dapp-kit-react` dependencies installed
-- Zod + React Hook Form dependencies installed
-- Vitest + React Testing Library + Playwright configured
-- lint, format, typecheck, test, e2e, build scripts
-- centralized Zod environment validation in `src/config/env.ts`
-- mock-first `AIService` boundary and deterministic `MockAIService`
-- Stage 1 intentionally has no live Gemini implementation
-- Sui and Supabase module/service boundaries created without live business integration
-- deterministic AI fixtures created under `tests/fixtures/ai/`
-- integer/minor-unit money helpers created in `src/domain/money.ts`
-- health homepage and `/api/health` route
-- base loading, error, and not-found UI
-- unit tests for money rules and mock AI schema outputs
-- Playwright home/health smoke test
-- GitHub Actions CI runs with `AI_MODE=mock`, no Gemini key, and frozen lockfile
-- CI verification passed: install, lint, typecheck, unit tests, production build, Chromium install, smoke test
+### Verified Sui Testnet deployment
 
-### Stage 2 — Domain foundation
+```text
+Network:
+Sui Testnet
 
-- shared Zod schemas for treasury, budget categories, budgets, claims, statuses, recommendations, currency, and minor-unit amounts
-- positive and non-negative safe-integer minor-unit validation
-- duplicate budget category ID/name validation
-- deterministic balanced/under-allocated/over-allocated budget-total checks
-- deterministic category-remaining and sufficient-balance checks
-- unit tests for the new schemas and financial rules
-- no live Gemini, Supabase, wallet, or Sui transaction behavior introduced
+Native Circle Testnet USDC:
+0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC
 
-### Stage 2 — Product shell
+Package:
+0xfbb2f939d484b6179f555a6cef8093faa749001184d84adb980de6d88c0e1d4f
 
-- polished responsive landing page with product workflow and financial-safety messaging
-- demo-access role-selection shell with treasurer navigation and clearly deferred member flow
-- reusable desktop sidebar, mobile navigation, brand, and icon components
-- responsive treasurer dashboard using schema-validated deterministic fixtures
-- mock treasury balance, budget-category, claim-queue, safety-boundary, and activity views
-- health endpoint advanced to Stage 2
-- browser smoke coverage for landing -> login -> dashboard navigation and mobile overflow
-- all displayed financial data is labeled mock/demo; no live service or payment claims introduced
+Publish digest:
+DdQQEcGD8FWmAde2rziBDjwua5CjcwRUtfN4p2Lkoeb
 
-### Stage 2 — Mock treasury creation
+UpgradeCap:
+0x711ea01bd5ed070582897c86b93340723f425e2cee634ef5d0e55adbb1363ce2
 
-- accessible treasury/event setup page using React Hook Form and shared Zod validation
-- event/treasury name and total USDC budget inputs with recoverable field errors
-- exact string-to-integer USDC minor-unit parsing without authoritative floating-point arithmetic
-- live local preview with locked USDC currency and demo-draft status
-- schema-validated session-only dashboard handoff with explicit no-persistence/no-wallet/no-on-chain labeling
-- path-aware desktop and mobile dashboard navigation
-- unit and browser coverage for valid and invalid treasury setup paths
+Treasury:
+0x8971fa3e32994b81396122c3e3b1a4b054c3e3799714f5c2206dd037054319e4
 
-### Stage 2 — Budget and claim workflow
+TreasurerCap:
+0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7
+```
 
-- editable category budget builder with add/remove controls and responsive structured preview
-- deterministic balanced, under-allocated, and over-allocated states
-- mock confirmation only when category totals equal the treasury total exactly
-- claim submission form with member, merchant, category, requested amount, typed receipt amount, and receipt reference
-- deterministic receipt/request amount comparison
-- exact duplicate detection by normalized receipt reference
-- similar duplicate detection by normalized merchant and exact amount
-- category-remaining validation and advisory Approve / Review / Reject recommendation
-- explicit human approve/reject demo decision with approved-unpaid safety state
-- transaction/history shell that never invents a Sui digest or payment result
-- session-only navigation across treasury, budget, claim, review, and history screens
+### Verified real Testnet flow
 
-### Stage 2 — Completion verification
+The project owner completed the dedicated Testnet demo with a browser wallet and native Circle Testnet USDC:
 
-- targeted formatting check passed
-- lint and strict TypeScript checks passed
-- 45 unit tests cover money, schemas, budget totals, category remaining, receipt comparison, duplicate detection, workflow builders, and human decision state
-- six Playwright smoke tests cover the product shell, treasury validation, full workflow, exact duplicate rejection, and mobile overflow
-- production build passed with all Stage 2 routes
-- desktop and 390 px visual inspection passed with zero browser console errors or warnings
-- Stage 2 exit criteria are verified
+1. Create treasury — confirmed
+2. Fund treasury with **1.00 USDC** — confirmed
+3. Confirm `events` category allocation of **1.00 USDC** — confirmed
+4. Human-approved payout of **0.10 USDC** — confirmed
+5. Refresh Treasury object from Testnet — confirmed
 
-### Stage 3 — Move treasury authorization foundation
+The page recorded confirmed explorer links for all four transactions and displayed the typed `PayoutEvent` after payout.
 
-- Move 2024 package created at `move/club_treasury`
-- shared `Treasury<phantom Asset>` object with treasurer address, opaque external reference, and metadata revision
-- address-owned `TreasurerCap<phantom Asset>` bound to one treasury object ID and treasurer
-- capability omits `store`, preventing arbitrary public transfer outside the defining module
-- privileged metadata update verifies capability/treasury binding and transaction sender
-- phantom asset type preserves the native Sui Testnet USDC direction without claiming real Testnet custody
-- Stage 2 TypeScript-to-Move responsibility mapping documented in `docs/ARCHITECTURE.md`
-- Sui CLI `1.78.1-722ac4fcf484` compiled the package and passed all four original authorization tests
-- no package was deployed and no package ID, object ID, transaction digest, deployed balance, or real USDC custody is claimed
+Final refreshed Treasury JSON reported:
 
-### Stage 3 — Generic treasury funding foundation
+```text
+allocations_confirmed: true
+category_allocated[0]: 1000000
+category_remaining[0]: 900000
+funds: 900000
+```
 
-- `Treasury<phantom Asset>` now owns a typed `Balance<Asset>` initialized to zero
-- read-only balance access returns the exact native coin base-unit amount as `u64`
-- permissionless `deposit<Asset>` consumes a positive `Coin<Asset>` into treasury custody
-- deposits do not grant or modify treasurer authority and no withdrawal/payout path exists
-- Move generic type safety prevents `Treasury<A>` from accepting `Coin<B>`
-- zero-value deposits abort deterministically
-- seven Move tests pass, including zero balance, exact single deposit, exact accumulation, zero rejection, and all prior authorization cases
-- on-chain amounts remain native coin base units; no assumption is made about real USDC decimal scale
-- no real Testnet USDC deposit, wallet connection, deployment, package/object ID, or transaction digest is claimed
+With verified USDC metadata `decimals = 6`, this proves:
 
-### Stage 3 — Confirmed category-allocation foundation
+```text
+1.00 USDC deposited
+1.00 USDC allocated
+0.10 USDC paid
+0.90 USDC remaining
+```
 
-- categories are stored on-chain using opaque, non-empty byte references rather than display metadata
-- each category stores exact `u64` `allocated` and `remaining` values
-- matching treasurer capability, treasury binding, and transaction sender are required for confirmation
-- all categories are confirmed together and confirmation is one-time
-- category references must be unique and allocations must be non-zero
-- reference/allocation vector lengths must match and the category list must be non-empty
-- total allocation must equal the current treasury custody balance exactly
-- every category starts with `remaining == allocated`
-- deposits are rejected after confirmation to preserve `custody balance == total confirmed allocation`
-- only read-only indexed category getters are exposed; no mutable invariant-bypassing reference exists
-- nineteen Move tests pass, including all prior authorization/funding cases and the complete allocation invariant matrix
-- this allocation milestone was subsequently extended by the authorized payout foundation documented below
+Stage 3 exit criteria are therefore **VERIFIED**.
 
-### Stage 3 — Authorized payout foundation
+## Current Not Yet Implemented
 
-- payout requires the matching `TreasurerCap<Asset>` and transaction sender stored on the treasury
-- the category must already be confirmed and is located by its exact opaque byte reference
-- payout amounts must be positive and recipients must be non-zero addresses
-- the selected category must have sufficient `remaining` and custody must be sufficient
-- `sum(category_remaining) == treasury custody balance` is checked before and after every payout
-- successful payout decrements only the selected category `remaining` and custody; original `allocated` values never decrease
-- `coin::take` creates the exact typed `Coin<Asset>` amount and transfers it directly to the recipient
-- every successful payout emits typed public evidence with treasury ID, category reference, recipient, amount, category remaining, and treasury balance
-- distinct aborts cover unconfirmed allocation, missing category, zero payout, invalid recipient, insufficient remaining/custody, and accounting corruption
-- thirty-one Move tests pass, including all nineteen prior tests and payout success/failure, exact transfer, event-count, and invariant cases
-- the installed test framework exposes emitted-event count but not typed event payload deserialization; payload fields are compiled and exercised but not directly decoded in tests
-- no production invariant-bypass mutation exists; the corruption helper is `#[test_only]`
-- no browser wallet, TypeScript transaction builder, Testnet deployment, real USDC payout, package/object ID, or transaction digest exists
-
-### Stage 3 — Wallet and typed transaction integration
-
-- Wallet Standard-compatible browser wallets are discovered through `@mysten/dapp-kit-react` `2.1.20` at a client-only provider boundary
-- wallet connection requires an explicit user action and exposes the connected public address, disconnect control, and a Sui Testnet label
-- connected accounts that do not advertise `sui:testnet` receive a wrong-network warning and cannot be presented as transaction-ready
-- missing `NEXT_PUBLIC_SUI_PACKAGE_ID` is represented as `null`; no fallback or fabricated package ID is used
-- typed `@mysten/sui` `2.27.0` transaction builders mirror Move `create`, `deposit`, `confirm_allocations`, and `payout`
-- deposits split an exact requested amount from an explicitly supplied compatible coin object before calling `deposit`
-- allocation references and exact `u64` amounts preserve input order and reject empty, duplicate, mismatched, zero, or invalid values before construction
-- transaction amounts accept positive `bigint` values only and enforce the Move `u64` range
-- application errors distinguish build validation and wallet readiness; they do not claim an on-chain abort before execution
-- the application service builds unsigned transactions only; the human browser wallet remains the sole future signer
-- package deployment is not configured, so all treasury execution controls remain unavailable and no wallet is asked to sign a treasury transaction
-- 61 application unit tests and six Playwright smoke tests pass; desktop and 390 px inspection have no horizontal overflow or browser console warnings/errors
-- automated no-extension behavior is verified; real browser-wallet connection QA remains required from the project owner
-- no Testnet package, treasury/cap object ID, transaction digest, real USDC treasury evidence, Gemini, or Supabase integration was added or claimed
-
-## Not Yet Implemented
-
-- real authentication and user accounts
-- treasury editing UI
-- real receipt file upload or storage
-- project-owner confirmation of a real browser-wallet connection on Sui Testnet
-- real Testnet treasury creation/funding/budget confirmation/payout
-- `@google/genai` live Gemini implementation
+- live `@google/genai` Gemini implementation
 - live budget/receipt AI analysis
-- Supabase migrations and private receipt bucket
-- persistent claim + human approval integration
-- Sui Testnet deployment
-- live demo URL, screenshots, and video
+- Supabase migrations / claim persistence
+- private receipt bucket and secure receipt upload
+- receipt hashing integrated with persisted claims
+- full persisted claim → AI review → human approval → existing Sui payout integration
+- deployed public web app
+- final screenshots/video/submission package
 
-Do not describe these as working until real code and verification exist.
+Do not describe these as complete until real implementation and verification exist.
 
 ## Next Recommended Task
 
-### Stage 3 task: Deploy and exercise the verified Testnet treasury flow
+### Stage 4 — Gemini AI layer
 
-Deploy the Move package to Sui Testnet, record the real package/object identifiers, configure the app with verified deployment values, and execute a small end-to-end Testnet treasury flow with real wallet signatures and blockchain evidence.
+Implement Gemini behind the existing `AIService` boundary while preserving the mock-first cost/safety policy.
 
 Required priorities:
 
-1. Deploy the already verified Move package to Sui Testnet with a compatible Sui CLI.
-2. Record only real package, treasury, capability, coin, and transaction identifiers produced by the flow.
-3. Configure `NEXT_PUBLIC_SUI_PACKAGE_ID` with the verified package value.
-4. Use the project owner's Testnet wallet for every explicit approval and signature; never handle its private keys or seed phrase.
-5. Execute a small create, fund, allocation-confirmation, and payout flow using real Testnet assets and preserve explorer evidence.
-6. Keep Gemini and Supabase out of this Stage 3 deployment task.
-
-### Stage 2 completion evidence
-
-- full mock product flow is navigable with clearly labeled mock/demo data: **VERIFIED**
-- hard financial rules are deterministic and covered by unit tests: **VERIFIED**
-- authoritative financial input and arithmetic use integer/minor-unit values: **VERIFIED**
-- UI makes no false live Gemini, persistence, wallet, or Sui payout claims: **VERIFIED**
-- formatting, lint, typecheck, unit tests, build, smoke tests, and responsive visual QA pass: **VERIFIED**
+1. Add official `@google/genai` SDK.
+2. Keep `AI_MODE=mock` and `GEMINI_LIVE_REQUESTS_ENABLED=false` as defaults.
+3. Implement `GeminiAIService` without giving AI financial authority.
+4. Add structured budget parsing.
+5. Add structured receipt/image extraction.
+6. Validate every model response server-side with Zod.
+7. Return category suggestions / ambiguity / concise reasons only.
+8. Keep money arithmetic, budget limits, payout authorization, wallet signing, and Sui execution deterministic/human-controlled.
+9. Run normal CI/tests with **zero live Gemini calls**.
+10. Use live Gemini only in explicit owner-controlled quality checks.
 
 ## Locked MVP Decisions
 
-Do not change without explicit team approval:
-
 - target user: university club treasurers and finance committee members
 - AI is advisory; treasurer approves final payment
-- Sui performs real testnet stablecoin custody/payment execution in later stages
+- Sui owns real Testnet custody/authorization/payout enforcement
 - payment asset: native Sui Testnet USDC
-- one Next.js application for frontend/server API
 - product AI provider: Google Gemini Developer API
-- default planned Gemini model: `gemini-2.5-flash`
-- official Gemini SDK when Stage 4 begins: `@google/genai`
+- planned default Gemini model: `gemini-2.5-flash`
+- official Stage 4 Gemini SDK: `@google/genai`
 - normal development AI mode: `mock`
 - database/storage later: Supabase PostgreSQL + private Storage
-- blockchain packages: `@mysten/sui` v2 + `@mysten/dapp-kit-react`
 - raw receipts remain private/off-chain
 - authoritative money values use integer/minor-unit semantics
 - optional features wait until the core demo is stable
 
-## External Setup Needed Later
-
-Not required for Stage 2, but later stages will need:
-
-- Google Gemini API project/key for explicit live AI tests/demo
-- Supabase project + keys and private receipt bucket
-- Sui wallet(s)
-- Sui Testnet SUI for gas
-- native Sui Testnet USDC
-
-Never place keys, wallet private keys, seed phrases, or secrets in GitHub.
-
 ## Mandatory Agent Startup Output
 
-Before development, every coding agent must read this file and show the values from it:
+Before development, every coding agent must show:
 
 ```text
-CURRENT PROJECT STAGE: Stage 3 — Sui foundation and Move treasury
+CURRENT PROJECT STAGE: Stage 4 — Gemini AI layer
 STATUS: CURRENT
-COMPLETED STAGES: Stage 0; Stage 1; Stage 2
-NEXT TASK: Deploy the Move package to Sui Testnet, record the real package/object identifiers, configure the app with verified deployment values, and execute a small end-to-end Testnet treasury flow with real wallet signatures and blockchain evidence.
+COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3
+NEXT TASK: Implement the Gemini AI layer behind the existing mock-first AIService boundary without giving AI financial authority.
 ```
-
-## Mandatory Update Rules
-
-A task is not complete until its agent:
-
-1. updates Current Snapshot and Stage Progress
-2. moves only genuinely verified work to Completed
-3. keeps missing/blocked work accurate
-4. replaces Next Recommended Task with the next smallest demo-critical task
-5. updates matching `docs/ROADMAP.md` items
-6. updates `docs/DEVELOPMENT_STAGES.md` if stage status changes
-7. records verification commands/results
-8. adds a Recent Development Log entry
-9. updates README/architecture/tech stack/env docs when affected
-10. never claims live Gemini/Sui/deployment behavior without evidence
 
 ## Recent Development Log
 
-### 2026-08-30 — Added Sui Testnet wallet and typed transaction integration
+### 2026-08-30 — Stage 3 completed with verified Sui Testnet treasury flow
 
-- Status: Stage 3 remains CURRENT; wallet and application transaction integration are complete and awaiting review.
-- Change: Added an explicit Wallet Standard-compatible connection boundary, connected-address state, Testnet-only guard, missing-deployment guard, typed unsigned create/fund/confirm/payout builders, exact `bigint`/`u64` validation, and normalized build/wallet errors.
-- Verification: Frozen install, lint, typecheck, 61/61 application unit tests, production build, and 6/6 Playwright smoke tests passed; desktop and 390 px browser inspection passed without horizontal overflow or console warnings/errors.
-- Manual boundary: Automated no-extension behavior passed; a project owner must still approve a connection-only request in their real Testnet browser wallet and verify connect/disconnect behavior.
-- Safety: No package was deployed, no treasury transaction was signed or executed, and no package/object ID, digest, real USDC movement, Gemini, Supabase, private key, or seed phrase was added or claimed.
-- Next: Deploy the Move package to Sui Testnet, record the real package/object identifiers, configure the app with verified deployment values, and execute a small end-to-end Testnet treasury flow with real wallet signatures and blockchain evidence.
-
-### 2026-08-29 — Added authorized Stage 3 payout foundation
-
-- Status: Stage 3 remains CURRENT; local generic payout foundation complete and awaiting review
-- Change: Added capability + sender-authorized payout, confirmed-category lookup, exact remaining/custody enforcement, direct typed coin transfer, payout events, distinct payout aborts, and pre/post accounting invariant checks.
-- Verification: Sui CLI `1.78.1-722ac4fcf484`; `sui move test` passed 31/31 tests; frozen install, lint, typecheck, 45 application unit tests, and production build passed.
-- Event testing: Successful tests verify emitted-event count and all resulting transfer/state values; this installed framework does not expose typed payload deserialization.
-- Safety: No unrestricted withdrawal, AI authority, browser wallet, TypeScript transaction integration, Testnet deployment, real USDC payout, package/object ID, transaction digest, Gemini, or Supabase integration was added or claimed.
-- Next: Connect the Sui Testnet wallet in the app and build the typed transaction/integration layer for treasury creation, funding, allocation confirmation, and payout, without deploying or fabricating package/object IDs.
-
-### 2026-08-29 — Added confirmed Stage 3 category-allocation foundation
-
-- Status: Stage 3 remains CURRENT; confirmed allocation task complete and awaiting review
-- Change: Added opaque category IDs, exact allocated/remaining values, one-time treasurer-authorized confirmation, balanced-total enforcement, read-only getters, and the post-confirmation deposit lock.
-- Verification: Sui CLI `1.78.1-722ac4fcf484`; `sui move test` passed 19/19 tests; frozen install, lint, typecheck, 45 application unit tests, and production build passed.
-- Safety: No payout, withdrawal, wallet connection, Testnet deployment, real Testnet USDC transaction, package/object ID, or transaction digest was added or claimed.
-- Next: Implement payout + category remaining enforcement + payout event + Move error hardening/tests.
-
-### 2026-08-29 — Added generic Stage 3 treasury funding foundation
-
-- Status: Stage 3 remains CURRENT; generic custody/deposit task complete and awaiting review
-- Change: Added typed `Balance<Asset>` custody, exact `u64` balance access, permissionless positive `Coin<Asset>` deposits, and focused funding tests.
-- Verification: Sui CLI `1.78.1-722ac4fcf484`; `sui move test` passed 7/7 tests; frozen install, lint, typecheck, 45 application unit tests, and production build passed.
-- Safety: No real Testnet USDC, wallet connection, withdrawal, payout, category allocation, deployment, package/object ID, or transaction digest was added or claimed.
-- Next: Implement and test the minimum confirmed category-allocation state without payout or deployment.
-
-### 2026-08-28 — Added Stage 3 Move treasury authorization foundation
-
-- Status: Stage 3 remains CURRENT; first foundation task complete and awaiting review
-- Change: Added the Move 2024 package, shared generic treasury object, module-controlled treasurer capability, privileged metadata mutation, and TypeScript-to-Move mapping.
-- Verification: Sui CLI `1.78.1-722ac4fcf484`; `sui move test` passed 4/4 tests; application verification recorded in the pull request.
-- Safety: No Testnet deployment, package/object ID, transaction digest, wallet key, real balance, or USDC custody claim was added.
-- Next: Implement and test generic treasury deposit/funding custody without payout or deployment.
-
-### 2026-08-28 — Completed Stage 2 core mock workflow and deterministic rules
-
-- Status: Stage 2 COMPLETE; Stage 3 CURRENT
-- Change: Added the category budget editor, balanced allocation preview, claim submission, receipt comparison, exact/similar duplicate helpers, category checks, deterministic recommendation, human demo decision, transaction/history shell, and complete responsive navigation.
-- Verification: Targeted Prettier check, lint, typecheck, 45 unit tests, six Playwright smoke tests, production build, desktop/mobile visual inspection, zero horizontal mobile overflow, and zero browser console errors passed.
-- Safety: All new data is session-only; no Supabase persistence, wallet signature, Move execution, transaction digest, live Gemini call, or Sui payout is claimed.
-- Next: Scaffold the Stage 3 Move package and test the treasury object plus treasurer admin capability.
-
-### 2026-08-28 — Added mock treasury/event creation flow
-
-- Status: Completed implementation, ready for review
-- Change: Added an accessible React Hook Form treasury setup page, exact USDC display-to-minor-unit parsing, schema-validated session storage, dashboard success handoff, path-aware navigation, and explicit demo safety boundaries.
-- Verification: Targeted Prettier check, lint, typecheck, 32 unit tests, 3 Playwright smoke tests, production build, desktop/mobile visual inspection, zero horizontal mobile overflow, and zero browser console errors passed.
-- Next: Build budget-category creation and an editable balanced-budget preview.
-
-### 2026-08-28 — Added Stage 2 landing and treasurer dashboard shell
-
-- Status: Completed implementation, ready for review
-- Change: Added the responsive landing page, demo role selection, reusable product navigation, schema-backed mock treasurer dashboard, Stage 2 health status, and desktop/mobile browser smoke coverage.
-- Verification: Targeted Prettier check, lint, typecheck, 18 unit tests, 2 Playwright smoke tests, production build, desktop/mobile visual inspection, zero horizontal mobile overflow, and zero browser console errors passed.
-- Next: Build the mock treasury/event creation UI with safe minor-unit validation.
-
-### 2026-08-28 — Added Stage 2 shared domain schemas and budget rules
-
-- Status: Completed implementation, ready for review
-- Change: Added treasury/budget/claim/status Zod schemas, safe positive minor-unit validation, budget-total checks, category-remaining checks, and deterministic unit tests.
-- Verification: Frozen dependency install, targeted Prettier check, lint, typecheck, 18 unit tests, and production build passed. Repository-wide `pnpm format` still reports pre-existing formatting drift outside this change.
-- Next: Build the landing/login and treasurer dashboard shell with clearly labeled mock data.
-
-### 2026-08-28 — Completed Stage 1 application foundation
-
-- Status: COMPLETE
-- Pull request: #5
-- Change: Added executable Next.js foundation, pinned runtime/package manager, mock-first service boundaries, deterministic money helpers/fixtures, error/loading states, tests, health route, and CI.
-- Verification: GitHub Actions passed frozen install, lint, typecheck, unit tests, production build, Chromium installation, and Playwright smoke test with no Gemini API key.
-- Next: Stage 2 — build mock-data product shell and deterministic financial domain.
-
-### 2026-08-28 — Strengthened Stage 1 foundation requirements
-
-- Status: Completed planning change
-- Change: Locked reproducibility, config, service-boundary, money, testing, and onboarding requirements before implementation.
-
-### 2026-08-28 — Switched AI plan to Gemini and added development stages
-
-- Status: Completed planning change
-- Change: Introduced Gemini mock-first policy and Stages 0–8.
-
-## Starter Prompt for a New Coding Agent
-
-```text
-Open this repository and read AGENTS.md, docs/PROJECT_STATUS.md,
-docs/DEVELOPMENT_STAGES.md, and docs/AI_USAGE_POLICY.md first, followed by the
-other required project documents. Before editing, print the current project stage,
-status, completed stages, and exact next task from docs/PROJECT_STATUS.md. Then
-complete only the Next Recommended Task. Preserve locked MVP decisions, run every
-listed acceptance check, and update docs/PROJECT_STATUS.md, docs/ROADMAP.md, and
-stage status in the same PR before declaring the task complete.
-```
+- Deployed the Move package to Sui Testnet and recorded the real package, UpgradeCap, Treasury, TreasurerCap, and publish digest.
+- Verified native Circle Testnet USDC metadata with 6 decimals.
+- Completed real browser-wallet create, 1.00 USDC fund, 1.00 USDC allocation confirmation, and 0.10 USDC payout transactions.
+- Confirmed all four transaction evidence links in the application.
+- Refreshed the Treasury object from Sui Testnet and verified 900000 base units / 0.90 USDC remaining after payout.
+- Confirmed the typed payout event was returned from the real Testnet transaction.
+- Stage 3 exit criteria verified; project advances to Stage 4.

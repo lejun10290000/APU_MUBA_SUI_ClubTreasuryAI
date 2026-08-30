@@ -19,7 +19,7 @@ export function MarketingHeader() {
             Safety model
           </Link>
           <span className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-medium text-white/80">
-            Sui Testnet · later stage
+            Sui Testnet · live treasury demo
           </span>
         </nav>
         <Link

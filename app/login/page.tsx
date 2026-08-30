@@ -15,14 +15,15 @@ export default function LoginPage() {
         </Link>
         <div className="relative z-10 my-auto max-w-lg">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
-            Stage 2 demo access
+            Stage 3 demo access
           </p>
           <h2 className="mt-5 text-5xl font-semibold leading-[1.02] tracking-[-0.055em]">
             A calmer way to run club finances.
           </h2>
           <p className="mt-6 max-w-md text-base leading-7 text-white/58">
-            Explore the treasurer workspace using deterministic mock data. No
-            account, wallet, or external service is connected.
+            Explore the treasurer workspace with deterministic mock product data,
+            plus a separate verified Sui Testnet treasury demo for real wallet
+            signatures and public blockchain evidence.
           </p>
         </div>
         <p className="relative z-10 text-xs text-white/35">
@@ -45,8 +46,8 @@ export default function LoginPage() {
               Choose your workspace
             </h1>
             <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-              Role selection is a Stage 2 navigation preview. Real wallet
-              identity arrives later.
+              Role selection remains a demo navigation layer. Wallet identity is
+              used only where explicit Sui Testnet signing is required.
             </p>
           </div>
           <div className="space-y-3">
@@ -60,7 +61,7 @@ export default function LoginPage() {
               <span className="min-w-0 flex-1">
                 <span className="block font-bold">Continue as treasurer</span>
                 <span className="mt-1 block text-sm text-[var(--muted)]">
-                  Review budgets, claims, and activity
+                  Review mock workflow data and access the real Testnet treasury demo
                 </span>
               </span>
               <Icon
@@ -91,8 +92,9 @@ export default function LoginPage() {
           <div className="mt-8 flex items-start gap-3 rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-900">
             <Icon className="mt-0.5 size-4 shrink-0" name="shield" />
             <p>
-              <strong>Safe preview:</strong> every value is synthetic. Buttons
-              cannot sign transactions or move funds.
+              <strong>Safety boundary:</strong> mock workflow values remain
+              synthetic. Real Sui Testnet actions live in the dedicated Testnet
+              demo and require one explicit wallet approval per transaction.
             </p>
           </div>
         </div>

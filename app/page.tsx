@@ -16,7 +16,7 @@ const steps = [
   {
     number: "03",
     title: "Approve with confidence",
-    copy: "A human approves first. Sui payment execution arrives in a later stage—never silently.",
+    copy: "A human approves first. The verified Testnet demo then asks the connected treasurer wallet to sign the Sui transaction explicitly.",
   },
 ];
 
@@ -56,8 +56,8 @@ export default function Home() {
               </Link>
             </div>
             <p className="mt-5 flex items-center gap-2 text-xs text-white/42">
-              <span className="size-1.5 rounded-full bg-emerald-400" /> Stage 2
-              complete · mock data · no wallet or live funds
+              <span className="size-1.5 rounded-full bg-emerald-400" /> Stage 3
+              complete · verified Sui Testnet treasury flow
             </p>
           </div>
 
