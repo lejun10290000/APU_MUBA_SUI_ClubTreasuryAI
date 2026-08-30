@@ -2,7 +2,10 @@
   "merchant": "Campus Print Shop",
   "amountMinor": 7500,
   "currency": "USDC",
+  "receiptDate": "2026-08-28",
+  "description": "Workshop printing",
   "categorySuggestion": "Marketing",
   "needsReview": false,
+  "missingFields": [],
   "reasons": ["Synthetic fixture for mock development only"]
 }

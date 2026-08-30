@@ -63,15 +63,15 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 
 ## Stage 4 — Gemini AI layer — CURRENT
 
-- [ ] Add official `@google/genai` SDK
-- [ ] Add live `GeminiAIService` behind existing `AIService`
-- [ ] Define structured budget output
-- [ ] Build natural-language budget parser
-- [ ] Define structured receipt output
-- [ ] Build receipt/image extraction
-- [ ] Add category suggestion + concise reasons
-- [ ] Validate all model output server-side
-- [ ] Enforce `docs/AI_USAGE_POLICY.md`
+- [x] Add official `@google/genai` SDK
+- [x] Add live `GeminiAIService` behind existing `AIService`
+- [x] Define structured budget output
+- [x] Build natural-language budget parser
+- [x] Define structured receipt output
+- [x] Build receipt/image extraction
+- [x] Add category suggestion + concise reasons
+- [x] Validate all model output server-side
+- [x] Enforce `docs/AI_USAGE_POLICY.md`
 - [ ] Verify live Gemini with small explicit fixture set only
 
 ## Stage 5 — Claim and receipt workflow integration — NOT STARTED

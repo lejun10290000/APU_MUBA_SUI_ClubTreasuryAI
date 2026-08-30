@@ -20,6 +20,7 @@
     "test:e2e:smoke": "playwright test tests/e2e/smoke.spec.ts"
   },
   "dependencies": {
+    "@google/genai": "2.19.0",
     "@mysten/dapp-kit-react": "2.1.20",
     "@mysten/sui": "2.27.0",
     "next": "16.3.3",

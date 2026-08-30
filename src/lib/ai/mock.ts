@@ -1,6 +1,13 @@
-import type { AIService, BudgetDraft, ReceiptAnalysis } from "./types";
+import {
+  budgetDraftSchema,
+  receiptAnalysisSchema,
+  type AIService,
+  type BudgetDraft,
+  type ReceiptAnalysis,
+  type ReceiptAnalysisInput,
+} from "./types";
 
-const defaultBudget: BudgetDraft = {
+const defaultBudget = budgetDraftSchema.parse({
   currency: "USDC",
   categories: [
     { name: "Food", amountMinor: 30000 },
@@ -9,17 +16,20 @@ const defaultBudget: BudgetDraft = {
     { name: "Prizes", amountMinor: 15000 },
     { name: "Emergency", amountMinor: 10000 },
   ],
-  notes: ["Deterministic Stage 1 mock fixture"],
-};
+  notes: ["Deterministic mock fixture; no live Gemini call"],
+});
 
-const defaultReceipt: ReceiptAnalysis = {
+const defaultReceipt = receiptAnalysisSchema.parse({
   merchant: "Campus Print Shop",
   amountMinor: 7500,
   currency: "USDC",
+  receiptDate: "2026-08-28",
+  description: "Workshop printing",
   categorySuggestion: "Marketing",
   needsReview: false,
+  missingFields: [],
   reasons: ["Schema-valid deterministic mock response"],
-};
+});
 
 export class MockAIService implements AIService {
   async parseBudget(input: string): Promise<BudgetDraft> {
@@ -27,7 +37,7 @@ export class MockAIService implements AIService {
     return structuredClone(defaultBudget);
   }
 
-  async analyzeReceipt(input: { receiptId: string; requestedAmountMinor: number }): Promise<ReceiptAnalysis> {
+  async analyzeReceipt(input: ReceiptAnalysisInput): Promise<ReceiptAnalysis> {
     void input;
     return structuredClone(defaultReceipt);
   }

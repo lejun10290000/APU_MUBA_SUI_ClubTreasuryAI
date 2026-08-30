@@ -39,15 +39,6 @@ const parsed = serverSchema.parse({
   NEXT_PUBLIC_SUI_USDC_COIN_TYPE: process.env.NEXT_PUBLIC_SUI_USDC_COIN_TYPE,
 });
 
-if (parsed.AI_MODE === "live") {
-  if (!parsed.GEMINI_LIVE_REQUESTS_ENABLED) {
-    throw new Error("AI_MODE=live requires GEMINI_LIVE_REQUESTS_ENABLED=true.");
-  }
-  if (!parsed.GEMINI_API_KEY) {
-    throw new Error("AI_MODE=live requires a server-side GEMINI_API_KEY.");
-  }
-}
-
 export const serverConfig = parsed;
 
 export const publicConfig = {
