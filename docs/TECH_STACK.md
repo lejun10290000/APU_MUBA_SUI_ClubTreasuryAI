@@ -7,27 +7,27 @@ This stack is intentionally small: one full-stack TypeScript application, one Mo
 
 ## Stack Summary
 
-| Area | Final choice | Purpose |
-|---|---|---|
-| Runtime | Node.js 24 LTS | Supported production runtime |
-| Package manager | pnpm with committed lockfile | Reproducible installs |
-| Web application | Next.js 16 App Router, React 19, strict TypeScript | Frontend and server API in one app |
-| UI | Tailwind CSS 4, shadcn/ui, Lucide icons | Fast dashboard construction |
-| Forms/schemas | React Hook Form + Zod | Shared validation |
-| Backend/API | Next.js Route Handlers + server-only modules | AI, auth, rules, storage |
-| Database | Supabase PostgreSQL | Treasury/claim/review/payout metadata |
-| Receipt storage | Private Supabase Storage bucket | Off-chain private receipt files |
-| AI provider | Google Gemini Developer API | Budget parsing and multimodal receipt analysis |
-| AI SDK/model | `@google/genai`, default `gemini-2.5-flash` | Official JS SDK + fast multimodal structured extraction |
-| AI development mode | Mock-first adapter architecture | Avoid unnecessary API calls/billing during normal development |
-| Blockchain client | `@mysten/sui` v2 + `@mysten/dapp-kit-react` | Sui queries/wallet/transactions |
-| Smart contract | Move on Sui | Treasury custody, limits, payout/events |
-| Network/asset | Sui Testnet + native testnet USDC | Real testnet stablecoin flow |
-| Hosting | Vercel + Supabase | Low-operations deployment |
-| Unit/integration tests | Vitest + React Testing Library | Rules/schemas/UI |
-| End-to-end tests | Playwright | Critical browser flow |
-| Contract tests | `sui move test` | Treasury invariants |
-| CI | GitHub Actions | Lint/typecheck/tests/build |
+| Area                   | Final choice                                         | Purpose                                                                                         |
+| ---------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Runtime                | Node.js 24 LTS                                       | Supported production runtime                                                                    |
+| Package manager        | pnpm with committed lockfile                         | Reproducible installs                                                                           |
+| Web application        | Next.js 16 App Router, React 19, strict TypeScript   | Frontend and server API in one app                                                              |
+| UI                     | Tailwind CSS 4, shadcn/ui, Lucide icons              | Fast dashboard construction                                                                     |
+| Forms/schemas          | React Hook Form + Zod                                | Shared validation                                                                               |
+| Backend/API            | Next.js Route Handlers + server-only modules         | AI, auth, rules, storage                                                                        |
+| Database               | Supabase PostgreSQL                                  | Treasury/claim/review/payout metadata                                                           |
+| Receipt storage        | Private Supabase Storage bucket                      | Off-chain private receipt files                                                                 |
+| AI provider            | Google Gemini Developer API                          | Budget parsing and multimodal receipt analysis                                                  |
+| AI SDK/model           | `@google/genai` `2.19.0`, default `gemini-2.5-flash` | Implemented official JS SDK adapter + multimodal structured extraction; live validation pending |
+| AI development mode    | Mock-first adapter architecture                      | Avoid unnecessary API calls/billing during normal development                                   |
+| Blockchain client      | `@mysten/sui` v2 + `@mysten/dapp-kit-react`          | Sui queries/wallet/transactions                                                                 |
+| Smart contract         | Move on Sui                                          | Treasury custody, limits, payout/events                                                         |
+| Network/asset          | Sui Testnet + native testnet USDC                    | Real testnet stablecoin flow                                                                    |
+| Hosting                | Vercel + Supabase                                    | Low-operations deployment                                                                       |
+| Unit/integration tests | Vitest + React Testing Library                       | Rules/schemas/UI                                                                                |
+| End-to-end tests       | Playwright                                           | Critical browser flow                                                                           |
+| Contract tests         | `sui move test`                                      | Treasury invariants                                                                             |
+| CI                     | GitHub Actions                                       | Lint/typecheck/tests/build                                                                      |
 
 Dependency patch versions will be pinned by `pnpm-lock.yaml` during Stage 1 scaffolding.
 
@@ -58,7 +58,7 @@ src/features/budgets/        Budget entry/preview/confirmation
 src/features/claims/         Claim/receipt/review
 src/domain/money/            Integer/minor-unit money helpers
 src/domain/schemas/          Shared Zod domain schemas
-src/lib/ai/                  AI interface + mock + future Gemini adapter
+src/lib/ai/                  AI interface + mock + guarded Gemini adapter
 src/lib/sui/                 Sui client/transaction boundary
 src/lib/supabase/            Database/private-storage boundary
 move/club_treasury/          Move package/tests
@@ -99,7 +99,7 @@ Conceptual boundaries:
 ```text
 AIService
   |- MockAIService
-  `- GeminiAIService        // implemented in Stage 4
+  `- GeminiAIService        // implemented; live validation pending
 
 SuiService / transaction module
   `- concrete Sui behavior // implemented in Stage 3+
@@ -108,7 +108,7 @@ Storage/Data adapter
   `- Supabase implementation // implemented in Stage 5
 ```
 
-During Stage 1, only the interface/module boundaries and safe mock/placeholders are required. Do not perform live Gemini, Supabase, or treasury operations prematurely.
+The Stage 4 Gemini implementation remains behind this boundary. Stage 5 UI/API work must call `AIService` rather than importing the provider SDK directly.
 
 ## Money Representation Rule
 
@@ -166,7 +166,7 @@ AIService
 
 Both return identical Zod-validated structures.
 
-Stage 1 creates the interface and mock-safe structure. Stage 4 implements live Gemini behavior.
+Stage 1 created the interface and mock-safe structure. Stage 4 implements guarded Gemini budget/receipt behavior with lazy client construction, JSON structured-output requests, and independent Zod validation. Owner-controlled live quality validation is still pending.
 
 ### Mock-first rule
 

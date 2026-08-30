@@ -9,11 +9,10 @@ This file is the **single source of truth for current implementation status, blo
 - **Current stage: Stage 4 — Gemini AI layer**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3**
-- Latest completed milestone: **Verified Sui Testnet treasury deployment and real create → fund → allocate → payout flow using native Circle Testnet USDC**
-- Active implementation branch: **None — Stage 3 is merged to `main`; Stage 4 should start from the latest `main`.**
-- Recommended Stage 4 branch: **`stage4/gemini-ai-layer`**
-- Current blockers: **None for implementation. Stage 4 can be built and tested in mock mode without a Gemini key. Final live Gemini validation requires an explicit owner-controlled server-side API key and live-request opt-in.**
-- Demo readiness: **Mock product workflow is complete; Sui Testnet wallet signing, Move treasury enforcement, real native Testnet USDC custody, allocation, payout, explorer evidence, and post-payout object-state verification are working. Live Gemini, claim persistence/private receipt upload, and deployed web hosting remain later-stage work.**
+- Latest completed milestone: **Stage 4 Gemini adapter implementation and zero-live-call automated verification are complete; owner-controlled live validation is still pending.**
+- Active implementation branch: **`stage4/gemini-ai-layer`**
+- Current blockers: **Stage 4 cannot be marked complete until the owner explicitly validates one live budget parse and one live synthetic receipt/image extraction with a local server-side Gemini key.**
+- Demo readiness: **Mock product workflow and the verified Sui Testnet treasury flow work. The Gemini adapter, structured output, multimodal input, live guard, and failure safety are implemented, but no live Gemini result is claimed yet. Claim persistence/private receipt upload and deployed web hosting remain later-stage work.**
 
 ## Stage Progress
 
@@ -120,10 +119,29 @@ With verified USDC metadata `decimals = 6`, this proves:
 
 Stage 3 exit criteria are therefore **VERIFIED**.
 
+## Stage 4 — Implementation Complete; Live Validation Pending
+
+- official `@google/genai` `2.19.0` SDK pinned in the application lockfile
+- `GeminiAIService` implemented behind the existing `AIService` interface
+- `AI_MODE=mock` still selects `MockAIService` and never constructs a Gemini client
+- live SDK loading and client construction are lazy and occur only on an explicitly permitted live request
+- natural-language budget parsing requests JSON structured output in USDC integer application minor units
+- receipt analysis accepts explicit bounded JPEG/PNG/WebP base64 image data without reading arbitrary local paths
+- receipt extraction returns merchant, amount, date, description, category suggestion, missing fields, review state, and concise reasons
+- every provider response is parsed as JSON and independently validated with Zod
+- malformed, empty, schema-invalid, blocked, missing-image, missing-key, disabled-live, and provider-error paths fail safely
+- provider errors are normalized without logging or exposing prompts, keys, or image/base64 payloads
+- prompts prohibit financial authorization and do not enable tools, search grounding, agents, RAG, or automatic payouts
+- deterministic TypeScript, human approval, wallet signing, and Move/Sui enforcement remain authoritative
+- normal verification uses fake clients and makes zero Gemini API calls
+- lint, strict TypeScript, **87/87 unit tests**, production build, and **7/7 Playwright smoke tests** pass in mock mode
+
+Stage 4 remains **CURRENT** because an owner-controlled live call has not been performed or claimed.
+
 ## Current Not Yet Implemented
 
-- live `@google/genai` Gemini implementation
-- live budget/receipt AI analysis
+- owner-controlled live Gemini validation for budget parsing and receipt/image extraction
+- Stage 5 UI/API integration that invokes the implemented AI adapter for persisted claims
 - Supabase migrations / claim persistence
 - private receipt bucket and secure receipt upload
 - receipt hashing integrated with persisted claims
@@ -137,21 +155,18 @@ Do not describe these as complete until real implementation and verification exi
 
 ### Stage 4 — Gemini AI layer
 
-Implement Gemini behind the existing `AIService` boundary while preserving the mock-first cost/safety policy.
+Complete the explicit live-validation gate for the implemented Gemini adapter without committing or sharing the owner key.
 
 Required priorities:
 
-1. Start from the latest `main` and use branch `stage4/gemini-ai-layer`.
-2. Add official `@google/genai` SDK.
-3. Keep `AI_MODE=mock` and `GEMINI_LIVE_REQUESTS_ENABLED=false` as committed/default values.
-4. Implement `GeminiAIService` without giving AI financial authority.
-5. Add structured budget parsing.
-6. Add structured receipt/image extraction.
-7. Validate every model response server-side with Zod.
-8. Return category suggestions / ambiguity / concise reasons only.
-9. Keep money arithmetic, budget limits, payout authorization, wallet signing, and Sui execution deterministic/human-controlled.
-10. Run normal CI/tests with **zero live Gemini calls**.
-11. Stop at an explicit owner-controlled live-validation gate if no safe Gemini key is available to the implementer.
+1. Review the Stage 4 implementation PR and confirm CI passes in mock mode with no Gemini key.
+2. Keep the API key only in the owner's untracked local `.env.local`.
+3. Explicitly set `AI_MODE=live` and `GEMINI_LIVE_REQUESTS_ENABLED=true` only for the small validation session.
+4. Validate one fixed natural-language budget instruction with `gemini-2.5-flash`.
+5. Validate one synthetic JPEG/PNG/WebP receipt image and confirm ambiguous/missing evidence becomes `needsReview=true`.
+6. Record the model and verified results without recording the key, prompt payload, image base64, or private receipt data.
+7. Return configuration to mock mode after validation.
+8. Only then mark Stage 4 complete and advance the repository to Stage 5.
 
 ## Locked MVP Decisions
 
@@ -160,7 +175,7 @@ Required priorities:
 - Sui owns real Testnet custody/authorization/payout enforcement
 - payment asset: native Sui Testnet USDC
 - product AI provider: Google Gemini Developer API
-- planned default Gemini model: `gemini-2.5-flash`
+- default Gemini model: `gemini-2.5-flash`
 - official Stage 4 Gemini SDK: `@google/genai`
 - normal development AI mode: `mock`
 - database/storage later: Supabase PostgreSQL + private Storage
@@ -176,10 +191,19 @@ Before development, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 4 — Gemini AI layer
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3
-NEXT TASK: Implement the Gemini AI layer behind the existing mock-first AIService boundary without giving AI financial authority.
+NEXT TASK: Complete owner-controlled live validation of the implemented budget parser and receipt/image extractor, then mark Stage 4 complete only if both pass.
 ```
 
 ## Recent Development Log
+
+### 2026-08-30 — Implemented the Stage 4 Gemini adapter; live validation pending
+
+- Pinned official `@google/genai` `2.19.0` and added lazy, guarded live client construction.
+- Implemented structured budget parsing and multimodal receipt extraction behind `AIService`.
+- Added bounded image input, JSON Schema requests, independent Zod validation, and normalized safe errors.
+- Verified mock selection constructs no Gemini client and all normal tests use fake clients with zero network calls.
+- Verification passed: lint, typecheck, 87 unit tests, production build, and 7 Playwright smoke tests.
+- Stage 4 remains CURRENT because no owner-controlled live Gemini call was performed.
 
 ### 2026-08-30 — Stage 4 teammate handoff prepared
 

@@ -37,13 +37,31 @@ Completed stages:
 - Stage 2 — Core UI and deterministic domain rules
 - Stage 3 — Sui foundation and Move treasury
 
-Stage 4 starts from the latest `main`. Recommended implementation branch:
+Stage 4 implementation is on:
 
 ```text
 stage4/gemini-ai-layer
 ```
 
 Read `docs/PROJECT_STATUS.md` for the authoritative current task before coding.
+
+## Stage 4 Gemini Adapter — Implemented, Live Validation Pending
+
+The application now includes:
+
+- official `@google/genai` `2.19.0`
+- `GeminiAIService` behind the existing `AIService` interface
+- lazy SDK/client construction only on an explicitly enabled live request
+- JSON structured-output requests for natural-language budget parsing
+- explicit bounded JPEG/PNG/WebP base64 input for receipt extraction
+- merchant, amount, date, description, category suggestion, missing-field, review, and reason output
+- independent Zod validation after every provider response
+- safe errors for disabled live mode, missing keys/images, malformed output, invalid schemas, and provider failures
+- fake-client tests that make zero Gemini API calls
+
+Normal development and CI still use `MockAIService`. Lint, strict TypeScript, **87 unit tests**, the production build, and **7 Playwright smoke tests** pass in mock mode.
+
+No real Gemini result is claimed yet. Stage 4 remains **CURRENT** until the project owner explicitly validates one budget parse and one synthetic receipt/image extraction with a local server-side key. AI remains advisory and cannot authorize or execute money movement.
 
 ## Stage 3 Verified Sui Testnet Deployment
 
@@ -226,7 +244,7 @@ sui move test
 - `@mysten/dapp-kit-react` 2.1.20
 - native Circle Sui Testnet USDC
 - mock-first `AIService`
-- Stage 4 product AI target: Google Gemini Developer API with `@google/genai`
+- implemented Google Gemini Developer API adapter with `@google/genai` `2.19.0`; live validation pending
 - planned later persistence/private receipt storage: Supabase
 
 ## AI Cost-Control Policy
@@ -238,7 +256,18 @@ AI_MODE=mock
 GEMINI_LIVE_REQUESTS_ENABLED=false
 ```
 
-Mock mode makes zero Gemini API calls. Stage 4 implementation should be completed and tested in mock mode first. Live Gemini is reserved for explicit owner-controlled integration/quality validation and the later official demo path.
+Mock mode makes zero Gemini API calls. Live Gemini is reserved for explicit owner-controlled integration/quality validation and the later official demo path.
+
+For the small owner-controlled validation session only, place these values in untracked `.env.local`:
+
+```text
+AI_MODE=live
+GEMINI_LIVE_REQUESTS_ENABLED=true
+GEMINI_API_KEY=<owner enters locally; never share or commit>
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+Validate only a fixed budget instruction and a synthetic receipt image, record no sensitive payloads, then return to mock mode. Stage 4 is not complete until both live paths are explicitly verified.
 
 ## AI Tools Used During Development
 
@@ -251,7 +280,7 @@ Currently declared:
 
 Product AI provider:
 
-- **Google Gemini Developer API** — Stage 4 target for live budget parsing and receipt/image analysis when explicitly enabled
+- **Google Gemini Developer API** — implemented product adapter for budget parsing and receipt/image analysis; owner-controlled live validation pending
 
 Add every other AI tool used by any teammate before submission.
 

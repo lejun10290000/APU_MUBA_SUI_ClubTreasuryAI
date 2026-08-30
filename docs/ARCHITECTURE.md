@@ -19,7 +19,7 @@ Next.js 16 Web Application
 AIService                 Supabase (later)       Sui Wallet      Private Storage (later)
   |- MockAIService                                 |
   `- GeminiAIService                              v
-     (Stage 4)                                Sui Testnet
+     (@google/genai 2.19.0)                  Sui Testnet
                                              - Move treasury
                                              - native Testnet USDC
 ```
@@ -65,7 +65,11 @@ AIService
 
 Mock mode is the default for development, CI, ordinary browser tests, and Sui work. It makes zero Gemini API calls.
 
-Stage 4 will implement `GeminiAIService` with the official `@google/genai` SDK and keep server-side Zod validation around every model response.
+Stage 4 implements `GeminiAIService` with the official `@google/genai` `2.19.0` SDK. The SDK/client is lazy-loaded only for an explicitly enabled live request, and every JSON response is independently validated with Zod before it crosses the service boundary. Owner-controlled live validation remains pending.
+
+Budget analysis accepts untrusted natural-language text and requests USDC category amounts directly as integer application minor units. Receipt analysis accepts explicit bounded JPEG/PNG/WebP base64 data; it never reads arbitrary local paths or persists/logs the image. The output includes extracted evidence, category suggestion, missing fields, `needsReview`, and concise reasons.
+
+`AI_MODE=mock` returns `MockAIService` without constructing a Gemini client. Live calls require both the server-side key and `GEMINI_LIVE_REQUESTS_ENABLED=true`. Empty, malformed, schema-invalid, unavailable, or blocked provider responses fail safely so later claim integration can route to manual `Review`.
 
 Gemini may:
 

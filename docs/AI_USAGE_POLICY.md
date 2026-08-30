@@ -7,7 +7,7 @@ The objective is simple: keep normal development deterministic and cheap, and re
 ## Final provider
 
 - Provider: **Google Gemini Developer API**
-- JavaScript SDK: **`@google/genai`**
+- JavaScript SDK: **`@google/genai` `2.19.0`**
 - Default model for the MVP: **`gemini-2.5-flash`**
 - Primary tasks: natural-language budget parsing and receipt/image information extraction
 
@@ -27,9 +27,10 @@ A developer must deliberately change the environment to:
 
 ```text
 AI_MODE=live
+GEMINI_LIVE_REQUESTS_ENABLED=true
 ```
 
-and provide a valid server-side `GEMINI_API_KEY` before live Gemini requests are allowed.
+and provide a valid server-side `GEMINI_API_KEY` before live Gemini requests are allowed. Selecting live mode alone never permits a request.
 
 If `AI_MODE` is absent or invalid, treat it as `mock` or fail safely during configuration validation. Do not silently switch to live mode.
 
@@ -134,6 +135,18 @@ AIService
 Both must return the same Zod-validated schemas.
 
 This prevents UI/business logic from depending directly on Gemini and lets developers switch between mock and live modes without changing product code.
+
+## Current Stage 4 implementation status
+
+- `GeminiAIService` is implemented with lazy SDK/client construction.
+- Budget parsing requests JSON structured output in USDC integer application minor units.
+- Receipt extraction accepts explicit bounded JPEG/PNG/WebP base64 and does not read or persist local files.
+- Model JSON is independently validated with Zod before return.
+- Provider/config/output failures are normalized without exposing keys, prompts, or image payloads.
+- Automated tests inject fake clients and make zero Gemini calls.
+- Owner-controlled live budget and synthetic receipt validation is still pending, so Stage 4 remains CURRENT.
+
+The application does not retry live requests automatically. It does not enable tools, Search grounding, agents, RAG, or provider-side financial actions.
 
 ## Gemini responsibilities
 

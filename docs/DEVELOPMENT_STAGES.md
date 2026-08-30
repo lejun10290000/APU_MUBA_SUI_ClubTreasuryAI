@@ -68,16 +68,26 @@ Goal: add Gemini for unstructured budget and receipt understanding while keeping
 
 Required work:
 
-- official `@google/genai` SDK
-- live `GeminiAIService` behind the existing `AIService` interface
-- structured budget parser
-- structured receipt/image extraction
-- category suggestion and concise reasons
-- server-side validation of model output
-- billing/live-call guardrails from `docs/AI_USAGE_POLICY.md`
-- small explicit quality fixture set
+- [x] official `@google/genai` SDK
+- [x] live `GeminiAIService` behind the existing `AIService` interface
+- [x] structured budget parser
+- [x] structured receipt/image extraction
+- [x] category suggestion and concise reasons
+- [x] server-side validation of model output
+- [x] billing/live-call guardrails from `docs/AI_USAGE_POLICY.md`
+- [x] zero-live-call fake-client fixture/test set
+- [ ] explicit owner-controlled live quality validation for budget and synthetic receipt inputs
 
-Exit criteria: mock mode remains default; live Gemini is manually enabled and validated without replacing deterministic financial rules.
+Automated verification:
+
+- SDK pinned at `@google/genai` `2.19.0`
+- mock mode selects the deterministic adapter without constructing a Gemini client
+- live client creation is lazy and blocked by the explicit guard/key checks
+- every model response is parsed and Zod-validated before application use
+- invalid or unavailable AI fails safely for manual review
+- 87 unit tests, production build, and 7 Playwright smoke tests pass in mock mode
+
+Exit criteria: mock mode remains default; live Gemini is manually enabled and validated without replacing deterministic financial rules. **Automated implementation criteria pass; live validation remains pending, so Stage 4 stays CURRENT.**
 
 ## Stage 5 — Claim and receipt workflow integration — NOT STARTED
 
