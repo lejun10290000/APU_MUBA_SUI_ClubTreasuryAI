@@ -39,7 +39,7 @@ test("Stage 2 product shell navigates from landing to treasurer dashboard", asyn
   expect(response.ok()).toBeTruthy();
   await expect(response.json()).resolves.toMatchObject({
     ok: true,
-    stage: 4,
+    stage: 5,
     aiMode: "mock",
   });
 });
