@@ -10,8 +10,9 @@ This file is the **single source of truth for current implementation status, blo
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3**
 - Latest completed milestone: **Verified Sui Testnet treasury deployment and real create → fund → allocate → payout flow using native Circle Testnet USDC**
-- Active implementation branch awaiting final review/merge: **`stage3/testnet-deployment-e2e`**
-- Current blockers: **None for Stage 3. Stage 4 requires implementation of the Gemini adapter and explicit owner-controlled live API configuration.**
+- Active implementation branch: **None — Stage 3 is merged to `main`; Stage 4 should start from the latest `main`.**
+- Recommended Stage 4 branch: **`stage4/gemini-ai-layer`**
+- Current blockers: **None for implementation. Stage 4 can be built and tested in mock mode without a Gemini key. Final live Gemini validation requires an explicit owner-controlled server-side API key and live-request opt-in.**
 - Demo readiness: **Mock product workflow is complete; Sui Testnet wallet signing, Move treasury enforcement, real native Testnet USDC custody, allocation, payout, explorer evidence, and post-payout object-state verification are working. Live Gemini, claim persistence/private receipt upload, and deployed web hosting remain later-stage work.**
 
 ## Stage Progress
@@ -140,16 +141,17 @@ Implement Gemini behind the existing `AIService` boundary while preserving the m
 
 Required priorities:
 
-1. Add official `@google/genai` SDK.
-2. Keep `AI_MODE=mock` and `GEMINI_LIVE_REQUESTS_ENABLED=false` as defaults.
-3. Implement `GeminiAIService` without giving AI financial authority.
-4. Add structured budget parsing.
-5. Add structured receipt/image extraction.
-6. Validate every model response server-side with Zod.
-7. Return category suggestions / ambiguity / concise reasons only.
-8. Keep money arithmetic, budget limits, payout authorization, wallet signing, and Sui execution deterministic/human-controlled.
-9. Run normal CI/tests with **zero live Gemini calls**.
-10. Use live Gemini only in explicit owner-controlled quality checks.
+1. Start from the latest `main` and use branch `stage4/gemini-ai-layer`.
+2. Add official `@google/genai` SDK.
+3. Keep `AI_MODE=mock` and `GEMINI_LIVE_REQUESTS_ENABLED=false` as committed/default values.
+4. Implement `GeminiAIService` without giving AI financial authority.
+5. Add structured budget parsing.
+6. Add structured receipt/image extraction.
+7. Validate every model response server-side with Zod.
+8. Return category suggestions / ambiguity / concise reasons only.
+9. Keep money arithmetic, budget limits, payout authorization, wallet signing, and Sui execution deterministic/human-controlled.
+10. Run normal CI/tests with **zero live Gemini calls**.
+11. Stop at an explicit owner-controlled live-validation gate if no safe Gemini key is available to the implementer.
 
 ## Locked MVP Decisions
 
@@ -178,6 +180,13 @@ NEXT TASK: Implement the Gemini AI layer behind the existing mock-first AIServic
 ```
 
 ## Recent Development Log
+
+### 2026-08-30 — Stage 4 teammate handoff prepared
+
+- Confirmed Stage 0–3 are complete on `main` and the post-merge GitHub CI is green.
+- Cleared the stale Stage 3 active-branch handoff state.
+- Stage 4 should start from latest `main` on `stage4/gemini-ai-layer`.
+- Stage 4 implementation can proceed entirely in mock mode; any live Gemini validation remains explicit and owner-controlled.
 
 ### 2026-08-30 — Stage 3 completed with verified Sui Testnet treasury flow
 
