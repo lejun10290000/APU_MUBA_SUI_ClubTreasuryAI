@@ -28,7 +28,7 @@ AI never owns authoritative balances, payout authorization, wallet signing, or S
 
 ## Current Development Stage
 
-**Stage 3 — Sui foundation and Move treasury — COMPLETE**
+**Stage 4 — Gemini AI layer — CURRENT**
 
 Completed stages:
 
@@ -37,7 +37,11 @@ Completed stages:
 - Stage 2 — Core UI and deterministic domain rules
 - Stage 3 — Sui foundation and Move treasury
 
-**Next: Stage 4 — Gemini AI layer.**
+Stage 4 starts from the latest `main`. Recommended implementation branch:
+
+```text
+stage4/gemini-ai-layer
+```
 
 Read `docs/PROJECT_STATUS.md` for the authoritative current task before coding.
 
@@ -187,7 +191,7 @@ Real Testnet treasury page:
 http://localhost:3000/dashboard/testnet
 ```
 
-The committed `.env.example` contains only public Testnet identifiers. Never commit `.env.local`, API keys, wallet private keys, or recovery phrases.
+The committed `.env.example` contains only public Testnet identifiers and blank server-side secret placeholders. Never commit `.env.local`, Gemini API keys, wallet private keys, or recovery phrases.
 
 ## Verification Commands
 
@@ -222,7 +226,7 @@ sui move test
 - `@mysten/dapp-kit-react` 2.1.20
 - native Circle Sui Testnet USDC
 - mock-first `AIService`
-- planned Stage 4 product AI: Google Gemini Developer API with `@google/genai`
+- Stage 4 product AI target: Google Gemini Developer API with `@google/genai`
 - planned later persistence/private receipt storage: Supabase
 
 ## AI Cost-Control Policy
@@ -234,7 +238,7 @@ AI_MODE=mock
 GEMINI_LIVE_REQUESTS_ENABLED=false
 ```
 
-Mock mode makes zero Gemini API calls. Live Gemini is reserved for explicit Stage 4 integration/quality validation and the later official demo path.
+Mock mode makes zero Gemini API calls. Stage 4 implementation should be completed and tested in mock mode first. Live Gemini is reserved for explicit owner-controlled integration/quality validation and the later official demo path.
 
 ## AI Tools Used During Development
 
@@ -247,7 +251,7 @@ Currently declared:
 
 Product AI provider:
 
-- **Google Gemini Developer API** — planned Stage 4 live budget parsing and receipt/image analysis when explicitly enabled
+- **Google Gemini Developer API** — Stage 4 target for live budget parsing and receipt/image analysis when explicitly enabled
 
 Add every other AI tool used by any teammate before submission.
 
