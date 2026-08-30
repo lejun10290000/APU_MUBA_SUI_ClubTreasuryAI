@@ -9,9 +9,9 @@ This file is the **single source of truth for current implementation status, blo
 - **Current stage: Stage 5 — Claim and receipt workflow integration**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4**
-- Latest completed milestone: **Stage 4 Gemini adapter implementation, automated verification, and owner-controlled live validation are complete.**
-- Active review branch: **`stage4/gemini-ai-layer`**; Stage 5 implementation branch is not created yet.
-- Current blockers: **None for Stage 4. Stage 5 implementation has not started.**
+- Latest completed milestone: **Stage 4 Gemini adapter implementation, automated verification, and owner-controlled live validation are complete and merged to `main`.**
+- Active implementation branch: **None — Stage 5 has not started yet. Create a fresh Stage 5 branch from the latest `main` when implementation begins.**
+- Current blockers: **None. Stage 5 implementation has not started.**
 - Demo readiness: **Mock product workflow, verified Sui Testnet treasury flow, and live-validated Gemini budget/receipt adapter work. Claim persistence/private receipt upload and deployed web hosting remain later-stage work.**
 
 ## Stage Progress
@@ -163,7 +163,7 @@ Connect private receipt storage, claim persistence, AI extraction, deterministic
 
 Required priorities:
 
-1. Review and merge the completed Stage 4 pull request.
+1. Start from the latest `main` and create a fresh Stage 5 implementation branch.
 2. Plan the Supabase schema/migrations and private receipt bucket before UI integration.
 3. Implement secure receipt upload, hashing, and claim persistence.
 4. Invoke mock/live AI only through the shared `AIService` boundary.
@@ -194,10 +194,16 @@ Before development, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 5 — Claim and receipt workflow integration
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4
-NEXT TASK: Review/merge the completed Stage 4 PR, then begin Stage 5 planning for Supabase-backed claim and private receipt integration without automatic money movement.
+NEXT TASK: Start Stage 5 from the latest main and implement Supabase-backed claim and private receipt integration without automatic money movement.
 ```
 
 ## Recent Development Log
+
+### 2026-08-30 — Stage 4 cleanup and Stage 5 handoff aligned
+
+- Confirmed Stage 4 implementation and live-validation documentation are merged to `main` through PR #16 and PR #17.
+- Removed stale Stage 4 active-review/merge instructions.
+- Aligned the project handoff with Stage 5 as the current stage.
 
 ### 2026-08-30 — Stage 4 completed with owner-controlled live Gemini validation
 
@@ -216,7 +222,7 @@ NEXT TASK: Review/merge the completed Stage 4 PR, then begin Stage 5 planning fo
 - Added bounded image input, JSON Schema requests, independent Zod validation, and normalized safe errors.
 - Verified mock selection constructs no Gemini client and all normal tests use fake clients with zero network calls.
 - Verification passed: lint, typecheck, 87 unit tests, production build, and 7 Playwright smoke tests.
-- Stage 4 remains CURRENT because no owner-controlled live Gemini call was performed.
+- Stage 4 remained CURRENT at that checkpoint because owner-controlled live Gemini validation had not yet been performed.
 
 ### 2026-08-30 — Stage 4 teammate handoff prepared
 
