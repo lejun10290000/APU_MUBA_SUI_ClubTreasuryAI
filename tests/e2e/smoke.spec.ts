@@ -8,7 +8,9 @@ test("Stage 2 product shell navigates from landing to treasurer dashboard", asyn
   await expect(
     page.getByRole("heading", { name: /Club funds, clearly governed/i }),
   ).toBeVisible();
-  await expect(page.getByText(/Stage 2 complete · mock data/i)).toBeVisible();
+  await expect(
+    page.getByText(/Stage 3 complete · verified Sui Testnet treasury flow/i),
+  ).toBeVisible();
 
   await page.getByRole("link", { name: "Open demo workspace" }).click();
   await expect(page).toHaveURL(/\/login$/);
