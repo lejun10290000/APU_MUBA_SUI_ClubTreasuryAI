@@ -4,15 +4,16 @@ This file is the **single source of truth for current implementation status, blo
 
 ## Current Snapshot
 
-- Last updated: **30 August 2026 (MYT)**
+- Last updated: **31 August 2026 (MYT)**
 - Default branch: `main`
 - **Current stage: Stage 5 — Claim and receipt workflow integration**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4**
 - Latest completed milestone: **Stage 4 Gemini adapter implementation, automated verification, and owner-controlled live validation are complete and merged to `main`.**
-- Active implementation branch: **None — Stage 5 has not started yet. Create a fresh Stage 5 branch from the latest `main` when implementation begins.**
-- Current blockers: **None. Stage 5 implementation has not started.**
-- Demo readiness: **Mock product workflow, verified Sui Testnet treasury flow, and live-validated Gemini budget/receipt adapter work. Claim persistence/private receipt upload and deployed web hosting remain later-stage work.**
+- Active implementation branch: **`stage5/claim-receipt-integration`**
+- Stage 5 implementation state: **Implemented and verified locally in mock mode; real Supabase acceptance validation is still pending.**
+- Current blockers: **The connected Supabase project is inactive and the local Docker engine is unavailable, so the migration/private-storage workflow has not yet been exercised against a real PostgreSQL/Storage instance.**
+- Demo readiness: **The mock product workflow, verified Sui Testnet treasury flow, live-validated Gemini adapter, and Stage 5 claim/review workflow are available. Stage 5 must remain CURRENT until the owner-controlled Supabase acceptance gate passes.**
 
 ## Stage Progress
 
@@ -143,33 +144,41 @@ Stage 3 exit criteria are therefore **VERIFIED**.
 
 Stage 4 exit criteria are **VERIFIED**. Gemini remains advisory; deterministic TypeScript, human approval, wallet signing, and Move/Sui remain authoritative.
 
-## Current Not Yet Implemented
+## Stage 5 — Implemented Locally, Live Acceptance Pending
 
-- Stage 5 UI/API integration that invokes the implemented AI adapter for persisted claims
-- Supabase migrations / claim persistence
-- private receipt bucket and secure receipt upload
-- receipt hashing integrated with persisted claims
-- full persisted claim → AI review → human approval → existing Sui payout integration
-- deployed public web app
-- final screenshots/video/submission package
+- versioned PostgreSQL migration for verified wallet profiles, wallet nonces, treasuries, memberships, budget categories, and claims
+- RLS policies and narrow server functions for treasury access and human claim decisions
+- private `receipts` bucket policy with JPEG/PNG/WebP and 10 MB limits
+- server-side MIME, size, and image-signature validation plus SHA-256 hashing of the exact receipt bytes
+- idempotent claim submission and exact/similar duplicate checks
+- shared `getAIService()` analysis followed by deterministic recommendation rules
+- persisted manual `Review` fallback when AI analysis fails or is invalid
+- wallet-signed nonce identity binding in live mode and a clearly isolated mock repository for local/CI use
+- persisted human Approve/Reject actions with a decision note
+- immutable `approved_*` payout snapshot with `payment_status = unpaid`
+- no wallet popup, Sui transaction construction, payout, digest, or paid state in Stage 5
+- local verification passed: lint, strict TypeScript, 101 unit tests, production build, and 7 Playwright tests
 
-Do not describe these as complete until real implementation and verification exist.
+Not yet verified:
+
+- migration applied to an active owner-controlled Supabase project
+- private Storage upload/read behavior under real Auth and RLS
+- real persisted synthetic claim, recommendation, decision, and approved payout snapshot
+- Supabase security/performance advisors after migration
+
+Do not describe Stage 5 as COMPLETE until the real acceptance gate in `docs/STAGE5_LIVE_VALIDATION.md` passes.
 
 ## Next Recommended Task
 
-### Stage 5 — Claim and receipt workflow integration
+### Stage 5 — Real Supabase acceptance and review
 
-Connect private receipt storage, claim persistence, AI extraction, deterministic checks, and review states without automatic money movement.
-
-Required priorities:
-
-1. Start from the latest `main` and create a fresh Stage 5 implementation branch.
-2. Plan the Supabase schema/migrations and private receipt bucket before UI integration.
-3. Implement secure receipt upload, hashing, and claim persistence.
-4. Invoke mock/live AI only through the shared `AIService` boundary.
-5. Apply deterministic duplicate and budget checks after validated AI extraction.
-6. Persist an understandable `Approve` / `Review` / `Reject` recommendation without triggering payment.
-7. Keep AI failure on the manual `Review` path and preserve all existing Sui authorization boundaries.
+1. Resume the owner-controlled Supabase project.
+2. Enable Anonymous Sign-ins for the MVP wallet-auth bridge.
+3. Apply the Stage 5 migration and regenerate database types from the live schema.
+4. Run the synthetic-receipt checklist in `docs/STAGE5_LIVE_VALIDATION.md`.
+5. Review Supabase security and performance advisors and resolve relevant findings.
+6. Open the Stage 5 pull request for teammate/owner review; do not merge it from this implementation task.
+7. Keep Stage 5 CURRENT and do not begin Stage 6 until every live acceptance item passes.
 
 ## Locked MVP Decisions
 
@@ -194,10 +203,19 @@ Before development, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 5 — Claim and receipt workflow integration
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4
-NEXT TASK: Start Stage 5 from the latest main and implement Supabase-backed claim and private receipt integration without automatic money movement.
+NEXT TASK: Complete the owner-controlled Supabase acceptance gate for the implemented Stage 5 claim/private-receipt workflow, then review its pull request without beginning Stage 6.
 ```
 
 ## Recent Development Log
+
+### 2026-08-31 — Stage 5 implemented locally; real Supabase acceptance pending
+
+- Added the versioned Stage 5 schema, RLS policies, private receipt bucket policy, wallet identity bridge, and Supabase adapters.
+- Connected multipart receipt submission to byte hashing, private upload, claim persistence, one shared AI analysis, deterministic checks, and stored recommendations.
+- Added persisted human Approve/Reject decisions and an immutable approved-but-unpaid Stage 6 payout snapshot without invoking Sui.
+- Added mock repository coverage for normal development/CI and a live adapter selected only through explicit environment configuration.
+- Verified lint, strict TypeScript, 101 unit tests, production build, and 7 Playwright tests with zero live Gemini calls and zero Sui payouts.
+- Kept Stage 5 CURRENT because the connected Supabase project is inactive and the local Docker engine is unavailable; no real migration/storage acceptance has been claimed.
 
 ### 2026-08-30 — Stage 4 cleanup and Stage 5 handoff aligned
 

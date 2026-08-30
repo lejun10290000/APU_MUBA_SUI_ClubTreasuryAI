@@ -29,7 +29,7 @@ This stack is intentionally small: one full-stack TypeScript application, one Mo
 | Contract tests         | `sui move test`                                      | Treasury invariants                                                 |
 | CI                     | GitHub Actions                                       | Lint/typecheck/tests/build                                          |
 
-Dependency patch versions will be pinned by `pnpm-lock.yaml` during Stage 1 scaffolding.
+Dependency patch versions are pinned by `pnpm-lock.yaml`. Stage 5 uses `@supabase/supabase-js` `2.112.4`, `@supabase/ssr` `0.12.5`, and Supabase CLI `2.116.0`.
 
 ## Foundation Reproducibility Rules
 
@@ -105,7 +105,8 @@ SuiService / transaction module
   `- concrete Sui behavior // implemented in Stage 3+
 
 Storage/Data adapter
-  `- Supabase implementation // implemented in Stage 5
+  |- Mock repository         // normal local development and CI
+  `- Supabase implementation // Stage 5 live-data mode
 ```
 
 The Stage 4 Gemini implementation remains behind this boundary. Stage 5 UI/API work must call `AIService` rather than importing the provider SDK directly.
@@ -299,15 +300,17 @@ The connected Sui wallet address is the MVP identity. Role-sensitive API mutatio
 
 A claim becomes `paid` only after successful Sui transaction confirmation.
 
-## Minimum Database Tables
+## Stage 5 Database and Storage Contract
 
-- `treasuries`
-- `budget_categories`
-- `claims`
-- `claim_files`
-- `ai_reviews`
-- `payouts`
-- `wallet_nonces`
+- `wallet_profiles` binds a Supabase user to a verified Sui wallet address
+- `wallet_nonces` stores short-lived, single-use wallet proof challenges and is never granted to browser roles
+- `treasuries`, `treasury_members`, and `budget_categories` persist the access-controlled budget relationship
+- `claims` stores immutable receipt evidence metadata, validated AI output, deterministic duplicate/recommendation evidence, the human decision, and the immutable `approved_*` payout snapshot
+- private Storage bucket `receipts` stores raw JPEG/PNG/WebP evidence up to 10 MB
+- RLS protects all exposed application tables and Storage objects
+- `payment_status` remains `unpaid` throughout Stage 5; payout records/digests belong to Stage 6
+
+The full versioned schema is in `supabase/migrations/`. Live mode uses SSR-compatible Supabase clients and the server-only secret only for trusted wallet binding, AI finalization, receipt cleanup, and authorized signed receipt URLs.
 
 ## Security Baseline
 

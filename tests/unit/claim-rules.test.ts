@@ -59,6 +59,30 @@ describe("claim rules", () => {
     expect(result.hasExact).toBe(true);
   });
 
+  it("finds exact duplicates by immutable receipt hash", () => {
+    const hash = "a".repeat(64);
+    const result = findPotentialDuplicateClaims(
+      {
+        id: "new",
+        merchant: "New Merchant",
+        receiptReference: "NEW",
+        receiptHash: hash,
+        requestedAmountMinor: asMinorAmount(7_500),
+      },
+      [
+        {
+          id: "existing",
+          merchant: "Old Merchant",
+          receiptReference: "OLD",
+          receiptHash: hash,
+          requestedAmountMinor: asMinorAmount(1_000),
+        },
+      ],
+    );
+
+    expect(result.exactIds).toEqual(["existing"]);
+  });
+
   it("finds similar duplicates by normalized merchant and exact amount", () => {
     const result = findPotentialDuplicateClaims(
       {

@@ -23,6 +23,8 @@
     "@google/genai": "2.19.0",
     "@mysten/dapp-kit-react": "2.1.20",
     "@mysten/sui": "2.27.0",
+    "@supabase/ssr": "0.12.5",
+    "@supabase/supabase-js": "2.112.4",
     "next": "16.3.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -42,6 +44,7 @@
     "eslint-config-next": "16.3.3",
     "jsdom": "26.1.0",
     "prettier": "3.6.2",
+    "supabase": "2.116.0",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
     "vitest": "4.1.10"

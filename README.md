@@ -40,6 +40,8 @@ Completed stages:
 
 Stage 4 implementation and live-validation documentation were merged into `main` through **PR #16** and **PR #17**.
 
+Stage 5 is implemented on `stage5/claim-receipt-integration` and passes local automated/browser verification. It remains **CURRENT**, not COMPLETE, until the migration and synthetic-receipt workflow pass against the owner-controlled Supabase project.
+
 Read `docs/PROJECT_STATUS.md` for the authoritative current task before coding.
 
 ## Stage 4 Gemini Adapter — COMPLETE
@@ -160,6 +162,22 @@ The web application provides:
 
 No application code stores private keys or recovery phrases.
 
+## Stage 5 Claim and Receipt Workflow
+
+Stage 5 adds:
+
+- normalized persisted treasuries, memberships, budget categories, and claims
+- private receipt storage with RLS, JPEG/PNG/WebP, 10 MB, and image-signature checks
+- SHA-256 hashing of the exact receipt bytes and immutable evidence metadata
+- idempotent submission plus deterministic exact/similar duplicate detection
+- one explicit shared `AIService` analysis followed by deterministic financial/evidence checks
+- persisted Approve / Review / Reject recommendations with manual Review fallback
+- wallet-signed nonce identity binding in live mode
+- persisted human Approve/Reject decisions with a decision note
+- immutable `approved_*` payout snapshot while `payment_status` remains `unpaid`
+
+There is no wallet popup, Sui transaction, payout, digest, or paid state in Stage 5. See `docs/STAGE5_LIVE_VALIDATION.md` for the remaining owner-controlled acceptance gate.
+
 ## Stage 2 Product Workflow
 
 The mock product workflow remains available for product/UI development and includes:
@@ -208,6 +226,24 @@ http://localhost:3000/dashboard/testnet
 
 The committed `.env.example` contains only public Testnet identifiers and blank server-side secret placeholders. Never commit `.env.local`, Gemini API keys, wallet private keys, or recovery phrases.
 
+Claim data defaults to the in-memory mock repository:
+
+```text
+NEXT_PUBLIC_CLAIM_DATA_MODE=mock
+```
+
+For the owner-controlled Stage 5 live acceptance only, first apply the migration in `supabase/migrations/`, enable Supabase Anonymous Sign-ins, and set these values in untracked `.env.local`:
+
+```text
+NEXT_PUBLIC_CLAIM_DATA_MODE=live
+NEXT_PUBLIC_SUPABASE_URL=<project URL>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable key>
+SUPABASE_SECRET_KEY=<server-only secret key>
+SUPABASE_RECEIPTS_BUCKET=receipts
+```
+
+Never expose `SUPABASE_SECRET_KEY` with a `NEXT_PUBLIC_` prefix. Return claim mode to `mock` after live validation if the project is not being used as the shared demo backend.
+
 ## Verification Commands
 
 Application:
@@ -242,7 +278,7 @@ sui move test
 - native Circle Sui Testnet USDC
 - mock-first `AIService`
 - verified Google Gemini Developer API adapter with `@google/genai` `2.19.0`
-- planned later persistence/private receipt storage: Supabase
+- Stage 5 persistence/private receipt storage: Supabase PostgreSQL, Auth, RLS, and private Storage
 
 ## AI Cost-Control Policy
 
@@ -293,6 +329,7 @@ Add every other AI tool used by any teammate before submission.
 - `docs/ARCHITECTURE.md` — architecture and responsibility boundaries
 - `docs/TECH_STACK.md` — technology decisions
 - `docs/DEMO_PLAN.md` — demo flow
+- `docs/STAGE5_LIVE_VALIDATION.md` — owner-controlled migration/private-receipt acceptance checklist
 
 ## Team Members
 

@@ -98,7 +98,7 @@ test("treasurer creates a validated session-only treasury preview", async ({
   await expect(page.getByText(/Session-only preview/i)).toBeVisible();
 });
 
-test("Stage 2 mock workflow runs from treasury through human claim decision", async ({
+test("Stage 5 mock adapter runs receipt persistence through an unpaid human decision", async ({
   page,
 }) => {
   await page.goto("/dashboard/treasury/new");
@@ -122,51 +122,75 @@ test("Stage 2 mock workflow runs from treasury through human claim decision", as
   await page.getByRole("button", { name: "Confirm mock budget" }).click();
 
   await expect(
-    page.getByRole("heading", { name: "Submit a demo claim" }),
+    page.getByRole("heading", { name: "Submit a claim" }),
   ).toBeVisible();
   await page.getByLabel("Member name").fill("Aina Rahman");
   await page.getByLabel("Merchant").fill("Campus Bookstore");
   await page.getByLabel("Expense description").fill("Workshop stationery");
-  await page.getByLabel("Budget category").selectOption("venue-1");
+  await page.getByLabel("Budget category").selectOption("marketing-3");
   await page.getByLabel("Requested amount").fill("75.00");
   await page.getByLabel("Receipt amount").fill("75.00");
   await page.getByLabel("Receipt reference").fill("BOOK-NEW-104");
-  await page.getByRole("button", { name: "Run deterministic review" }).click();
+  await page.getByLabel("Receipt image").setInputFiles({
+    name: "receipt.png",
+    mimeType: "image/png",
+    buffer: pngFixture("synthetic-stage5-receipt"),
+  });
+  await page.getByRole("button", { name: "Submit claim for review" }).click();
 
   await expect(
     page.getByRole("heading", { name: "Review the claim" }),
   ).toBeVisible();
-  await expect(page.getByText("Rules suggest approve")).toBeVisible();
+  await expect(page.getByText("Recommendation · approve")).toBeVisible();
   await expect(page.getByText("Exact amount match")).toBeVisible();
-  await page.getByRole("button", { name: "Approve as demo" }).click();
-
+  await page
+    .getByLabel("Human decision note")
+    .fill("Receipt and category evidence verified.");
+  await page.getByRole("button", { name: "Approve · keep unpaid" }).click();
   await expect(
-    page.getByRole("heading", { name: "Activity and transaction history" }),
+    page.getByText("Decision saved · approved unpaid"),
   ).toBeVisible();
-  await expect(page.getByText("Claim approved as demo")).toBeVisible();
-  await expect(
-    page.getByText(/No database row, wallet signature/i),
-  ).toBeVisible();
+  await expect(page.getByText("Approved payout snapshot")).toBeVisible();
+  await expect(page.getByText(/No payment in Stage 5/i)).toBeVisible();
 });
 
-test("deterministic review rejects an exact receipt duplicate", async ({
+test("deterministic review rejects an exact receipt byte duplicate", async ({
   page,
 }) => {
-  await page.goto("/dashboard/claims/new");
-  await page.getByLabel("Member name").fill("Demo Member");
-  await page.getByLabel("Merchant").fill("Campus Print Shop");
-  await page.getByLabel("Expense description").fill("Duplicate banner print");
-  await page.getByLabel("Budget category").selectOption("marketing");
-  await page.getByLabel("Requested amount").fill("75.00");
-  await page.getByLabel("Receipt amount").fill("75.00");
-  await page.getByLabel("Receipt reference").fill("RCP-PRINT-001");
-  await page.getByRole("button", { name: "Run deterministic review" }).click();
+  async function submit(reference: string) {
+    await page.goto("/dashboard/claims/new");
+    await page.getByLabel("Member name").fill("Demo Member");
+    await page.getByLabel("Merchant").fill("Campus Print Shop");
+    await page.getByLabel("Expense description").fill("Duplicate banner print");
+    await page.getByLabel("Budget category").selectOption("marketing");
+    await page.getByLabel("Requested amount").fill("75.00");
+    await page.getByLabel("Receipt amount").fill("75.00");
+    await page.getByLabel("Receipt reference").fill(reference);
+    await page.getByLabel("Receipt image").setInputFiles({
+      name: "duplicate.png",
+      mimeType: "image/png",
+      buffer: pngFixture("same-immutable-receipt-bytes"),
+    });
+    await page.getByRole("button", { name: "Submit claim for review" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Review the claim" }),
+    ).toBeVisible();
+  }
 
-  await expect(page.getByText("Rules suggest reject")).toBeVisible();
+  await submit("FIRST-UNIQUE-REF");
+  await submit("SECOND-UNIQUE-REF");
+  await expect(page.getByText("Recommendation · reject")).toBeVisible();
   await expect(
-    page.getByText("Matching receipt reference found"),
+    page.getByText("Receipt bytes or reference already used"),
   ).toBeVisible();
 });
+
+function pngFixture(payload: string): Buffer {
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    Buffer.from(payload),
+  ]);
+}
 
 test("remaining Stage 2 pages avoid mobile horizontal overflow", async ({
   page,

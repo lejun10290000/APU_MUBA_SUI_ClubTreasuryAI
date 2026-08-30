@@ -16,12 +16,13 @@ Next.js 16 Web Application
         +-----------------------+----------------------+-------------------+
         |                       |                      |                   |
         v                       v                      v                   v
-AIService                 Supabase (later)       Sui Wallet      Private Storage (later)
-  |- MockAIService                                 |
-  `- GeminiAIService                              v
-     (@google/genai 2.19.0)                  Sui Testnet
-                                             - Move treasury
-                                             - native Testnet USDC
+AIService                 Supabase PostgreSQL     Sui Wallet      Private Storage
+  |- MockAIService        + RLS/Auth              (Stage 6 payout) (Supabase receipts)
+  `- GeminiAIService                                 |
+     (@google/genai 2.19.0)                          v
+                                                Sui Testnet
+                                                - Move treasury
+                                                - native Testnet USDC
 ```
 
 ## Responsibility Split
@@ -234,7 +235,7 @@ This verifies the Stage 3 custody/allocation/payout invariant in a real Testnet 
 
 ## Claim Decision Pipeline
 
-Planned complete MVP integration:
+Stage 5 implements and persists the workflow through the human decision boundary:
 
 ```text
 Receipt + member request
@@ -251,6 +252,14 @@ Approve / Review / Reject recommendation
         ↓
 Treasurer final decision
         ↓
+Immutable approved_* snapshot + payment_status=unpaid
+```
+
+Stage 6 begins only after that persisted boundary:
+
+```text
+Approved-unpaid claim snapshot
+        ↓
 Explicit wallet signature
         ↓
 Move payout re-check
@@ -259,6 +268,12 @@ Sui Testnet USDC transfer
         ↓
 Only after confirmation: synchronize paid status / remaining budget
 ```
+
+The Stage 5 API never imports the Sui transaction execution layer. In live data mode, it first binds an anonymous Supabase Auth session to a Sui address through a signed, single-use, expiring nonce. PostgreSQL RLS then limits treasury, membership, category, and claim access. Receipt objects stay private and the server returns short-lived signed URLs only after an RLS-authorized claim lookup.
+
+Receipt evidence is validated as JPEG/PNG/WebP up to 10 MB, hashed from the exact uploaded bytes with lowercase SHA-256, stored under the authenticated user path, and made immutable after claim creation. A unique external reference protects submission retries. An exact receipt hash or reference cannot receive an Approve recommendation; similar merchant/amount evidence routes to Review.
+
+AI analysis runs once after explicit submission through `getAIService()`, and its validated result is stored. Provider or output failure leaves the claim persisted and forces manual Review. Deterministic TypeScript checks remain authoritative for amount/category/budget/duplicate/evidence decisions.
 
 ## On-chain vs Off-chain
 
@@ -283,14 +298,14 @@ Only after confirmation: synchronize paid status / remaining budget
 
 - AI unavailable/invalid → manual `Review`
 - unclear receipt → `Review` with missing/conflicting fields
-- wallet rejected → no payout; keep approved-unpaid state in later persisted workflow
+- wallet rejected in Stage 6 → no payout; keep the Stage 5 approved-unpaid state
 - Sui transaction fails → do not mark claim paid
 - database synchronization fails after Sui success → reconcile from digest before retry
 
 ## Deployment Direction
 
 - Web app: Vercel (Stage 7)
-- Persistence/private receipt storage: Supabase (Stage 5+)
+- Persistence/private receipt storage: Supabase (implemented in Stage 5; live acceptance pending)
 - Payment network: Sui Testnet
 
 ## Architecture Goal for Judging

@@ -76,20 +76,24 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 
 ## Stage 5 — Claim and receipt workflow integration — CURRENT
 
-- [ ] Create Supabase migrations
-- [ ] Configure private receipt bucket
-- [ ] Secure receipt upload + hash receipt bytes
-- [ ] Persist claims and AI review results
-- [ ] Exact/similar duplicate checks
-- [ ] Run mock/live AI through shared adapter
-- [ ] Apply deterministic budget checks
-- [ ] Return Approve / Review / Reject with understandable reasons
-- [ ] Manual Review fallback when AI fails
+- [x] Create Supabase migrations
+- [x] Configure private receipt bucket policy
+- [x] Secure receipt upload + hash receipt bytes
+- [x] Persist treasury/category relationships, claims, and AI review results
+- [x] Add submission idempotency and exact/similar duplicate checks
+- [x] Run mock/live AI through shared adapter
+- [x] Apply deterministic budget/evidence checks
+- [x] Return Approve / Review / Reject with understandable reasons
+- [x] Manual Review fallback when AI fails
+- [x] Persist human Approve/Reject decisions
+- [x] Persist immutable `approved_*` snapshot while payment remains unpaid
+- [x] Verify mock-mode workflow with unit, build, and Playwright coverage
+- [ ] Apply migration and complete the real Supabase/synthetic-receipt acceptance gate
+- [ ] Review Supabase security/performance advisors after live migration
 
 ## Stage 6 — Human approval and on-chain payment — NOT STARTED
 
-- [ ] Real treasurer review with claim data
-- [ ] Approve/reject actions + approved-unpaid state
+- [ ] Build a payout action that reads only the immutable approved snapshot
 - [ ] Connect claim approval to Sui payout transaction
 - [ ] Treasurer wallet signs/confirms
 - [ ] Move payout re-checks category budget

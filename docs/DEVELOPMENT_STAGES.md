@@ -95,18 +95,23 @@ Goal: connect private receipt storage, claim persistence, AI extraction, determi
 
 Required work:
 
-- Supabase schema/migrations
-- private receipt bucket
-- secure receipt upload
-- receipt hashing
-- claim persistence
-- exact/similar duplicate checks
-- mock/live AI through shared adapter
-- deterministic budget checks
-- Approve / Review / Reject recommendation assembly
-- manual Review fallback on AI failure
+- [x] Supabase schema/migrations
+- [x] private receipt bucket policy
+- [x] secure receipt upload adapter
+- [x] receipt byte hashing and immutable evidence metadata
+- [x] persisted treasury/category/claim relationship
+- [x] submission idempotency and exact/similar duplicate checks
+- [x] mock/live AI through the shared adapter
+- [x] deterministic budget/evidence checks
+- [x] Approve / Review / Reject recommendation assembly
+- [x] manual Review fallback on AI failure
+- [x] persisted human Approve/Reject decision
+- [x] immutable approved-but-unpaid Stage 6 payout snapshot
+- [ ] owner-controlled live Supabase acceptance gate
 
-Exit criteria: a member submits a claim/receipt and the treasurer receives a validated recommendation without automatic money movement.
+Implementation status: **local implementation and automated verification are complete**. Stage 5 remains **CURRENT** until a member submits a synthetic receipt through an active owner-controlled Supabase project, a treasurer reopens and decides the persisted claim, the immutable payout snapshot is verified, and no wallet/Sui action occurs.
+
+Exit criteria: a member submits a claim/receipt and the treasurer receives and persists a validated recommendation and human decision without automatic money movement.
 
 ## Stage 6 — Human approval and on-chain payment — NOT STARTED
 
@@ -114,8 +119,6 @@ Goal: connect persisted claim approval to the already verified Sui payout founda
 
 Required work:
 
-- approve/reject actions
-- approved-unpaid state
 - claim-linked Sui transaction construction
 - wallet confirmation/signature
 - Move payout re-check
