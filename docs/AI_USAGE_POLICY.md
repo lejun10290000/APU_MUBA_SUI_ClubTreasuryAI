@@ -144,7 +144,7 @@ This prevents UI/business logic from depending directly on Gemini and lets devel
 - Model JSON is independently validated with Zod before return.
 - Provider/config/output failures are normalized without exposing keys, prompts, or image payloads.
 - Automated tests inject fake clients and make zero Gemini calls.
-- Owner-controlled live budget and synthetic receipt validation is still pending, so Stage 4 remains CURRENT.
+- Owner-controlled live validation passed on 30 August 2026 using one fixed budget request and one in-memory synthetic receipt image with `gemini-2.5-flash`. Missing currency correctly produced `needsReview=true`; no key or image payload was recorded, and configuration returned to mock mode.
 
 The application does not retry live requests automatically. It does not enable tools, Search grounding, agents, RAG, or provider-side financial actions.
 

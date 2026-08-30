@@ -61,7 +61,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Confirm all four transaction evidence links
 - [x] Refresh treasury and verify 0.90 USDC remaining
 
-## Stage 4 — Gemini AI layer — CURRENT
+## Stage 4 — Gemini AI layer — COMPLETE
 
 - [x] Add official `@google/genai` SDK
 - [x] Add live `GeminiAIService` behind existing `AIService`
@@ -72,9 +72,9 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Add category suggestion + concise reasons
 - [x] Validate all model output server-side
 - [x] Enforce `docs/AI_USAGE_POLICY.md`
-- [ ] Verify live Gemini with small explicit fixture set only
+- [x] Verify live Gemini with small explicit fixture set only
 
-## Stage 5 — Claim and receipt workflow integration — NOT STARTED
+## Stage 5 — Claim and receipt workflow integration — CURRENT
 
 - [ ] Create Supabase migrations
 - [ ] Configure private receipt bucket
