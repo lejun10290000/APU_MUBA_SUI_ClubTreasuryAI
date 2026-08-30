@@ -38,11 +38,7 @@ Completed stages:
 - Stage 3 — Sui foundation and Move treasury
 - Stage 4 — Gemini AI layer
 
-Stage 4 implementation and completion evidence are on:
-
-```text
-stage4/gemini-ai-layer
-```
+Stage 4 implementation and live-validation documentation were merged into `main` through **PR #16** and **PR #17**.
 
 Read `docs/PROJECT_STATUS.md` for the authoritative current task before coding.
 
