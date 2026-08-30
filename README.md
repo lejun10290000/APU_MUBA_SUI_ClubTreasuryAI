@@ -28,7 +28,7 @@ AI never owns authoritative balances, payout authorization, wallet signing, or S
 
 ## Current Development Stage
 
-**Stage 4 — Gemini AI layer — CURRENT**
+**Stage 5 — Claim and receipt workflow integration — CURRENT**
 
 Completed stages:
 
@@ -36,8 +36,9 @@ Completed stages:
 - Stage 1 — Application foundation
 - Stage 2 — Core UI and deterministic domain rules
 - Stage 3 — Sui foundation and Move treasury
+- Stage 4 — Gemini AI layer
 
-Stage 4 implementation is on:
+Stage 4 implementation and completion evidence are on:
 
 ```text
 stage4/gemini-ai-layer
@@ -45,7 +46,7 @@ stage4/gemini-ai-layer
 
 Read `docs/PROJECT_STATUS.md` for the authoritative current task before coding.
 
-## Stage 4 Gemini Adapter — Implemented, Live Validation Pending
+## Stage 4 Gemini Adapter — COMPLETE
 
 The application now includes:
 
@@ -61,7 +62,7 @@ The application now includes:
 
 Normal development and CI still use `MockAIService`. Lint, strict TypeScript, **87 unit tests**, the production build, and **7 Playwright smoke tests** pass in mock mode.
 
-No real Gemini result is claimed yet. Stage 4 remains **CURRENT** until the project owner explicitly validates one budget parse and one synthetic receipt/image extraction with a local server-side key. AI remains advisory and cannot authorize or execute money movement.
+The project owner explicitly validated one live budget parse and one live in-memory synthetic receipt/image extraction with `gemini-2.5-flash` on 30 August 2026. The five expected budget categories validated, the receipt amount matched, and intentionally missing currency produced `needsReview=true`. The key was never committed or printed, the temporary runner was deleted, and local configuration returned to mock mode. AI remains advisory and cannot authorize or execute money movement.
 
 ## Stage 3 Verified Sui Testnet Deployment
 
@@ -244,7 +245,7 @@ sui move test
 - `@mysten/dapp-kit-react` 2.1.20
 - native Circle Sui Testnet USDC
 - mock-first `AIService`
-- implemented Google Gemini Developer API adapter with `@google/genai` `2.19.0`; live validation pending
+- verified Google Gemini Developer API adapter with `@google/genai` `2.19.0`
 - planned later persistence/private receipt storage: Supabase
 
 ## AI Cost-Control Policy
@@ -267,7 +268,7 @@ GEMINI_API_KEY=<owner enters locally; never share or commit>
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
-Validate only a fixed budget instruction and a synthetic receipt image, record no sensitive payloads, then return to mock mode. Stage 4 is not complete until both live paths are explicitly verified.
+Live validation used only a fixed budget instruction and an in-memory synthetic receipt image, recorded no sensitive payloads, and returned to mock mode. Both live paths are verified and Stage 4 is complete.
 
 ## AI Tools Used During Development
 
@@ -280,7 +281,7 @@ Currently declared:
 
 Product AI provider:
 
-- **Google Gemini Developer API** — implemented product adapter for budget parsing and receipt/image analysis; owner-controlled live validation pending
+- **Google Gemini Developer API** — verified product adapter for budget parsing and receipt/image analysis
 
 Add every other AI tool used by any teammate before submission.
 

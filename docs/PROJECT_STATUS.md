@@ -6,13 +6,13 @@ This file is the **single source of truth for current implementation status, blo
 
 - Last updated: **30 August 2026 (MYT)**
 - Default branch: `main`
-- **Current stage: Stage 4 — Gemini AI layer**
+- **Current stage: Stage 5 — Claim and receipt workflow integration**
 - Stage status: **CURRENT**
-- Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3**
-- Latest completed milestone: **Stage 4 Gemini adapter implementation and zero-live-call automated verification are complete; owner-controlled live validation is still pending.**
-- Active implementation branch: **`stage4/gemini-ai-layer`**
-- Current blockers: **Stage 4 cannot be marked complete until the owner explicitly validates one live budget parse and one live synthetic receipt/image extraction with a local server-side Gemini key.**
-- Demo readiness: **Mock product workflow and the verified Sui Testnet treasury flow work. The Gemini adapter, structured output, multimodal input, live guard, and failure safety are implemented, but no live Gemini result is claimed yet. Claim persistence/private receipt upload and deployed web hosting remain later-stage work.**
+- Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4**
+- Latest completed milestone: **Stage 4 Gemini adapter implementation, automated verification, and owner-controlled live validation are complete.**
+- Active review branch: **`stage4/gemini-ai-layer`**; Stage 5 implementation branch is not created yet.
+- Current blockers: **None for Stage 4. Stage 5 implementation has not started.**
+- Demo readiness: **Mock product workflow, verified Sui Testnet treasury flow, and live-validated Gemini budget/receipt adapter work. Claim persistence/private receipt upload and deployed web hosting remain later-stage work.**
 
 ## Stage Progress
 
@@ -22,8 +22,8 @@ This file is the **single source of truth for current implementation status, blo
 | 1     | Application foundation                 | COMPLETE    |
 | 2     | Core UI and deterministic domain rules | COMPLETE    |
 | 3     | Sui foundation and Move treasury       | COMPLETE    |
-| 4     | Gemini AI layer                        | CURRENT     |
-| 5     | Claim and receipt workflow integration | NOT STARTED |
+| 4     | Gemini AI layer                        | COMPLETE    |
+| 5     | Claim and receipt workflow integration | CURRENT     |
 | 6     | Human approval and on-chain payment    | NOT STARTED |
 | 7     | Demo hardening and deployment          | NOT STARTED |
 | 8     | Submission and pitch                   | NOT STARTED |
@@ -119,7 +119,7 @@ With verified USDC metadata `decimals = 6`, this proves:
 
 Stage 3 exit criteria are therefore **VERIFIED**.
 
-## Stage 4 — Implementation Complete; Live Validation Pending
+## Stage 4 — COMPLETE
 
 - official `@google/genai` `2.19.0` SDK pinned in the application lockfile
 - `GeminiAIService` implemented behind the existing `AIService` interface
@@ -135,12 +135,16 @@ Stage 3 exit criteria are therefore **VERIFIED**.
 - deterministic TypeScript, human approval, wallet signing, and Move/Sui enforcement remain authoritative
 - normal verification uses fake clients and makes zero Gemini API calls
 - lint, strict TypeScript, **87/87 unit tests**, production build, and **7/7 Playwright smoke tests** pass in mock mode
+- GitHub CI run 44 passed on the Stage 4 pull request with no Gemini key and zero live calls
+- owner-controlled live validation passed with `gemini-2.5-flash` using exactly one fixed budget request and one in-memory synthetic receipt-image request
+- the live budget response passed Zod validation with all five expected categories and integer minor-unit amounts
+- the live receipt response accepted the synthetic PNG, matched the expected amount, detected intentionally missing currency, and returned `needsReview=true`
+- no key, prompt payload, image base64, or private receipt data was recorded; the temporary runner was deleted and `.env.local` returned to mock mode with its key value cleared
 
-Stage 4 remains **CURRENT** because an owner-controlled live call has not been performed or claimed.
+Stage 4 exit criteria are **VERIFIED**. Gemini remains advisory; deterministic TypeScript, human approval, wallet signing, and Move/Sui remain authoritative.
 
 ## Current Not Yet Implemented
 
-- owner-controlled live Gemini validation for budget parsing and receipt/image extraction
 - Stage 5 UI/API integration that invokes the implemented AI adapter for persisted claims
 - Supabase migrations / claim persistence
 - private receipt bucket and secure receipt upload
@@ -153,20 +157,19 @@ Do not describe these as complete until real implementation and verification exi
 
 ## Next Recommended Task
 
-### Stage 4 — Gemini AI layer
+### Stage 5 — Claim and receipt workflow integration
 
-Complete the explicit live-validation gate for the implemented Gemini adapter without committing or sharing the owner key.
+Connect private receipt storage, claim persistence, AI extraction, deterministic checks, and review states without automatic money movement.
 
 Required priorities:
 
-1. Review the Stage 4 implementation PR and confirm CI passes in mock mode with no Gemini key.
-2. Keep the API key only in the owner's untracked local `.env.local`.
-3. Explicitly set `AI_MODE=live` and `GEMINI_LIVE_REQUESTS_ENABLED=true` only for the small validation session.
-4. Validate one fixed natural-language budget instruction with `gemini-2.5-flash`.
-5. Validate one synthetic JPEG/PNG/WebP receipt image and confirm ambiguous/missing evidence becomes `needsReview=true`.
-6. Record the model and verified results without recording the key, prompt payload, image base64, or private receipt data.
-7. Return configuration to mock mode after validation.
-8. Only then mark Stage 4 complete and advance the repository to Stage 5.
+1. Review and merge the completed Stage 4 pull request.
+2. Plan the Supabase schema/migrations and private receipt bucket before UI integration.
+3. Implement secure receipt upload, hashing, and claim persistence.
+4. Invoke mock/live AI only through the shared `AIService` boundary.
+5. Apply deterministic duplicate and budget checks after validated AI extraction.
+6. Persist an understandable `Approve` / `Review` / `Reject` recommendation without triggering payment.
+7. Keep AI failure on the manual `Review` path and preserve all existing Sui authorization boundaries.
 
 ## Locked MVP Decisions
 
@@ -188,13 +191,23 @@ Required priorities:
 Before development, every coding agent must show:
 
 ```text
-CURRENT PROJECT STAGE: Stage 4 — Gemini AI layer
+CURRENT PROJECT STAGE: Stage 5 — Claim and receipt workflow integration
 STATUS: CURRENT
-COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3
-NEXT TASK: Complete owner-controlled live validation of the implemented budget parser and receipt/image extractor, then mark Stage 4 complete only if both pass.
+COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4
+NEXT TASK: Review/merge the completed Stage 4 PR, then begin Stage 5 planning for Supabase-backed claim and private receipt integration without automatic money movement.
 ```
 
 ## Recent Development Log
+
+### 2026-08-30 — Stage 4 completed with owner-controlled live Gemini validation
+
+- Confirmed GitHub CI run 44 passed in mock mode without a Gemini key or live call.
+- Enabled live mode only in ignored local configuration and validated `gemini-2.5-flash` with exactly one budget request and one in-memory synthetic receipt-image request.
+- Verified all five expected budget categories and integer minor-unit values.
+- Verified the receipt image was accepted, the expected amount matched, intentionally missing currency was detected, and `needsReview=true` was returned.
+- Recorded no key, prompt payload, image base64, or private receipt data.
+- Deleted the temporary runner, restored mock mode, disabled the live guard, and cleared the local key value.
+- Stage 4 exit criteria are verified; Stage 5 is now current but implementation has not started.
 
 ### 2026-08-30 — Implemented the Stage 4 Gemini adapter; live validation pending
 

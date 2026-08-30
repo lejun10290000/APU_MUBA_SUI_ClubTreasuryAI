@@ -62,7 +62,7 @@ Publish digest: DdQQEcGD8FWmAde2rziBDjwua5CjcwRUtfN4p2Lkoeb
 
 Exit criteria: **VERIFIED** — a treasurer funded a real Testnet treasury and executed a verified test payout with public Sui evidence.
 
-## Stage 4 — Gemini AI layer — CURRENT
+## Stage 4 — Gemini AI layer — COMPLETE
 
 Goal: add Gemini for unstructured budget and receipt understanding while keeping routine development mock-first.
 
@@ -76,7 +76,7 @@ Required work:
 - [x] server-side validation of model output
 - [x] billing/live-call guardrails from `docs/AI_USAGE_POLICY.md`
 - [x] zero-live-call fake-client fixture/test set
-- [ ] explicit owner-controlled live quality validation for budget and synthetic receipt inputs
+- [x] explicit owner-controlled live quality validation for budget and synthetic receipt inputs
 
 Automated verification:
 
@@ -87,9 +87,9 @@ Automated verification:
 - invalid or unavailable AI fails safely for manual review
 - 87 unit tests, production build, and 7 Playwright smoke tests pass in mock mode
 
-Exit criteria: mock mode remains default; live Gemini is manually enabled and validated without replacing deterministic financial rules. **Automated implementation criteria pass; live validation remains pending, so Stage 4 stays CURRENT.**
+Exit criteria: **VERIFIED** — mock mode remains default; the owner explicitly validated one live structured budget parse and one live in-memory synthetic receipt extraction with `gemini-2.5-flash`; missing currency correctly required human review; configuration returned to mock mode; deterministic financial rules remained authoritative.
 
-## Stage 5 — Claim and receipt workflow integration — NOT STARTED
+## Stage 5 — Claim and receipt workflow integration — CURRENT
 
 Goal: connect private receipt storage, claim persistence, AI extraction, deterministic checks, and review states.
 
