@@ -32,6 +32,17 @@ export async function ensureWalletIdentity({
   }
 
   const normalizedAddress = normalizeSuiAddress(walletAddress);
+  const { data: verifiedProfile, error: profileError } = await supabase
+    .from("wallet_profiles")
+    .select("wallet_address")
+    .maybeSingle();
+  if (profileError) {
+    throw profileError;
+  }
+  if (verifiedProfile?.wallet_address === normalizedAddress) {
+    return;
+  }
+
   const challengeResponse = await fetch("/api/auth/wallet/challenge", {
     method: "POST",
     headers: { "content-type": "application/json" },
