@@ -19,6 +19,18 @@ describe("Stage 5 claim validation", () => {
       ),
     ).toThrow(/valid Sui/);
   });
+
+  it("distinguishes an invalid treasury object ID from an invalid recipient", () => {
+    expect(() =>
+      persistedClaimSubmissionSchema.parse({
+        ...makeSubmission(),
+        workspace: {
+          ...makeSubmission().workspace,
+          treasuryObjectId: "not-a-sui-object-id",
+        },
+      }),
+    ).toThrow(/valid Sui treasury object ID/);
+  });
 });
 
 function makeSubmission(overrides: Record<string, unknown> = {}) {

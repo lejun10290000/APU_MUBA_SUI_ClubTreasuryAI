@@ -16,7 +16,11 @@ import {
   validateReceiptBytes,
   validateReceiptFile,
 } from "@/src/domain/receipt-validation";
-import { demoSuiAddress } from "@/src/domain/stage5-claims";
+import {
+  demoSuiAddress,
+  recipientSuiAddressSchema,
+  treasurySuiObjectIdSchema,
+} from "@/src/domain/stage5-claims";
 import { budgetSchema, treasurySchema } from "@/src/domain/schemas";
 import { demoTreasuryStorageKey } from "@/src/domain/treasury-setup";
 import { demoBudget, demoTreasury } from "@/src/data/mock-dashboard";
@@ -55,6 +59,7 @@ export function ClaimSubmissionForm() {
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<Stage5ClaimFields>({
     defaultValues: {
@@ -91,6 +96,12 @@ export function ClaimSubmissionForm() {
   const submitClaim = async (values: Stage5ClaimFields) => {
     try {
       const parsed = claimSubmissionInputSchema.parse(values);
+      const treasuryObjectId = treasurySuiObjectIdSchema.parse(
+        values.treasuryObjectId,
+      );
+      const recipientSuiAddress = recipientSuiAddressSchema.parse(
+        values.recipientSuiAddress,
+      );
       const receipt = values.receipt?.item(0);
       if (!receipt) {
         setError("receipt", {
@@ -136,7 +147,7 @@ export function ClaimSubmissionForm() {
           externalReference: treasury.id,
           name: treasury.name,
           totalBudgetMinor: treasury.totalBudgetMinor,
-          treasuryObjectId: values.treasuryObjectId,
+          treasuryObjectId,
           categories: budget.categories.map((category) => ({
             externalReference: category.id,
             name: category.name,
@@ -153,7 +164,7 @@ export function ClaimSubmissionForm() {
           ? parseUsdcDisplay(parsed.receiptAmount)
           : null,
         receiptReference: parsed.receiptReference || null,
-        recipientSuiAddress: values.recipientSuiAddress,
+        recipientSuiAddress,
         currency: "USDC",
       };
       const formData = new FormData();
@@ -177,6 +188,16 @@ export function ClaimSubmissionForm() {
           const field = issue.path[0];
           if (typeof field === "string" && field in values) {
             setError(field as keyof Stage5ClaimFields, {
+              type: "validation",
+              message: issue.message,
+            });
+          } else if (issue.message.includes("treasury object ID")) {
+            setError("treasuryObjectId", {
+              type: "validation",
+              message: issue.message,
+            });
+          } else if (issue.message.includes("recipient address")) {
+            setError("recipientSuiAddress", {
               type: "validation",
               message: issue.message,
             });
@@ -336,6 +357,20 @@ export function ClaimSubmissionForm() {
                   required: "Enter the recipient Sui address.",
                 })}
               />
+              {account && (
+                <button
+                  className="mt-2 text-xs font-bold text-[var(--brand)] underline-offset-4 hover:underline"
+                  onClick={() =>
+                    setValue("recipientSuiAddress", account.address, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
+                  type="button"
+                >
+                  Use connected wallet
+                </button>
+              )}
             </Field>
           </div>
           <div className="sm:col-span-2">

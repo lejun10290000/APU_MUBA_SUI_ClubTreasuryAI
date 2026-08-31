@@ -7,11 +7,23 @@ import {
   positiveMinorAmountSchema,
 } from "./schemas";
 
-const suiAddressSchema = z
-  .string()
-  .trim()
-  .refine(isValidSuiAddress, "Enter a valid Sui recipient address.")
-  .transform((value) => normalizeSuiAddress(value));
+function createSuiAddressSchema(message: string) {
+  return z
+    .string()
+    .trim()
+    .refine(isValidSuiAddress, message)
+    .transform((value) => normalizeSuiAddress(value));
+}
+
+export const treasurySuiObjectIdSchema = createSuiAddressSchema(
+  "Enter a valid Sui treasury object ID.",
+);
+export const recipientSuiAddressSchema = createSuiAddressSchema(
+  "Enter a valid Sui recipient address.",
+);
+const walletSuiAddressSchema = createSuiAddressSchema(
+  "The member wallet address is invalid.",
+);
 
 const externalReferenceSchema = z.string().trim().min(1).max(160);
 
@@ -19,7 +31,7 @@ export const claimWorkspaceSchema = z.object({
   externalReference: externalReferenceSchema,
   name: z.string().trim().min(1).max(120),
   totalBudgetMinor: positiveMinorAmountSchema,
-  treasuryObjectId: suiAddressSchema,
+  treasuryObjectId: treasurySuiObjectIdSchema,
   categories: z
     .array(
       z.object({
@@ -48,7 +60,7 @@ export const persistedClaimSubmissionSchema = z.object({
   requestedAmountMinor: positiveMinorAmountSchema,
   receiptAmountMinor: positiveMinorAmountSchema.nullable(),
   receiptReference: z.string().trim().max(100).nullable(),
-  recipientSuiAddress: suiAddressSchema,
+  recipientSuiAddress: recipientSuiAddressSchema,
   currency: currencySchema.default("USDC"),
 });
 
@@ -64,9 +76,9 @@ export const persistedClaimSchema = z.object({
   categoryId: z.string().uuid(),
   categoryName: z.string(),
   categoryExternalReference: z.string(),
-  treasuryObjectId: suiAddressSchema,
-  memberWalletAddress: suiAddressSchema,
-  recipientSuiAddress: suiAddressSchema,
+  treasuryObjectId: treasurySuiObjectIdSchema,
+  memberWalletAddress: walletSuiAddressSchema,
+  recipientSuiAddress: recipientSuiAddressSchema,
   submitterName: z.string(),
   merchant: z.string(),
   description: z.string(),
@@ -89,9 +101,9 @@ export const persistedClaimSchema = z.object({
   paymentStatus: z.literal("unpaid"),
   approvedSnapshot: z
     .object({
-      treasuryObjectId: suiAddressSchema,
+      treasuryObjectId: treasurySuiObjectIdSchema,
       categoryReference: z.string(),
-      recipientSuiAddress: suiAddressSchema,
+      recipientSuiAddress: recipientSuiAddressSchema,
       amountMinor: positiveMinorAmountSchema,
       currency: currencySchema,
     })
