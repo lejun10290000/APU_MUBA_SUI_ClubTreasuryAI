@@ -201,6 +201,11 @@ create index claims_member_created_idx
 create index claims_receipt_hash_idx on public.claims (receipt_hash);
 create index claims_similar_duplicate_idx
   on public.claims (treasury_id, lower(merchant), requested_amount_minor);
+create index claims_category_treasury_fk_idx
+  on public.claims (category_id, treasury_id);
+create index claims_decided_by_idx on public.claims (decided_by);
+create index treasury_members_user_id_idx
+  on public.treasury_members (user_id);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -311,6 +316,8 @@ $$;
 
 revoke all on function public.can_access_treasury(uuid) from public;
 revoke all on function public.can_manage_treasury(uuid) from public;
+revoke all on function public.can_access_treasury(uuid) from anon;
+revoke all on function public.can_manage_treasury(uuid) from anon;
 grant execute on function public.can_access_treasury(uuid) to authenticated;
 grant execute on function public.can_manage_treasury(uuid) to authenticated;
 
@@ -504,6 +511,7 @@ end;
 $$;
 
 revoke all on function public.decide_claim(uuid, public.claim_decision, text) from public;
+revoke all on function public.decide_claim(uuid, public.claim_decision, text) from anon;
 grant execute on function public.decide_claim(uuid, public.claim_decision, text) to authenticated;
 
 revoke all on table
