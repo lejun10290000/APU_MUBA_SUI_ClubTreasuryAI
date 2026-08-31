@@ -2,14 +2,19 @@ import type {
   ClaimRuleEvaluation,
   DuplicateClaimCandidate,
 } from "@/src/domain/claim-rules";
+import type { MinorAmount } from "@/src/domain/money";
 import type { ReceiptMimeType } from "@/src/domain/receipt-evidence";
 import type {
   ClaimDecisionInput,
   PersistedClaim,
   PersistedClaimSubmission,
 } from "@/src/domain/stage5-claims";
+import type {
+  ConfirmedPaymentInput,
+  PaymentAttempt,
+  PreparePaymentResult,
+} from "@/src/domain/stage6-payments";
 import type { ReceiptAnalysis } from "@/src/lib/ai/types";
-import type { MinorAmount } from "@/src/domain/money";
 
 export interface ClaimIdentity {
   userId: string;
@@ -70,4 +75,21 @@ export interface ClaimRepository {
     decision: ClaimDecisionInput["decision"],
     reason: ClaimDecisionInput["reason"],
   ): Promise<PersistedClaim>;
+  preparePaymentAttempt(claimId: string): Promise<PreparePaymentResult>;
+  getPaymentAttempt(attemptId: string): Promise<PaymentAttempt | null>;
+  markPaymentAttemptSigned(
+    attemptId: string,
+    digest: string,
+    treasurerCapObjectId: string,
+  ): Promise<PaymentAttempt>;
+  markPaymentAttemptSubmitted(attemptId: string): Promise<PaymentAttempt>;
+  markPaymentAttemptReconciliationRequired(
+    attemptId: string,
+    code: string,
+  ): Promise<PaymentAttempt>;
+  markPaymentAttemptFailed(
+    attemptId: string,
+    code: string,
+  ): Promise<PaymentAttempt>;
+  finalizeConfirmedPayment(input: ConfirmedPaymentInput): Promise<PersistedClaim>;
 }
