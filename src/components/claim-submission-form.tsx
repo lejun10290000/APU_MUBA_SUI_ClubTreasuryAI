@@ -12,6 +12,10 @@ import {
   demoBudgetStorageKey,
 } from "@/src/domain/demo-workflow";
 import { formatUsdcMinor, parseUsdcDisplay } from "@/src/domain/money";
+import {
+  validateReceiptBytes,
+  validateReceiptFile,
+} from "@/src/domain/receipt-validation";
 import { demoSuiAddress } from "@/src/domain/stage5-claims";
 import { budgetSchema, treasurySchema } from "@/src/domain/schemas";
 import { demoTreasuryStorageKey } from "@/src/domain/treasury-setup";
@@ -92,6 +96,23 @@ export function ClaimSubmissionForm() {
         setError("receipt", {
           type: "validation",
           message: "Upload the receipt image.",
+        });
+        return;
+      }
+
+      try {
+        validateReceiptFile(receipt);
+        validateReceiptBytes(
+          new Uint8Array(await receipt.arrayBuffer()),
+          receipt.type,
+        );
+      } catch (error) {
+        setError("receipt", {
+          type: "validation",
+          message:
+            error instanceof Error
+              ? error.message
+              : "The receipt image is invalid.",
         });
         return;
       }
