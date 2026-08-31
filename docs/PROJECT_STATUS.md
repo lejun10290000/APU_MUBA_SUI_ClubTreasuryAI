@@ -11,8 +11,8 @@ This file is the **single source of truth for current implementation status, blo
 - Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4**
 - Latest completed milestone: **Stage 4 Gemini adapter implementation, automated verification, and owner-controlled live validation are complete and merged to `main`.**
 - Active implementation branch: **`stage5/claim-receipt-integration`**
-- Stage 5 implementation state: **Implemented and verified locally in mock mode; real Supabase acceptance validation is still pending.**
-- Current blockers: **The connected Supabase project is inactive and the local Docker engine is unavailable, so the migration/private-storage workflow has not yet been exercised against a real PostgreSQL/Storage instance.**
+- Stage 5 implementation state: **Implemented and verified locally; the live Supabase acceptance validation is in progress against the active owner-controlled project.**
+- Current blockers: **The owner must finish the browser acceptance flow: sign the wallet identity challenge, submit one synthetic receipt, review/decide the persisted claim, and inspect the private Storage/RLS evidence.**
 - Demo readiness: **The mock product workflow, verified Sui Testnet treasury flow, live-validated Gemini adapter, and Stage 5 claim/review workflow are available. Stage 5 must remain CURRENT until the owner-controlled Supabase acceptance gate passes.**
 
 ## Stage Progress
@@ -157,11 +157,12 @@ Stage 4 exit criteria are **VERIFIED**. Gemini remains advisory; deterministic T
 - persisted human Approve/Reject actions with a decision note
 - immutable `approved_*` payout snapshot with `payment_status = unpaid`
 - no wallet popup, Sui transaction construction, payout, digest, or paid state in Stage 5
-- local verification passed: lint, strict TypeScript, 101 unit tests, production build, and 7 Playwright tests
+- local verification passed: lint, strict TypeScript, 103 unit tests, production build, and 7 Playwright tests
+- owner-controlled Supabase project is active, the Stage 5 migration is applied, Anonymous Sign-ins are enabled, and the live auth challenge endpoint creates a persisted nonce
+- standard and zkLogin wallet identity signatures are routed through Sui Testnet-aware verification; zkLogin uses the official Testnet GraphQL verifier
 
 Not yet verified:
 
-- migration applied to an active owner-controlled Supabase project
 - private Storage upload/read behavior under real Auth and RLS
 - real persisted synthetic claim, recommendation, decision, and approved payout snapshot
 - Supabase security/performance advisors after migration
@@ -172,13 +173,11 @@ Do not describe Stage 5 as COMPLETE until the real acceptance gate in `docs/STAG
 
 ### Stage 5 — Real Supabase acceptance and review
 
-1. Resume the owner-controlled Supabase project.
-2. Enable Anonymous Sign-ins for the MVP wallet-auth bridge.
-3. Apply the Stage 5 migration and regenerate database types from the live schema.
-4. Run the synthetic-receipt checklist in `docs/STAGE5_LIVE_VALIDATION.md`.
-5. Review Supabase security and performance advisors and resolve relevant findings.
-6. Open the Stage 5 pull request for teammate/owner review; do not merge it from this implementation task.
-7. Keep Stage 5 CURRENT and do not begin Stage 6 until every live acceptance item passes.
+1. Re-run the browser claim submission and approve the wallet identity message signature.
+2. Complete the synthetic-receipt checklist in `docs/STAGE5_LIVE_VALIDATION.md`.
+3. Review Supabase security and performance advisors and resolve relevant findings.
+4. Record the synthetic claim/storage/decision evidence without exposing receipt contents or secrets.
+5. Keep Stage 5 CURRENT and do not begin Stage 6 until every live acceptance item passes and PR #18 is reviewed.
 
 ## Locked MVP Decisions
 
@@ -207,6 +206,14 @@ NEXT TASK: Complete the owner-controlled Supabase acceptance gate for the implem
 ```
 
 ## Recent Development Log
+
+### 2026-08-31 — Live Supabase auth reached zkLogin verification
+
+- Confirmed the active Supabase project accepts anonymous sign-in cookies and the live wallet challenge endpoint returns `200` with a persisted single-use nonce.
+- Diagnosed the initial authentication warning as a network-restricted local development process and restarted the server with Supabase access.
+- Added a Sui Testnet GraphQL client to personal-message verification so zkLogin wallet signatures can be verified instead of failing for a missing Sui client.
+- Added regression coverage asserting that wallet signature verification always receives the Testnet client.
+- Verified lint, strict TypeScript, and 103 unit tests; the owner-controlled synthetic receipt/browser acceptance flow remains in progress.
 
 ### 2026-08-31 — Stage 5 implemented locally; real Supabase acceptance pending
 

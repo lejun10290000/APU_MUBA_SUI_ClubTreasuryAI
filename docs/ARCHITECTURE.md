@@ -269,7 +269,7 @@ Sui Testnet USDC transfer
 Only after confirmation: synchronize paid status / remaining budget
 ```
 
-The Stage 5 API never imports the Sui transaction execution layer. In live data mode, it first binds an anonymous Supabase Auth session to a Sui address through a signed, single-use, expiring nonce. PostgreSQL RLS then limits treasury, membership, category, and claim access. Receipt objects stay private and the server returns short-lived signed URLs only after an RLS-authorized claim lookup.
+The Stage 5 API never imports the Sui transaction execution layer. In live data mode, it first binds an anonymous Supabase Auth session to a Sui address through a signed, single-use, expiring nonce. Standard and zkLogin personal-message signatures are checked against the expected address; network-bound zkLogin verification uses the official Sui Testnet GraphQL service. PostgreSQL RLS then limits treasury, membership, category, and claim access. Receipt objects stay private and the server returns short-lived signed URLs only after an RLS-authorized claim lookup.
 
 Receipt evidence is validated as JPEG/PNG/WebP up to 10 MB, hashed from the exact uploaded bytes with lowercase SHA-256, stored under the authenticated user path, and made immutable after claim creation. A unique external reference protects submission retries. An exact receipt hash or reference cannot receive an Approve recommendation; similar merchant/amount evidence routes to Review.
 

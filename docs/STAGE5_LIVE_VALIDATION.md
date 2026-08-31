@@ -22,7 +22,7 @@ Stage 5 is implemented and verified locally, but it remains **CURRENT** until th
 ## Run the Human Browser Check
 
 1. Start the app and open `http://localhost:3000/dashboard/claims/new`.
-2. Connect a Sui Testnet wallet. The live app should ask for one message signature to bind the wallet identity; this is not a transaction and costs no gas.
+2. Connect a Sui Testnet wallet. The live app should ask for one message signature to bind the wallet identity; this is not a transaction and costs no gas. Standard key and zkLogin wallets are supported, with zkLogin verified through Sui Testnet GraphQL.
 3. Enter a unique external reference and valid treasury/category setup values.
 4. Enter a valid Sui recipient, member name, description, merchant, and positive USDC amount.
 5. Attach a small synthetic JPEG, PNG, or WebP receipt and submit once.

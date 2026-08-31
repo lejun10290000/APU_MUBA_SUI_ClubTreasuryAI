@@ -1,7 +1,7 @@
-import { isValidPersonalMessageSignature } from "@mysten/sui/verify";
 import { isValidSuiAddress, normalizeSuiAddress } from "@mysten/sui/utils";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { isValidWalletPersonalMessageSignature } from "@/src/lib/sui/wallet-signature-verification";
 import { createAdminSupabaseClient } from "@/src/lib/supabase/admin";
 import {
   createServerSupabaseClient,
@@ -40,11 +40,11 @@ export async function POST(request: Request) {
       throw new Error("The connected wallet does not match this challenge.");
     }
 
-    const isValid = await isValidPersonalMessageSignature(
-      new TextEncoder().encode(nonce.message),
-      input.signature,
-      { address: walletAddress },
-    );
+    const isValid = await isValidWalletPersonalMessageSignature({
+      message: new TextEncoder().encode(nonce.message),
+      signature: input.signature,
+      walletAddress,
+    });
     if (!isValid) {
       throw new Error("The wallet signature is invalid.");
     }
