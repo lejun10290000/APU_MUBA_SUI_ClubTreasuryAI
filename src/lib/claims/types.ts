@@ -75,6 +75,9 @@ export interface ClaimRepository {
     decision: ClaimDecisionInput["decision"],
     reason: ClaimDecisionInput["reason"],
   ): Promise<PersistedClaim>;
+}
+
+export interface Stage6ClaimRepository extends ClaimRepository {
   preparePaymentAttempt(claimId: string): Promise<PreparePaymentResult>;
   getPaymentAttempt(attemptId: string): Promise<PaymentAttempt | null>;
   markPaymentAttemptSigned(
