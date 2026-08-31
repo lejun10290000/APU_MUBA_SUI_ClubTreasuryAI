@@ -68,6 +68,6 @@ During every check:
 
 Record the date, Supabase project reference (never a secret), migration version, synthetic claim ID, receipt object path, receipt hash, recommendation, human decision, and final unpaid status in `docs/PROJECT_STATUS.md` or the Stage 5 handoff report.
 
-Positive-path acceptance passed on 31 August 2026 against project `arldlnqiywhcuungvgei`. The sanitized claim/storage/recommendation/decision record and advisor dispositions are recorded in `docs/PROJECT_STATUS.md`. Negative checks remain outstanding.
+Positive-path acceptance passed on 31 August 2026 against project `arldlnqiywhcuungvgei`. The sanitized claim/storage/recommendation/decision record and advisor dispositions are recorded in `docs/PROJECT_STATUS.md`. Transaction-wrapped live checks 6 and 7 also passed: the receipt-evidence and approved-payout-snapshot triggers rejected mutations, the transaction was rolled back, and the claim remained unchanged. Negative checks 1 through 5 remain outstanding.
 
 Only after every item passes may the team mark Stage 5 COMPLETE and plan Stage 6.

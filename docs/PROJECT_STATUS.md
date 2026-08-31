@@ -166,7 +166,7 @@ Stage 4 exit criteria are **VERIFIED**. Gemini remains advisory; deterministic T
 
 Not yet verified:
 
-- live duplicate/idempotency, invalid-file/address, interrupted-AI, immutable-evidence, and immutable-approved-snapshot negative checks
+- live duplicate/idempotency, invalid-file/address, and interrupted-AI negative checks
 - teammate/owner review of PR #18
 
 Do not describe Stage 5 as COMPLETE until the real acceptance gate in `docs/STAGE5_LIVE_VALIDATION.md` passes.
@@ -227,6 +227,7 @@ NEXT TASK: Complete the Stage 5 negative acceptance checks and review PR #18 wit
 - Stored recommendation: `review`; human decision: `approve`; final claim state: `approved_unpaid`; final payment state: `unpaid`.
 - Approved snapshot persisted the verified Testnet treasury object, `marketing` category reference, recipient, `1000` USDC application minor units, and `USDC` currency.
 - Supabase evidence showed one wallet profile, one treasury, one owner membership, five categories, one claim, one private receipt object, RLS enabled on all six public tables, and the expected private-bucket limits.
+- Transaction-wrapped live negative checks confirmed that the database rejects receipt-evidence changes with `Receipt evidence is immutable` and approved-payout changes with `Approved payout snapshot is immutable`; the transaction was rolled back and a follow-up read confirmed the accepted claim remained unchanged.
 - Security/performance advisors were reviewed. The current notices are expected and documented: no nonce policies because browser roles receive no nonce-table grants; authenticated helper/RPC functions perform explicit `auth.uid()` ownership/role checks; anonymous Auth is intentional for the wallet bridge and still uses ownership-scoped RLS; password protection is not used by the anonymous-only flow; and unused indexes are expected in a fresh one-record project.
 - Stage 5 remains CURRENT pending the documented negative checks and PR #18 review. No Sui transaction, payout, digest, or paid state occurred.
 
