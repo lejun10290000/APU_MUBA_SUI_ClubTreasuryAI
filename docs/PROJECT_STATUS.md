@@ -213,6 +213,8 @@ NEXT TASK: Complete the owner-controlled Supabase acceptance gate for the implem
 - Diagnosed the initial authentication warning as a network-restricted local development process and restarted the server with Supabase access.
 - Added a Sui Testnet GraphQL client to personal-message verification so zkLogin wallet signatures can be verified instead of failing for a missing Sui client.
 - Added regression coverage asserting that wallet signature verification always receives the Testnet client.
+- Confirmed the owner completed zkLogin verification, then traced claim submission to a first-treasury RLS failure caused by `INSERT ... RETURNING` evaluating the treasury SELECT policy before its helper could observe the new row.
+- Preserved the existing RLS boundary and changed treasury persistence to insert without `RETURNING`, followed by a separate owner-authorized SELECT; a rolled-back live policy test verified the two-statement path and retained no diagnostic data.
 - Verified lint, strict TypeScript, and 103 unit tests; the owner-controlled synthetic receipt/browser acceptance flow remains in progress.
 
 ### 2026-08-31 — Stage 5 implemented locally; real Supabase acceptance pending

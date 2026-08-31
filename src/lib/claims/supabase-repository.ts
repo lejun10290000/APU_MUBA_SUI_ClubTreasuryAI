@@ -76,24 +76,37 @@ export class SupabaseClaimRepository implements ClaimRepository {
 
     let treasury = existingTreasury;
     if (!treasury) {
-      const { data, error } = await this.userClient
+      // Keep INSERT and SELECT as separate statements. PostgreSQL applies the
+      // SELECT policy to INSERT ... RETURNING before can_access_treasury() can
+      // observe the new row, which rejects a valid first-time owner insert.
+      const { error: insertError } = await this.userClient
         .from("treasuries")
-        .upsert(
-          {
-            owner_user_id: this.identity.userId,
-            external_reference: submission.workspace.externalReference,
-            name: submission.workspace.name,
-            total_budget_minor: submission.workspace.totalBudgetMinor,
-            sui_treasury_object_id: submission.workspace.treasuryObjectId,
-            currency: "USDC",
-            status: "active",
-          },
-          { onConflict: "sui_treasury_object_id" },
-        )
+        .insert({
+          owner_user_id: this.identity.userId,
+          external_reference: submission.workspace.externalReference,
+          name: submission.workspace.name,
+          total_budget_minor: submission.workspace.totalBudgetMinor,
+          sui_treasury_object_id: submission.workspace.treasuryObjectId,
+          currency: "USDC",
+          status: "active",
+        });
+      if (insertError && insertError.code !== "23505") throw insertError;
+
+      const { data, error: createdLookupError } = await this.userClient
+        .from("treasuries")
         .select("*")
+        .eq("sui_treasury_object_id", submission.workspace.treasuryObjectId)
         .single();
-      if (error) throw error;
+      if (createdLookupError) throw createdLookupError;
       treasury = data;
+
+      if (
+        treasury.external_reference !== submission.workspace.externalReference
+      ) {
+        throw new Error(
+          "The selected Sui treasury does not match this workspace reference.",
+        );
+      }
     }
 
     const { data: membership, error: membershipError } = await this.userClient
