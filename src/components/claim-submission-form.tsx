@@ -1,30 +1,51 @@
 "use client";
 
+import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useMemo, useState } from "react";
+import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import { ZodError } from "zod";
-import { Icon } from "./icon";
+import { publicConfig } from "@/src/config/public-env";
 import {
-  removeDemoSessionValue,
-  useDemoSessionValue,
-  writeDemoSessionValue,
-} from "./use-demo-session";
-import {
-  buildDemoClaimRecord,
+  claimSubmissionInputSchema,
   demoBudgetStorageKey,
-  demoClaimStorageKey,
-  demoDecisionStorageKey,
-  type ClaimSubmissionFields,
 } from "@/src/domain/demo-workflow";
 import { formatUsdcMinor, parseUsdcDisplay } from "@/src/domain/money";
+import {
+  validateReceiptBytes,
+  validateReceiptFile,
+} from "@/src/domain/receipt-validation";
+import {
+  demoSuiAddress,
+  recipientSuiAddressSchema,
+  treasurySuiObjectIdSchema,
+} from "@/src/domain/stage5-claims";
 import { budgetSchema, treasurySchema } from "@/src/domain/schemas";
 import { demoTreasuryStorageKey } from "@/src/domain/treasury-setup";
 import { demoBudget, demoTreasury } from "@/src/data/mock-dashboard";
+import { ensureWalletIdentity } from "@/src/lib/sui/wallet-identity";
+import { Icon } from "./icon";
+import { useDemoSessionValue } from "./use-demo-session";
+
+interface Stage5ClaimFields {
+  submitterName: string;
+  description: string;
+  merchant: string;
+  categoryId: string;
+  requestedAmount: string;
+  receiptAmount: string;
+  receiptReference: string;
+  treasuryObjectId: string;
+  recipientSuiAddress: string;
+  receipt: FileList;
+}
 
 export function ClaimSubmissionForm() {
   const router = useRouter();
+  const dAppKit = useDAppKit();
+  const account = useCurrentAccount();
+  const [requestReference] = useState(() => crypto.randomUUID());
   const sessionTreasury = useDemoSessionValue(
     demoTreasuryStorageKey,
     treasurySchema,
@@ -38,8 +59,9 @@ export function ClaimSubmissionForm() {
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors, isSubmitting },
-  } = useForm<ClaimSubmissionFields>({
+  } = useForm<Stage5ClaimFields>({
     defaultValues: {
       submitterName: "",
       description: "",
@@ -48,6 +70,12 @@ export function ClaimSubmissionForm() {
       requestedAmount: "",
       receiptAmount: "",
       receiptReference: "",
+      treasuryObjectId:
+        publicConfig.claimDataMode === "mock"
+          ? publicConfig.demoTreasuryObjectId
+          : "",
+      recipientSuiAddress:
+        publicConfig.claimDataMode === "mock" ? demoSuiAddress : "",
     },
   });
   const [requestedAmount = "", receiptAmount = "", categoryId = ""] = useWatch({
@@ -65,37 +93,124 @@ export function ClaimSubmissionForm() {
     [receiptAmount, requestedAmount],
   );
 
-  const submitClaim = (values: ClaimSubmissionFields) => {
+  const submitClaim = async (values: Stage5ClaimFields) => {
     try {
-      const record = buildDemoClaimRecord(treasury, budget, values);
-      writeDemoSessionValue(demoClaimStorageKey, record);
-      removeDemoSessionValue(demoDecisionStorageKey);
-      router.push("/dashboard/claims/review");
+      const parsed = claimSubmissionInputSchema.parse(values);
+      const treasuryObjectId = treasurySuiObjectIdSchema.parse(
+        values.treasuryObjectId,
+      );
+      const recipientSuiAddress = recipientSuiAddressSchema.parse(
+        values.recipientSuiAddress,
+      );
+      const receipt = values.receipt?.item(0);
+      if (!receipt) {
+        setError("receipt", {
+          type: "validation",
+          message: "Upload the receipt image.",
+        });
+        return;
+      }
+
+      try {
+        validateReceiptFile(receipt);
+        validateReceiptBytes(
+          new Uint8Array(await receipt.arrayBuffer()),
+          receipt.type,
+        );
+      } catch (error) {
+        setError("receipt", {
+          type: "validation",
+          message:
+            error instanceof Error
+              ? error.message
+              : "The receipt image is invalid.",
+        });
+        return;
+      }
+
+      if (publicConfig.claimDataMode === "live") {
+        if (!account) {
+          throw new Error(
+            "Connect the member Sui wallet before submitting a live claim.",
+          );
+        }
+        await ensureWalletIdentity({
+          signer: dAppKit,
+          walletAddress: account.address,
+          displayName: parsed.submitterName,
+        });
+      }
+
+      const payload = {
+        externalReference: requestReference,
+        workspace: {
+          externalReference: treasury.id,
+          name: treasury.name,
+          totalBudgetMinor: treasury.totalBudgetMinor,
+          treasuryObjectId,
+          categories: budget.categories.map((category) => ({
+            externalReference: category.id,
+            name: category.name,
+            allocatedMinor: category.allocatedMinor,
+            spentMinor: category.spentMinor,
+          })),
+        },
+        categoryExternalReference: parsed.categoryId,
+        submitterName: parsed.submitterName,
+        merchant: parsed.merchant,
+        description: parsed.description,
+        requestedAmountMinor: parseUsdcDisplay(parsed.requestedAmount),
+        receiptAmountMinor: parsed.receiptAmount
+          ? parseUsdcDisplay(parsed.receiptAmount)
+          : null,
+        receiptReference: parsed.receiptReference || null,
+        recipientSuiAddress,
+        currency: "USDC",
+      };
+      const formData = new FormData();
+      formData.set("payload", JSON.stringify(payload));
+      formData.set("receipt", receipt);
+      const response = await fetch("/api/claims", {
+        method: "POST",
+        body: formData,
+      });
+      const result = (await response.json()) as {
+        claim?: { id: string };
+        error?: string;
+      };
+      if (!response.ok || !result.claim) {
+        throw new Error(result.error ?? "The claim could not be submitted.");
+      }
+      router.push(`/dashboard/claims/review?claim=${result.claim.id}`);
     } catch (error) {
       if (error instanceof ZodError) {
         for (const issue of error.issues) {
           const field = issue.path[0];
-          if (
-            field === "submitterName" ||
-            field === "description" ||
-            field === "merchant" ||
-            field === "categoryId" ||
-            field === "requestedAmount" ||
-            field === "receiptAmount" ||
-            field === "receiptReference"
-          ) {
-            setError(field, { type: "validation", message: issue.message });
+          if (typeof field === "string" && field in values) {
+            setError(field as keyof Stage5ClaimFields, {
+              type: "validation",
+              message: issue.message,
+            });
+          } else if (issue.message.includes("treasury object ID")) {
+            setError("treasuryObjectId", {
+              type: "validation",
+              message: issue.message,
+            });
+          } else if (issue.message.includes("recipient address")) {
+            setError("recipientSuiAddress", {
+              type: "validation",
+              message: issue.message,
+            });
           }
         }
         return;
       }
-
       setError("root", {
         type: "validation",
         message:
           error instanceof Error
             ? error.message
-            : "The demo claim could not be submitted.",
+            : "The claim could not be submitted.",
       });
     }
   };
@@ -113,14 +228,14 @@ export function ClaimSubmissionForm() {
           </span>
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.13em] text-violet-700">
-              Member request
+              Stage 5 member request
             </p>
             <h2 className="mt-1 text-xl font-bold tracking-[-0.025em]">
-              Add the claim and receipt facts
+              Submit the claim and receipt
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              Receipt fields are typed mock evidence only. No file is uploaded
-              or stored.
+              The receipt is validated, hashed, privately stored, analysed once,
+              and checked by deterministic rules.
             </p>
           </div>
         </div>
@@ -132,10 +247,8 @@ export function ClaimSubmissionForm() {
             label="Member name"
           >
             <input
-              aria-invalid={Boolean(errors.submitterName)}
               className={inputClass}
               id="submitterName"
-              placeholder="e.g. Aina Rahman"
               {...register("submitterName")}
             />
           </Field>
@@ -145,10 +258,8 @@ export function ClaimSubmissionForm() {
             label="Merchant"
           >
             <input
-              aria-invalid={Boolean(errors.merchant)}
               className={inputClass}
               id="merchant"
-              placeholder="e.g. Campus Print Shop"
               {...register("merchant")}
             />
           </Field>
@@ -159,10 +270,8 @@ export function ClaimSubmissionForm() {
               label="Expense description"
             >
               <textarea
-                aria-invalid={Boolean(errors.description)}
                 className={`${inputClass} min-h-24 resize-y`}
                 id="description"
-                placeholder="What was purchased and why?"
                 {...register("description")}
               />
             </Field>
@@ -173,7 +282,6 @@ export function ClaimSubmissionForm() {
             label="Budget category"
           >
             <select
-              aria-invalid={Boolean(errors.categoryId)}
               className={inputClass}
               id="categoryId"
               {...register("categoryId")}
@@ -193,36 +301,96 @@ export function ClaimSubmissionForm() {
           >
             <MoneyInput
               id="requestedAmount"
-              invalid={Boolean(errors.requestedAmount)}
               register={register("requestedAmount")}
             />
           </Field>
           <Field
             error={errors.receiptAmount?.message}
-            hint="Optional; leave blank when evidence is incomplete."
+            hint="Optional typed fallback; AI reads the uploaded image."
             id="receiptAmount"
             label="Receipt amount"
           >
             <MoneyInput
               id="receiptAmount"
-              invalid={Boolean(errors.receiptAmount)}
               register={register("receiptAmount")}
             />
           </Field>
           <Field
             error={errors.receiptReference?.message}
-            hint="Mock invoice or receipt number used for duplicate checks."
+            hint="Optional invoice or receipt number."
             id="receiptReference"
             label="Receipt reference"
           >
             <input
-              aria-invalid={Boolean(errors.receiptReference)}
               className={inputClass}
               id="receiptReference"
-              placeholder="e.g. RCP-2026-104"
               {...register("receiptReference")}
             />
           </Field>
+          <div className="sm:col-span-2">
+            <Field
+              error={errors.treasuryObjectId?.message}
+              hint="Select the real persisted treasury relationship. The demo ID is prefilled only in mock mode."
+              id="treasuryObjectId"
+              label="Treasury Sui object ID"
+            >
+              <input
+                className={`${inputClass} font-mono text-xs`}
+                id="treasuryObjectId"
+                {...register("treasuryObjectId", {
+                  required: "Enter the Sui treasury object ID.",
+                })}
+              />
+            </Field>
+          </div>
+          <div className="sm:col-span-2">
+            <Field
+              error={errors.recipientSuiAddress?.message}
+              hint="Immutable payout destination if a treasurer approves. No payment occurs in Stage 5."
+              id="recipientSuiAddress"
+              label="Recipient Sui address"
+            >
+              <input
+                className={`${inputClass} font-mono text-xs`}
+                id="recipientSuiAddress"
+                {...register("recipientSuiAddress", {
+                  required: "Enter the recipient Sui address.",
+                })}
+              />
+              {account && (
+                <button
+                  className="mt-2 text-xs font-bold text-[var(--brand)] underline-offset-4 hover:underline"
+                  onClick={() =>
+                    setValue("recipientSuiAddress", account.address, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
+                  type="button"
+                >
+                  Use connected wallet
+                </button>
+              )}
+            </Field>
+          </div>
+          <div className="sm:col-span-2">
+            <Field
+              error={errors.receipt?.message}
+              hint="JPEG, PNG, or WebP · maximum 10 MB · immutable after submission"
+              id="receipt"
+              label="Receipt image"
+            >
+              <input
+                accept="image/jpeg,image/png,image/webp"
+                className={`${inputClass} file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-xs file:font-bold file:text-emerald-800`}
+                id="receipt"
+                type="file"
+                {...register("receipt", {
+                  required: "Upload the receipt image.",
+                })}
+              />
+            </Field>
+          </div>
         </div>
 
         {errors.root && (
@@ -242,11 +410,13 @@ export function ClaimSubmissionForm() {
             Back to budget
           </Link>
           <button
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 py-3 text-sm font-bold text-white shadow-[0_10px_24px_rgba(29,91,79,0.18)] transition hover:-translate-y-0.5 hover:bg-[var(--brand-deep)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 py-3 text-sm font-bold text-white shadow-[0_10px_24px_rgba(29,91,79,0.18)] disabled:cursor-wait disabled:opacity-50"
             disabled={isSubmitting}
             type="submit"
           >
-            Run deterministic review
+            {isSubmitting
+              ? "Securing and analysing…"
+              : "Submit claim for review"}
             <Icon className="size-4" name="arrow" />
           </button>
         </div>
@@ -254,15 +424,10 @@ export function ClaimSubmissionForm() {
 
       <aside className="space-y-5">
         <section className="rounded-3xl bg-[var(--brand)] p-6 text-white shadow-[0_18px_50px_rgba(24,72,63,0.18)] sm:p-7">
-          <div className="flex items-center justify-between">
-            <span className="grid size-11 place-items-center rounded-2xl bg-white/10 text-[var(--accent)]">
-              <Icon className="size-5" name="receipt" />
-            </span>
-            <span className="rounded-full border border-white/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">
-              Claim preview
-            </span>
-          </div>
-          <p className="mt-7 text-xs text-white/55">Requested</p>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/60">
+            Claim preview
+          </p>
+          <p className="mt-5 text-xs text-white/55">Requested</p>
           <p className="mt-1 text-3xl font-semibold tracking-[-0.04em]">
             {preview.requested}
           </p>
@@ -281,11 +446,11 @@ export function ClaimSubmissionForm() {
         </section>
         <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-800">
-            <Icon className="size-4" name="shield" /> Safety boundary
+            <Icon className="size-4" name="shield" /> Human boundary
           </div>
           <p className="mt-3 text-sm leading-6 text-amber-950/70">
-            The next screen recommends a result using deterministic rules. A
-            human treasurer still makes the final demo decision.
+            AI and rules only recommend. A treasurer decides, and approval
+            remains unpaid with no wallet popup or Sui transaction.
           </p>
         </section>
       </aside>
@@ -327,19 +492,14 @@ function Field({
 
 function MoneyInput({
   id,
-  invalid,
   register,
 }: {
   id: string;
-  invalid: boolean;
-  register: ReturnType<
-    ReturnType<typeof useForm<ClaimSubmissionFields>>["register"]
-  >;
+  register: UseFormRegisterReturn;
 }) {
   return (
     <div className="relative">
       <input
-        aria-invalid={invalid}
         className={`${inputClass} pr-16`}
         id={id}
         inputMode="decimal"
@@ -354,9 +514,7 @@ function MoneyInput({
 }
 
 function formatOptionalAmount(value: string): string {
-  if (!value.trim()) {
-    return "—";
-  }
+  if (!value.trim()) return "—";
   try {
     return formatUsdcMinor(parseUsdcDisplay(value));
   } catch {

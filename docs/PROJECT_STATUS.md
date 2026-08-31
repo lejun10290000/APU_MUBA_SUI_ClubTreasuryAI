@@ -4,15 +4,16 @@ This file is the **single source of truth for current implementation status, blo
 
 ## Current Snapshot
 
-- Last updated: **30 August 2026 (MYT)**
+- Last updated: **31 August 2026 (MYT)**
 - Default branch: `main`
 - **Current stage: Stage 5 — Claim and receipt workflow integration**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4**
 - Latest completed milestone: **Stage 4 Gemini adapter implementation, automated verification, and owner-controlled live validation are complete and merged to `main`.**
-- Active implementation branch: **None — Stage 5 has not started yet. Create a fresh Stage 5 branch from the latest `main` when implementation begins.**
-- Current blockers: **None. Stage 5 implementation has not started.**
-- Demo readiness: **Mock product workflow, verified Sui Testnet treasury flow, and live-validated Gemini budget/receipt adapter work. Claim persistence/private receipt upload and deployed web hosting remain later-stage work.**
+- Active implementation branch: **`stage5/claim-receipt-integration`**
+- Stage 5 implementation state: **Implemented and verified locally; the complete owner-controlled live Supabase acceptance gate passed.**
+- Current blockers: **Complete teammate/owner review and merge PR #18 before marking Stage 5 complete.**
+- Demo readiness: **The mock product workflow, verified Sui Testnet treasury flow, live-validated Gemini adapter, and live-accepted Stage 5 claim/review workflow are available. Stage 5 remains CURRENT only until PR #18 is reviewed and merged.**
 
 ## Stage Progress
 
@@ -143,33 +144,40 @@ Stage 3 exit criteria are therefore **VERIFIED**.
 
 Stage 4 exit criteria are **VERIFIED**. Gemini remains advisory; deterministic TypeScript, human approval, wallet signing, and Move/Sui remain authoritative.
 
-## Current Not Yet Implemented
+## Stage 5 — Live Acceptance Complete, Review Pending
 
-- Stage 5 UI/API integration that invokes the implemented AI adapter for persisted claims
-- Supabase migrations / claim persistence
-- private receipt bucket and secure receipt upload
-- receipt hashing integrated with persisted claims
-- full persisted claim → AI review → human approval → existing Sui payout integration
-- deployed public web app
-- final screenshots/video/submission package
+- versioned PostgreSQL migration for verified wallet profiles, wallet nonces, treasuries, memberships, budget categories, and claims
+- RLS policies and narrow server functions for treasury access and human claim decisions
+- private `receipts` bucket policy with JPEG/PNG/WebP and 10 MB limits
+- server-side MIME, size, and image-signature validation plus SHA-256 hashing of the exact receipt bytes
+- idempotent claim submission and exact/similar duplicate checks
+- shared `getAIService()` analysis followed by deterministic recommendation rules
+- persisted manual `Review` fallback when AI analysis fails or is invalid
+- wallet-signed nonce identity binding in live mode and a clearly isolated mock repository for local/CI use
+- persisted human Approve/Reject actions with a decision note
+- immutable `approved_*` payout snapshot with `payment_status = unpaid`
+- no wallet popup, Sui transaction construction, payout, digest, or paid state in Stage 5
+- local verification passed: lint, strict TypeScript, 104 unit tests, production build, and 7 Playwright tests
+- owner-controlled Supabase project is active, the Stage 5 migration is applied, Anonymous Sign-ins are enabled, and the live auth challenge endpoint creates a persisted nonce
+- standard and zkLogin wallet identity signatures are routed through Sui Testnet-aware verification; zkLogin uses the official Testnet GraphQL verifier
+- owner-controlled live positive path passed: zkLogin identity, first treasury/member/categories, private PNG upload, one persisted claim, stored `Review` recommendation, private receipt read, human approval, immutable approved payout snapshot, and `payment_status = unpaid`
+- live evidence confirms exactly one claim for the external reference, one private receipt object, RLS on all six public tables, a 10 MB private receipt bucket, and the JPEG/PNG/WebP allowlist
+- all seven live negative checks passed, including same-reference idempotency, exact-duplicate rejection, pre-auth file validation, invalid-recipient rejection, persisted interrupted-AI manual Review, immutable receipt evidence, and immutable approved payout snapshots
+- Supabase security/performance advisors were reviewed after acceptance; current notices are expected for the deny-by-default nonce table, narrowly scoped authenticated `SECURITY DEFINER` helpers/RPC, the intentional anonymous-user MVP bridge, disabled password protection in an anonymous-only flow, and unused indexes in a new one-record project
 
-Do not describe these as complete until real implementation and verification exist.
+Not yet verified:
+
+- teammate/owner review of PR #18
+
+The real acceptance gate in `docs/STAGE5_LIVE_VALIDATION.md` passed. Do not describe Stage 5 as COMPLETE until PR #18 is reviewed and merged.
 
 ## Next Recommended Task
 
-### Stage 5 — Claim and receipt workflow integration
+### Stage 5 — Review and merge
 
-Connect private receipt storage, claim persistence, AI extraction, deterministic checks, and review states without automatic money movement.
-
-Required priorities:
-
-1. Start from the latest `main` and create a fresh Stage 5 implementation branch.
-2. Plan the Supabase schema/migrations and private receipt bucket before UI integration.
-3. Implement secure receipt upload, hashing, and claim persistence.
-4. Invoke mock/live AI only through the shared `AIService` boundary.
-5. Apply deterministic duplicate and budget checks after validated AI extraction.
-6. Persist an understandable `Approve` / `Review` / `Reject` recommendation without triggering payment.
-7. Keep AI failure on the manual `Review` path and preserve all existing Sui authorization boundaries.
+1. Complete teammate/owner review of PR #18.
+2. Merge PR #18 after required CI and review checks pass.
+3. Mark Stage 5 COMPLETE on `main`, then prepare the Stage 6 handoff without implementing Stage 6 early.
 
 ## Locked MVP Decisions
 
@@ -194,10 +202,48 @@ Before development, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 5 — Claim and receipt workflow integration
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4
-NEXT TASK: Start Stage 5 from the latest main and implement Supabase-backed claim and private receipt integration without automatic money movement.
+NEXT TASK: Review and merge PR #18, then mark Stage 5 COMPLETE before planning Stage 6.
 ```
 
 ## Recent Development Log
+
+### 2026-08-31 — Live Supabase auth reached zkLogin verification
+
+- Confirmed the active Supabase project accepts anonymous sign-in cookies and the live wallet challenge endpoint returns `200` with a persisted single-use nonce.
+- Diagnosed the initial authentication warning as a network-restricted local development process and restarted the server with Supabase access.
+- Added a Sui Testnet GraphQL client to personal-message verification so zkLogin wallet signatures can be verified instead of failing for a missing Sui client.
+- Added regression coverage asserting that wallet signature verification always receives the Testnet client.
+- Confirmed the owner completed zkLogin verification, then traced claim submission to a first-treasury RLS failure caused by `INSERT ... RETURNING` evaluating the treasury SELECT policy before its helper could observe the new row.
+- Preserved the existing RLS boundary and changed treasury persistence to insert without `RETURNING`, followed by a separate owner-authorized SELECT; a rolled-back live policy test verified the two-statement path and retained no diagnostic data.
+- Verified lint, strict TypeScript, and 103 unit tests; the owner-controlled synthetic receipt/browser acceptance flow remains in progress.
+
+### 2026-08-31 — Stage 5 live positive-path acceptance passed
+
+- Project reference: `arldlnqiywhcuungvgei`.
+- Applied migrations: `stage5_claim_receipt_workflow` and `stage5_security_performance_hardening`.
+- Synthetic claim: `1aa9db3a-2a43-44e2-9628-923c6744ab03` with exactly one row for external reference `c3106fbc-2d6f-4f50-baca-7840b45cfe8b`.
+- Private receipt path: `2f6973e7-1c6d-4bde-b3de-3375ed3ec753/c3106fbc-2d6f-4f50-baca-7840b45cfe8b/receipt`; PNG; 2,218,738 bytes; SHA-256 `15497253e8cc6df6cf550d4354d141bbbb858e13668d14d0d7655a58cf890c78`.
+- Stored recommendation: `review`; human decision: `approve`; final claim state: `approved_unpaid`; final payment state: `unpaid`.
+- Approved snapshot persisted the verified Testnet treasury object, `marketing` category reference, recipient, `1000` USDC application minor units, and `USDC` currency.
+- Supabase evidence showed one wallet profile, one treasury, one owner membership, five categories, one claim, one private receipt object, RLS enabled on all six public tables, and the expected private-bucket limits.
+- Transaction-wrapped live negative checks confirmed that the database rejects receipt-evidence changes with `Receipt evidence is immutable` and approved-payout changes with `Approved payout snapshot is immutable`; the transaction was rolled back and a follow-up read confirmed the accepted claim remained unchanged.
+- Live exact-receipt duplicate check passed: claim `db1a75bc-59ea-4ee2-ba2f-26f8484a5f87` reused the original receipt bytes under a new request reference, persisted the same SHA-256 hash with an `exactIds` link to the original claim, stored `recommendation = reject`, remained `under_review` and `unpaid`, and created no approved payout snapshot or Sui side effect.
+- Live invalid-recipient API check passed with HTTP 400 and `Enter a valid Sui recipient address.`; a follow-up Supabase read confirmed zero matching claim rows and no additional receipt object.
+- The first invalid-file attempt exposed that wallet authentication ran before client receipt validation. Receipt metadata and signature validation now run in the browser before `ensureWalletIdentity`, while the authoritative server checks remain unchanged. A browser retest rejected a text-backed `.png` with `Receipt bytes do not match the selected image type.` before any wallet/auth/claim request; Supabase remained at two claims and two private receipt objects.
+- The same attempt showed that `ensureWalletIdentity` requested a new signature for every claim. It now reuses an authenticated session whose RLS-visible verified wallet profile matches the connected address; a new personal-message challenge is required only for an unbound session or changed wallet.
+- A later valid Opera submission persisted claim `a778ec65-c147-48d9-9379-2e71340e008d` under external reference `8f6192ae-5c0c-48fa-87b5-25b1a8e6d228`; it remained `under_review` and `unpaid`. Opera's DevTools version could not resend the Fetch request, so a temporary local integration replay called the real Stage 5 workflow twice with that live external reference. Both calls returned the existing claim with `idempotentReplay=true`, no mutation/upload method ran, and follow-up Supabase reads remained at exactly three claims and three private receipt objects. The temporary test was removed.
+- The controlled interrupted-AI check ran with `AI_MODE=live` and live Gemini requests deliberately disabled. Synthetic claim `bd74b34d-d0c6-4402-b9c4-d0dbff6b33b5` persisted `receipt_analysis.failed=true` with `Live Gemini requests are disabled by configuration.`, recommendation `review`, status `under_review`, no decision, and `payment_status=unpaid`. The private receipt object persisted normally; no wallet transaction, payout, digest, paid status, or Gemini request occurred. The server was then restored to `AI_MODE=mock` and its health endpoint confirmed normal mode.
+- Security/performance advisors were reviewed. The current notices are expected and documented: no nonce policies because browser roles receive no nonce-table grants; authenticated helper/RPC functions perform explicit `auth.uid()` ownership/role checks; anonymous Auth is intentional for the wallet bridge and still uses ownership-scoped RLS; password protection is not used by the anonymous-only flow; and unused indexes are expected in a fresh one-record project.
+- All Stage 5 live acceptance checks passed. Stage 5 remains CURRENT only pending PR #18 review and merge. No Sui transaction, payout, digest, or paid state occurred.
+
+### 2026-08-31 — Stage 5 implemented locally; real Supabase acceptance pending
+
+- Added the versioned Stage 5 schema, RLS policies, private receipt bucket policy, wallet identity bridge, and Supabase adapters.
+- Connected multipart receipt submission to byte hashing, private upload, claim persistence, one shared AI analysis, deterministic checks, and stored recommendations.
+- Added persisted human Approve/Reject decisions and an immutable approved-but-unpaid Stage 6 payout snapshot without invoking Sui.
+- Added mock repository coverage for normal development/CI and a live adapter selected only through explicit environment configuration.
+- Verified lint, strict TypeScript, 101 unit tests, production build, and 7 Playwright tests with zero live Gemini calls and zero Sui payouts.
+- Kept Stage 5 CURRENT because the connected Supabase project is inactive and the local Docker engine is unavailable; no real migration/storage acceptance has been claimed.
 
 ### 2026-08-30 — Stage 4 cleanup and Stage 5 handoff aligned
 

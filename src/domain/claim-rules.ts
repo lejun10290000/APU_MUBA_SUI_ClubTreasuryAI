@@ -18,6 +18,7 @@ export interface DuplicateClaimCandidate {
   id: string;
   merchant: string;
   receiptReference: string | null;
+  receiptHash?: string | null;
   requestedAmountMinor: MinorAmount;
 }
 
@@ -71,6 +72,7 @@ export function findPotentialDuplicateClaims(
   existingClaims: readonly DuplicateClaimCandidate[],
 ): DuplicateClaimCheck {
   const candidateReference = normalize(candidate.receiptReference ?? "");
+  const candidateHash = normalizeHash(candidate.receiptHash);
   const candidateMerchant = normalize(candidate.merchant);
   const exactIds: string[] = [];
   const similarIds: string[] = [];
@@ -81,8 +83,11 @@ export function findPotentialDuplicateClaims(
     }
 
     const existingReference = normalize(existing.receiptReference ?? "");
+    const existingHash = normalizeHash(existing.receiptHash);
     const isExact =
-      candidateReference.length > 0 && candidateReference === existingReference;
+      (candidateHash.length > 0 && candidateHash === existingHash) ||
+      (candidateReference.length > 0 &&
+        candidateReference === existingReference);
 
     if (isExact) {
       exactIds.push(existing.id);
@@ -111,16 +116,20 @@ export function evaluateClaimRules({
   claim,
   merchant,
   receiptReference,
+  receiptHash,
   existingClaims,
   categoryAllocatedMinor,
   categorySpentMinor,
+  aiNeedsReview = false,
 }: {
   claim: Claim;
   merchant: string;
   receiptReference: string | null;
+  receiptHash?: string | null;
   existingClaims: readonly DuplicateClaimCandidate[];
   categoryAllocatedMinor: MinorAmount;
   categorySpentMinor: MinorAmount;
+  aiNeedsReview?: boolean;
 }): ClaimRuleEvaluation {
   const receipt = compareReceiptAmount(
     claim.requestedAmountMinor,
@@ -131,6 +140,7 @@ export function evaluateClaimRules({
       id: claim.id,
       merchant,
       receiptReference,
+      receiptHash,
       requestedAmountMinor: claim.requestedAmountMinor,
     },
     existingClaims,
@@ -151,7 +161,9 @@ export function evaluateClaimRules({
   }
 
   if (duplicates.hasExact) {
-    reasons.push("The receipt reference exactly matches an existing claim.");
+    reasons.push(
+      "The receipt bytes or reference exactly match an existing claim.",
+    );
   } else if (duplicates.hasSimilar) {
     reasons.push("The merchant and requested amount match an existing claim.");
   } else {
@@ -164,10 +176,16 @@ export function evaluateClaimRules({
       : "The request exceeds the selected category's remaining budget.",
   );
 
+  if (aiNeedsReview) {
+    reasons.push(
+      "AI analysis found missing, ambiguous, or category-conflicting evidence that needs human review.",
+    );
+  }
+
   let recommendation: ClaimRecommendation = "approve";
   if (duplicates.hasExact || !hasSufficientBudget) {
     recommendation = "reject";
-  } else if (!receipt.matches || duplicates.hasSimilar) {
+  } else if (!receipt.matches || duplicates.hasSimilar || aiNeedsReview) {
     recommendation = "review";
   }
 
@@ -178,6 +196,11 @@ export function evaluateClaimRules({
     hasSufficientBudget,
     reasons,
   };
+}
+
+function normalizeHash(value: string | null | undefined): string {
+  const normalized = value?.trim().toLocaleLowerCase("en") ?? "";
+  return /^[0-9a-f]{64}$/.test(normalized) ? normalized : "";
 }
 
 function normalize(value: string): string {
