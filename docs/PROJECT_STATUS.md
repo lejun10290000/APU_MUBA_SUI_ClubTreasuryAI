@@ -166,7 +166,7 @@ Stage 4 exit criteria are **VERIFIED**. Gemini remains advisory; deterministic T
 
 Not yet verified:
 
-- live same-reference idempotency, invalid-file/address, and interrupted-AI negative checks
+- live same-reference idempotency, invalid-file, and interrupted-AI negative checks
 - teammate/owner review of PR #18
 
 Do not describe Stage 5 as COMPLETE until the real acceptance gate in `docs/STAGE5_LIVE_VALIDATION.md` passes.
@@ -229,6 +229,7 @@ NEXT TASK: Complete the Stage 5 negative acceptance checks and review PR #18 wit
 - Supabase evidence showed one wallet profile, one treasury, one owner membership, five categories, one claim, one private receipt object, RLS enabled on all six public tables, and the expected private-bucket limits.
 - Transaction-wrapped live negative checks confirmed that the database rejects receipt-evidence changes with `Receipt evidence is immutable` and approved-payout changes with `Approved payout snapshot is immutable`; the transaction was rolled back and a follow-up read confirmed the accepted claim remained unchanged.
 - Live exact-receipt duplicate check passed: claim `db1a75bc-59ea-4ee2-ba2f-26f8484a5f87` reused the original receipt bytes under a new request reference, persisted the same SHA-256 hash with an `exactIds` link to the original claim, stored `recommendation = reject`, remained `under_review` and `unpaid`, and created no approved payout snapshot or Sui side effect.
+- Live invalid-recipient API check passed with HTTP 400 and `Enter a valid Sui recipient address.`; a follow-up Supabase read confirmed zero matching claim rows and no additional receipt object.
 - Security/performance advisors were reviewed. The current notices are expected and documented: no nonce policies because browser roles receive no nonce-table grants; authenticated helper/RPC functions perform explicit `auth.uid()` ownership/role checks; anonymous Auth is intentional for the wallet bridge and still uses ownership-scoped RLS; password protection is not used by the anonymous-only flow; and unused indexes are expected in a fresh one-record project.
 - Stage 5 remains CURRENT pending the documented negative checks and PR #18 review. No Sui transaction, payout, digest, or paid state occurred.
 
