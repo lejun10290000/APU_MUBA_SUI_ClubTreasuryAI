@@ -6,14 +6,14 @@ This file is the **single source of truth for current implementation status, blo
 
 - Last updated: **31 August 2026 (MYT)**
 - Default branch: `main`
-- **Current stage: Stage 5 — Claim and receipt workflow integration**
+- **Current stage: Stage 6 — Human approval and on-chain payment**
 - Stage status: **CURRENT**
-- Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4**
-- Latest completed milestone: **Stage 4 Gemini adapter implementation, automated verification, and owner-controlled live validation are complete and merged to `main`.**
-- Active implementation branch: **`stage5/claim-receipt-integration`**
-- Stage 5 implementation state: **Implemented and verified locally; the complete owner-controlled live Supabase acceptance gate passed.**
-- Current blockers: **Complete teammate/owner review and merge PR #18 before marking Stage 5 complete.**
-- Demo readiness: **The mock product workflow, verified Sui Testnet treasury flow, live-validated Gemini adapter, and live-accepted Stage 5 claim/review workflow are available. Stage 5 remains CURRENT only until PR #18 is reviewed and merged.**
+- Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5**
+- Latest completed milestone: **Stage 5 claim/receipt persistence, wallet identity binding, private storage, human decision flow, and the complete owner-controlled live Supabase acceptance gate are verified and merged to `main` through PR #18.**
+- Active implementation branch: **None. Create the Stage 6 branch only after the payout state machine and implementation boundary are agreed.**
+- Stage 5 implementation state: **COMPLETE — merged to `main` at merge commit `8212881d5e8f999180700d96e3722a5313d1885c`.**
+- Current blockers: **No Stage 5 blocker. Stage 6 requires a reviewed implementation plan before coding begins.**
+- Demo readiness: **The mock product workflow, verified Sui Testnet treasury flow, live-validated Gemini adapter, and live-accepted Stage 5 claim/review workflow are available. Claim-linked Stage 6 payout synchronization is not implemented yet.**
 
 ## Stage Progress
 
@@ -24,8 +24,8 @@ This file is the **single source of truth for current implementation status, blo
 | 2     | Core UI and deterministic domain rules | COMPLETE    |
 | 3     | Sui foundation and Move treasury       | COMPLETE    |
 | 4     | Gemini AI layer                        | COMPLETE    |
-| 5     | Claim and receipt workflow integration | CURRENT     |
-| 6     | Human approval and on-chain payment    | NOT STARTED |
+| 5     | Claim and receipt workflow integration | COMPLETE    |
+| 6     | Human approval and on-chain payment    | CURRENT     |
 | 7     | Demo hardening and deployment          | NOT STARTED |
 | 8     | Submission and pitch                   | NOT STARTED |
 
@@ -144,7 +144,7 @@ Stage 3 exit criteria are therefore **VERIFIED**.
 
 Stage 4 exit criteria are **VERIFIED**. Gemini remains advisory; deterministic TypeScript, human approval, wallet signing, and Move/Sui remain authoritative.
 
-## Stage 5 — Live Acceptance Complete, Review Pending
+## Stage 5 — COMPLETE
 
 - versioned PostgreSQL migration for verified wallet profiles, wallet nonces, treasuries, memberships, budget categories, and claims
 - RLS policies and narrow server functions for treasury access and human claim decisions
@@ -164,20 +164,17 @@ Stage 4 exit criteria are **VERIFIED**. Gemini remains advisory; deterministic T
 - live evidence confirms exactly one claim for the external reference, one private receipt object, RLS on all six public tables, a 10 MB private receipt bucket, and the JPEG/PNG/WebP allowlist
 - all seven live negative checks passed, including same-reference idempotency, exact-duplicate rejection, pre-auth file validation, invalid-recipient rejection, persisted interrupted-AI manual Review, immutable receipt evidence, and immutable approved payout snapshots
 - Supabase security/performance advisors were reviewed after acceptance; current notices are expected for the deny-by-default nonce table, narrowly scoped authenticated `SECURITY DEFINER` helpers/RPC, the intentional anonymous-user MVP bridge, disabled password protection in an anonymous-only flow, and unused indexes in a new one-record project
+- PR #18 passed its required CI, was reviewed by the project owner, and was merged to `main` as `8212881d5e8f999180700d96e3722a5313d1885c`
 
-Not yet verified:
-
-- teammate/owner review of PR #18
-
-The real acceptance gate in `docs/STAGE5_LIVE_VALIDATION.md` passed. Do not describe Stage 5 as COMPLETE until PR #18 is reviewed and merged.
+The real acceptance gate in `docs/STAGE5_LIVE_VALIDATION.md` passed and Stage 5 exit criteria are **VERIFIED**.
 
 ## Next Recommended Task
 
-### Stage 5 — Review and merge
+### Stage 6 — Plan approved-claim payout integration
 
-1. Complete teammate/owner review of PR #18.
-2. Merge PR #18 after required CI and review checks pass.
-3. Mark Stage 5 COMPLETE on `main`, then prepare the Stage 6 handoff without implementing Stage 6 early.
+1. Review and approve `docs/STAGE6_IMPLEMENTATION_PLAN.md`, including the digest-first recovery boundary and the old live claim's treasury/category mismatch.
+2. Record whether the existing Move package can remain unchanged or needs a reviewed claim-reference upgrade for stronger on-chain idempotency.
+3. Create a dedicated Stage 6 branch and implement only the approved scope; AI must remain advisory and the wallet must require explicit human approval.
 
 ## Locked MVP Decisions
 
@@ -199,13 +196,19 @@ The real acceptance gate in `docs/STAGE5_LIVE_VALIDATION.md` passed. Do not desc
 Before development, every coding agent must show:
 
 ```text
-CURRENT PROJECT STAGE: Stage 5 — Claim and receipt workflow integration
+CURRENT PROJECT STAGE: Stage 6 — Human approval and on-chain payment
 STATUS: CURRENT
-COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4
-NEXT TASK: Review and merge PR #18, then mark Stage 5 COMPLETE before planning Stage 6.
+COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5
+NEXT TASK: Review and approve docs/STAGE6_IMPLEMENTATION_PLAN.md before creating the Stage 6 implementation branch.
 ```
 
 ## Recent Development Log
+
+### 2026-08-31 — Stage 5 completed and merged
+
+- Confirmed PR #18 merged into `main` at `8212881d5e8f999180700d96e3722a5313d1885c` after the Stage 5 CI and owner-controlled live acceptance gate passed.
+- Marked Stage 5 COMPLETE: positive submission/review/approval, all seven negative checks, private receipt evidence, immutable approved payout snapshot, and Supabase advisor review are verified.
+- Advanced Stage 6 to CURRENT for planning only and added `docs/STAGE6_IMPLEMENTATION_PLAN.md` plus a teammate/Codex handoff. No Stage 6 transaction construction, wallet approval, payout, digest, paid-state synchronization, or implementation branch has been started.
 
 ### 2026-08-31 — Live Supabase auth reached zkLogin verification
 
@@ -234,7 +237,7 @@ NEXT TASK: Review and merge PR #18, then mark Stage 5 COMPLETE before planning S
 - A later valid Opera submission persisted claim `a778ec65-c147-48d9-9379-2e71340e008d` under external reference `8f6192ae-5c0c-48fa-87b5-25b1a8e6d228`; it remained `under_review` and `unpaid`. Opera's DevTools version could not resend the Fetch request, so a temporary local integration replay called the real Stage 5 workflow twice with that live external reference. Both calls returned the existing claim with `idempotentReplay=true`, no mutation/upload method ran, and follow-up Supabase reads remained at exactly three claims and three private receipt objects. The temporary test was removed.
 - The controlled interrupted-AI check ran with `AI_MODE=live` and live Gemini requests deliberately disabled. Synthetic claim `bd74b34d-d0c6-4402-b9c4-d0dbff6b33b5` persisted `receipt_analysis.failed=true` with `Live Gemini requests are disabled by configuration.`, recommendation `review`, status `under_review`, no decision, and `payment_status=unpaid`. The private receipt object persisted normally; no wallet transaction, payout, digest, paid status, or Gemini request occurred. The server was then restored to `AI_MODE=mock` and its health endpoint confirmed normal mode.
 - Security/performance advisors were reviewed. The current notices are expected and documented: no nonce policies because browser roles receive no nonce-table grants; authenticated helper/RPC functions perform explicit `auth.uid()` ownership/role checks; anonymous Auth is intentional for the wallet bridge and still uses ownership-scoped RLS; password protection is not used by the anonymous-only flow; and unused indexes are expected in a fresh one-record project.
-- All Stage 5 live acceptance checks passed. Stage 5 remains CURRENT only pending PR #18 review and merge. No Sui transaction, payout, digest, or paid state occurred.
+- All Stage 5 live acceptance checks passed. No Sui transaction, payout, digest, or paid state occurred during Stage 5.
 
 ### 2026-08-31 — Stage 5 implemented locally; real Supabase acceptance pending
 

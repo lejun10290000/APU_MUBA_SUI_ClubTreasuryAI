@@ -1,6 +1,6 @@
 # Stage 5 Live Supabase Validation
 
-Stage 5 is implemented and verified locally, but it remains **CURRENT** until this owner-controlled acceptance gate passes against a real Supabase project. Use only a synthetic receipt. Do not use a real member's private financial evidence.
+Stage 5 is **COMPLETE**. This checklist records the owner-controlled acceptance gate that passed against the real Supabase project. Only synthetic receipts were used; no real member private financial evidence was used.
 
 ## Preconditions
 
@@ -70,4 +70,4 @@ Record the date, Supabase project reference (never a secret), migration version,
 
 Positive-path acceptance passed on 31 August 2026 against project `arldlnqiywhcuungvgei`. The sanitized claim/storage/recommendation/decision record and advisor dispositions are recorded in `docs/PROJECT_STATUS.md`. Live check 1 passed through a temporary local integration replay after Opera could not resend the Fetch request: two calls with the latest persisted external reference both returned the existing claim before any mutation or upload, and follow-up reads remained at three claims and three private receipt objects. The temporary test was removed. Live check 2 passed when the same receipt bytes under a new request reference produced an exact-duplicate `Reject` claim that remained unpaid. Live check 3 passed after pre-wallet client validation rejected mismatched PNG bytes before any auth or claim request and created no database or Storage record. Live check 4 passed when the API rejected an invalid recipient with HTTP 400 before creating a claim or receipt object. Live check 5 passed under controlled failure configuration: the synthetic claim persisted `receipt_analysis.failed=true`, recommendation `review`, status `under_review`, no decision, and `payment_status=unpaid`; no Gemini request or Sui transaction occurred, and the server was restored to mock AI mode afterward. Transaction-wrapped live checks 6 and 7 also passed: the receipt-evidence and approved-payout-snapshot triggers rejected mutations, the transaction was rolled back, and the claim remained unchanged. All seven negative checks passed.
 
-The live acceptance gate is complete. Keep Stage 5 CURRENT only until PR #18 is reviewed and merged; then mark Stage 5 COMPLETE before planning Stage 6.
+The live acceptance gate is complete. PR #18 was reviewed and merged into `main` at `8212881d5e8f999180700d96e3722a5313d1885c`; Stage 5 is COMPLETE and Stage 6 is current for planning.

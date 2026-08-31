@@ -28,7 +28,7 @@ AI never owns authoritative balances, payout authorization, wallet signing, or S
 
 ## Current Development Stage
 
-**Stage 5 — Claim and receipt workflow integration — CURRENT**
+**Stage 6 — Human approval and on-chain payment — CURRENT (planning)**
 
 Completed stages:
 
@@ -37,10 +37,11 @@ Completed stages:
 - Stage 2 — Core UI and deterministic domain rules
 - Stage 3 — Sui foundation and Move treasury
 - Stage 4 — Gemini AI layer
+- Stage 5 — Claim and receipt workflow integration
 
 Stage 4 implementation and live-validation documentation were merged into `main` through **PR #16** and **PR #17**.
 
-Stage 5 is implemented on `stage5/claim-receipt-integration` and passes local automated/browser verification. It remains **CURRENT**, not COMPLETE, until the migration and synthetic-receipt workflow pass against the owner-controlled Supabase project.
+Stage 5 is **COMPLETE**. Its local verification and owner-controlled live Supabase acceptance gate passed, and **PR #18** merged the implementation into `main`. Stage 6 is current for planning; claim-linked payout execution has not been implemented yet.
 
 Read `docs/PROJECT_STATUS.md` for the authoritative current task before coding.
 
@@ -176,7 +177,7 @@ Stage 5 adds:
 - persisted human Approve/Reject decisions with a decision note
 - immutable `approved_*` payout snapshot while `payment_status` remains `unpaid`
 
-There is no wallet popup, Sui transaction, payout, digest, or paid state in Stage 5. See `docs/STAGE5_LIVE_VALIDATION.md` for the remaining owner-controlled acceptance gate.
+There is no wallet popup, Sui transaction, payout, digest, or paid state in Stage 5. The completed owner-controlled acceptance record is in `docs/STAGE5_LIVE_VALIDATION.md`; those effects belong to Stage 6.
 
 ## Stage 2 Product Workflow
 
@@ -330,6 +331,7 @@ Add every other AI tool used by any teammate before submission.
 - `docs/TECH_STACK.md` — technology decisions
 - `docs/DEMO_PLAN.md` — demo flow
 - `docs/STAGE5_LIVE_VALIDATION.md` — owner-controlled migration/private-receipt acceptance checklist
+- `docs/STAGE6_IMPLEMENTATION_PLAN.md` — reviewed boundary required before claim-linked payout work begins
 
 ## Team Members
 

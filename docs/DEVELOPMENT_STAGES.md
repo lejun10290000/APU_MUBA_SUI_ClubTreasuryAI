@@ -89,7 +89,7 @@ Automated verification:
 
 Exit criteria: **VERIFIED** — mock mode remains default; the owner explicitly validated one live structured budget parse and one live in-memory synthetic receipt extraction with `gemini-2.5-flash`; missing currency correctly required human review; configuration returned to mock mode; deterministic financial rules remained authoritative.
 
-## Stage 5 — Claim and receipt workflow integration — CURRENT
+## Stage 5 — Claim and receipt workflow integration — COMPLETE
 
 Goal: connect private receipt storage, claim persistence, AI extraction, deterministic checks, and review states.
 
@@ -107,13 +107,13 @@ Required work:
 - [x] manual Review fallback on AI failure
 - [x] persisted human Approve/Reject decision
 - [x] immutable approved-but-unpaid Stage 6 payout snapshot
-- [ ] owner-controlled live Supabase acceptance gate
+- [x] owner-controlled live Supabase acceptance gate
 
-Implementation status: **local implementation and automated verification are complete**. Stage 5 remains **CURRENT** until a member submits a synthetic receipt through an active owner-controlled Supabase project, a treasurer reopens and decides the persisted claim, the immutable payout snapshot is verified, and no wallet/Sui action occurs.
+Implementation status: **COMPLETE**. Local automated/browser verification and the owner-controlled live Supabase acceptance gate passed. A member submitted synthetic receipts, the treasurer reopened and decided the persisted claim, the immutable payout snapshot was verified, all seven negative checks passed, and no wallet/Sui payout action occurred. PR #18 merged the stage into `main` at `8212881d5e8f999180700d96e3722a5313d1885c`.
 
-Exit criteria: a member submits a claim/receipt and the treasurer receives and persists a validated recommendation and human decision without automatic money movement.
+Exit criteria: **VERIFIED** — a member submitted a claim/receipt and the treasurer received and persisted a validated recommendation and human decision without automatic money movement.
 
-## Stage 6 — Human approval and on-chain payment — NOT STARTED
+## Stage 6 — Human approval and on-chain payment — CURRENT
 
 Goal: connect persisted claim approval to the already verified Sui payout foundation.
 
@@ -127,6 +127,8 @@ Required work:
 - transaction digest/explorer link
 - idempotent database synchronization
 - remaining budget changes only after on-chain success
+
+Current boundary: planning only. Review `docs/STAGE6_IMPLEMENTATION_PLAN.md`, including the payout state machine, transaction idempotency, finality, retry, old-claim treasury/category mismatch, and post-confirmation reconciliation before implementation begins on a dedicated Stage 6 branch.
 
 Exit criteria: the full core payment workflow works end to end and AI cannot bypass human approval.
 

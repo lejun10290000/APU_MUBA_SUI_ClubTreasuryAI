@@ -74,7 +74,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Enforce `docs/AI_USAGE_POLICY.md`
 - [x] Verify live Gemini with small explicit fixture set only
 
-## Stage 5 — Claim and receipt workflow integration — CURRENT
+## Stage 5 — Claim and receipt workflow integration — COMPLETE
 
 - [x] Create Supabase migrations
 - [x] Configure private receipt bucket policy
@@ -88,11 +88,12 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Persist human Approve/Reject decisions
 - [x] Persist immutable `approved_*` snapshot while payment remains unpaid
 - [x] Verify mock-mode workflow with unit, build, and Playwright coverage
-- [ ] Apply migration and complete the real Supabase/synthetic-receipt acceptance gate
-- [ ] Review Supabase security/performance advisors after live migration
+- [x] Apply migration and complete the real Supabase/synthetic-receipt acceptance gate
+- [x] Review Supabase security/performance advisors after live migration
 
-## Stage 6 — Human approval and on-chain payment — NOT STARTED
+## Stage 6 — Human approval and on-chain payment — CURRENT
 
+- [ ] Review and approve `docs/STAGE6_IMPLEMENTATION_PLAN.md`
 - [ ] Build a payout action that reads only the immutable approved snapshot
 - [ ] Connect claim approval to Sui payout transaction
 - [ ] Treasurer wallet signs/confirms

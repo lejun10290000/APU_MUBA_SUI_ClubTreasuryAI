@@ -305,7 +305,7 @@ AI analysis runs once after explicit submission through `getAIService()`, and it
 ## Deployment Direction
 
 - Web app: Vercel (Stage 7)
-- Persistence/private receipt storage: Supabase (implemented in Stage 5; live acceptance pending)
+- Persistence/private receipt storage: Supabase (implemented and live-accepted in Stage 5)
 - Payment network: Sui Testnet
 
 ## Architecture Goal for Judging
