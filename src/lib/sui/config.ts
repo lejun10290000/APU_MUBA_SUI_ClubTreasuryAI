@@ -1,4 +1,4 @@
-import { publicConfig } from "@/src/config/env";
+import { publicConfig } from "@/src/config/public-env";
 
 export const suiConfig = {
   network: publicConfig.suiNetwork,

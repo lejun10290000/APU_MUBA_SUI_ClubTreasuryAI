@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import { ZodError } from "zod";
-import { publicConfig } from "@/src/config/env";
+import { publicConfig } from "@/src/config/public-env";
 import {
   claimSubmissionInputSchema,
   demoBudgetStorageKey,
