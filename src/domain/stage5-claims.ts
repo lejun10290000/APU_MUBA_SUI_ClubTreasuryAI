@@ -95,10 +95,16 @@ export const persistedClaimSchema = z.object({
   }),
   recommendation: claimRecommendationSchema.nullable(),
   recommendationReasons: z.array(z.string()),
-  status: z.enum(["submitted", "under_review", "approved_unpaid", "rejected"]),
+  status: z.enum([
+    "submitted",
+    "under_review",
+    "approved_unpaid",
+    "rejected",
+    "paid",
+  ]),
   decision: z.enum(["approve", "reject"]).nullable(),
   decisionReason: z.string().nullable(),
-  paymentStatus: z.literal("unpaid"),
+  paymentStatus: z.enum(["unpaid", "paid"]),
   approvedSnapshot: z
     .object({
       treasuryObjectId: treasurySuiObjectIdSchema,
@@ -110,6 +116,8 @@ export const persistedClaimSchema = z.object({
     .nullable(),
   createdAt: z.string(),
   decidedAt: z.string().nullable(),
+  confirmedTransactionDigest: z.string().nullable().default(null),
+  paidAt: z.string().nullable().default(null),
 });
 
 export type PersistedClaimSubmission = z.infer<

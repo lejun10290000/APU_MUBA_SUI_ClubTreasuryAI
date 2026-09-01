@@ -18,7 +18,7 @@ export function mapClaimRow(
       )
     : [];
   const approvedSnapshot =
-    row.status === "approved_unpaid" &&
+    (row.status === "approved_unpaid" || row.status === "paid") &&
     row.approved_treasury_object_id &&
     row.approved_category_reference &&
     row.approved_recipient_sui_address &&
@@ -63,6 +63,8 @@ export function mapClaimRow(
     approvedSnapshot,
     createdAt: row.created_at,
     decidedAt: row.decided_at,
+    confirmedTransactionDigest: row.confirmed_transaction_digest,
+    paidAt: row.paid_at,
   });
 }
 

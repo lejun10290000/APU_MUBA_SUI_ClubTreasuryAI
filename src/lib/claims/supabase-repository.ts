@@ -11,6 +11,7 @@ import type {
 import { serverConfig } from "@/src/config/env";
 import { createAdminSupabaseClient } from "@/src/lib/supabase/admin";
 import type {
+  ClaimPaymentAttemptRow,
   BudgetCategoryRow,
   ClaimRow,
   Database,
@@ -21,16 +22,20 @@ import {
 } from "@/src/lib/supabase/server";
 import { mapClaimRow } from "./map-claim";
 import type {
+  ConfirmedPaymentInput,
+  PaymentAttempt,
+} from "@/src/domain/stage6-payments";
+import type {
   ClaimIdentity,
-  ClaimRepository,
   FinalClaimReview,
   PersistedWorkspace,
+  Stage6ClaimRepository,
   SubmittedClaimInsert,
 } from "./types";
 
 type TypedClient = SupabaseClient<Database>;
 
-export class SupabaseClaimRepository implements ClaimRepository {
+export class SupabaseClaimRepository implements Stage6ClaimRepository {
   constructor(
     readonly identity: ClaimIdentity,
     private readonly userClient: TypedClient,
@@ -322,6 +327,111 @@ export class SupabaseClaimRepository implements ClaimRepository {
     return this.hydrate(data);
   }
 
+  async preparePaymentAttempt(claimId: string) {
+    const { data, error } = await this.userClient.rpc("prepare_claim_payment", {
+      p_claim_id: claimId,
+    });
+    if (error) throw error;
+    const attempt = mapPaymentAttemptRow(data);
+    return { attempt, snapshot: attempt.snapshot };
+  }
+
+  async getPaymentAttempt(attemptId: string) {
+    const { data, error } = await this.userClient
+      .from("claim_payment_attempts")
+      .select("*")
+      .eq("id", attemptId)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? mapPaymentAttemptRow(data) : null;
+  }
+
+  async getActivePaymentAttemptForClaim(claimId: string) {
+    const { data, error } = await this.userClient
+      .from("claim_payment_attempts")
+      .select("*")
+      .eq("claim_id", claimId)
+      .in("status", [
+        "prepared",
+        "signed",
+        "submitted",
+        "reconciliation_required",
+      ])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? mapPaymentAttemptRow(data) : null;
+  }
+
+  async markPaymentAttemptSigned(
+    attemptId: string,
+    digest: string,
+    treasurerCapObjectId: string,
+  ) {
+    return this.transitionPaymentAttempt(attemptId, "signed", {
+      digest,
+      treasurerCapObjectId,
+    });
+  }
+
+  async markPaymentAttemptSubmitted(attemptId: string) {
+    return this.transitionPaymentAttempt(attemptId, "submitted");
+  }
+
+  async cancelPaymentAttempt(attemptId: string, code?: string) {
+    return this.transitionPaymentAttempt(attemptId, "cancelled", { code });
+  }
+
+  async markPaymentAttemptReconciliationRequired(
+    attemptId: string,
+    code: string,
+  ) {
+    return this.transitionPaymentAttempt(attemptId, "reconciliation_required", {
+      code,
+    });
+  }
+
+  async markPaymentAttemptFailed(attemptId: string, code: string) {
+    return this.transitionPaymentAttempt(attemptId, "failed", { code });
+  }
+
+  async finalizeConfirmedPayment(input: ConfirmedPaymentInput) {
+    const { data, error } = await this.userClient.rpc("finalize_claim_payment", {
+      p_attempt_id: input.attemptId,
+      p_transaction_digest: input.transactionDigest,
+      p_confirmed_category_remaining_minor: input.categoryRemainingMinor,
+    });
+    if (error) throw error;
+    if (data.id !== input.claimId) {
+      throw new Error("Finalized payment does not match the requested claim.");
+    }
+    return this.hydrate(data);
+  }
+
+  private async transitionPaymentAttempt(
+    attemptId: string,
+    status: ClaimPaymentAttemptRow["status"],
+    evidence: {
+      digest?: string;
+      treasurerCapObjectId?: string;
+      code?: string;
+    } = {},
+  ) {
+    const { data, error } = await this.userClient.rpc(
+      "transition_claim_payment_attempt",
+      {
+        p_attempt_id: attemptId,
+        p_status: status,
+        p_transaction_digest: evidence.digest ?? null,
+        p_treasurer_cap_object_id: evidence.treasurerCapObjectId ?? null,
+        p_failure_code: evidence.code ?? null,
+      },
+    );
+    if (error) throw error;
+    return mapPaymentAttemptRow(data);
+  }
+
   private async hydrate(row: ClaimRow): Promise<PersistedClaim> {
     const { data: category, error } = await this.userClient
       .from("budget_categories")
@@ -334,6 +444,28 @@ export class SupabaseClaimRepository implements ClaimRepository {
       category as Pick<BudgetCategoryRow, "name" | "external_reference">,
     );
   }
+}
+
+function mapPaymentAttemptRow(row: ClaimPaymentAttemptRow): PaymentAttempt {
+  return {
+    id: row.id,
+    claimId: row.claim_id,
+    initiatedByUserId: row.initiated_by,
+    snapshot: {
+      treasuryObjectId: row.expected_treasury_object_id,
+      categoryReference: row.expected_category_reference,
+      recipientSuiAddress: row.expected_recipient_sui_address,
+      amountMinor: asMinorAmount(row.expected_amount_minor),
+      currency: row.expected_currency,
+    },
+    treasurerCapObjectId: row.treasurer_cap_object_id,
+    transactionDigest: row.transaction_digest,
+    status: row.status,
+    failureCode: row.failure_code,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    confirmedAt: row.confirmed_at,
+  };
 }
 
 export async function createSupabaseClaimRepository() {

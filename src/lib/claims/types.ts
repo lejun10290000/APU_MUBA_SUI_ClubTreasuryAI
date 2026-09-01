@@ -80,12 +80,19 @@ export interface ClaimRepository {
 export interface Stage6ClaimRepository extends ClaimRepository {
   preparePaymentAttempt(claimId: string): Promise<PreparePaymentResult>;
   getPaymentAttempt(attemptId: string): Promise<PaymentAttempt | null>;
+  getActivePaymentAttemptForClaim(
+    claimId: string,
+  ): Promise<PaymentAttempt | null>;
   markPaymentAttemptSigned(
     attemptId: string,
     digest: string,
     treasurerCapObjectId: string,
   ): Promise<PaymentAttempt>;
   markPaymentAttemptSubmitted(attemptId: string): Promise<PaymentAttempt>;
+  cancelPaymentAttempt(
+    attemptId: string,
+    code?: string,
+  ): Promise<PaymentAttempt>;
   markPaymentAttemptReconciliationRequired(
     attemptId: string,
     code: string,
