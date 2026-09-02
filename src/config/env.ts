@@ -17,6 +17,15 @@ const optionalUrl = z.preprocess(
   z.string().url().optional(),
 );
 
+function isLoopbackHostname(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname.startsWith("127.") ||
+    hostname === "[::1]"
+  );
+}
+
 const serverSchema = z
   .object({
     APP_ENV: z
@@ -37,7 +46,7 @@ const serverSchema = z
     NEXT_PUBLIC_SUI_TREASURER_CAP_OBJECT_ID: z
       .string()
       .default(
-        "0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7",
+        "0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101",
       ),
     NEXT_PUBLIC_SUI_USDC_COIN_TYPE: z
       .string()
@@ -47,7 +56,7 @@ const serverSchema = z
     NEXT_PUBLIC_DEMO_TREASURY_OBJECT_ID: z
       .string()
       .default(
-        "0x8971fa3e32994b81396122c3e3b1a4b054c3e3799714f5c2206dd037054319e4",
+        "0x9d9a0b5a7d58d4efa77419ba891a442f3ad23610b4c824a2fa67c7893917f0f3",
       ),
     NEXT_PUBLIC_SUPABASE_URL: optionalUrl,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: optionalString,
@@ -55,6 +64,17 @@ const serverSchema = z
     SUPABASE_RECEIPTS_BUCKET: z.string().trim().min(1).default("receipts"),
   })
   .superRefine((config, context) => {
+    if (config.APP_ENV === "production") {
+      const appUrl = new URL(config.NEXT_PUBLIC_APP_URL);
+      if (appUrl.protocol !== "https:" || isLoopbackHostname(appUrl.hostname)) {
+        context.addIssue({
+          code: "custom",
+          message:
+            "NEXT_PUBLIC_APP_URL must use HTTPS and a non-localhost host in production.",
+          path: ["NEXT_PUBLIC_APP_URL"],
+        });
+      }
+    }
     if (config.NEXT_PUBLIC_CLAIM_DATA_MODE !== "live") {
       return;
     }
@@ -89,7 +109,7 @@ const parsed = serverSchema.parse({
     process.env.NEXT_PUBLIC_SUI_TREASURER_CAP_OBJECT_ID || undefined,
   NEXT_PUBLIC_SUI_USDC_COIN_TYPE: process.env.NEXT_PUBLIC_SUI_USDC_COIN_TYPE,
   NEXT_PUBLIC_DEMO_TREASURY_OBJECT_ID:
-    process.env.NEXT_PUBLIC_DEMO_TREASURY_OBJECT_ID,
+    process.env.NEXT_PUBLIC_DEMO_TREASURY_OBJECT_ID || undefined,
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
