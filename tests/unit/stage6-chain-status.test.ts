@@ -46,7 +46,34 @@ describe("Sui payment chain status", () => {
     });
   });
 
-  it("fails closed when a successful transaction has mismatched payout evidence", async () => {
+  it("accepts the UTF-8 string representation Sui JSON may use for vector<u8>", async () => {
+    const event = validEvent();
+    event.json.category_reference = "events";
+    const provider = createSuiPaymentChainStatusProvider(
+      {
+        getTransaction: async () => ({
+          $kind: "Transaction" as const,
+          Transaction: {
+            digest,
+            status: { success: true as const, error: null },
+            timestampMs: 1_788_336_600_000,
+            events: [event],
+          },
+        }),
+      },
+      { packageId, coinType },
+    );
+
+    await expect(provider.getStatus(digest, snapshot)).resolves.toEqual({
+      state: "success",
+      transactionDigest: digest,
+      categoryRemainingMinor: 990,
+      treasuryBalanceMinor: 990,
+      confirmedAt: "2026-09-02T08:10:00.000Z",
+    });
+  });
+
+  it("keeps a successful transaction with mismatched payout evidence non-terminal", async () => {
     const event = validEvent();
     event.json.recipient = treasury;
     const provider = createSuiPaymentChainStatusProvider(
@@ -65,7 +92,7 @@ describe("Sui payment chain status", () => {
     );
 
     await expect(provider.getStatus(digest, snapshot)).resolves.toEqual({
-      state: "failure",
+      state: "pending",
       code: "payout_event_verification_failed",
     });
   });
