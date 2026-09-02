@@ -80,8 +80,11 @@ export function createSuiPaymentChainStatusProvider(
           confirmedAt: new Date(transaction.timestampMs).toISOString(),
         };
       } catch {
+        // The transaction itself succeeded, so an event parsing/mismatch problem
+        // cannot safely be treated as proof that no money moved. Keep the exact
+        // digest active for reconciliation and block construction of a replacement.
         return {
-          state: "failure",
+          state: "pending",
           code: "payout_event_verification_failed",
         };
       }
