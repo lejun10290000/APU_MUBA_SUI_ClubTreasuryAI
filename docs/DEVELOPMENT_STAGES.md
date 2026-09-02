@@ -55,10 +55,12 @@ Verified deployment:
 
 ```text
 Package: 0xfbb2f939d484b6179f555a6cef8093faa749001184d84adb980de6d88c0e1d4f
-Treasury: 0x8971fa3e32994b81396122c3e3b1a4b054c3e3799714f5c2206dd037054319e4
-TreasurerCap: 0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7
+Historical Stage 3 Treasury: 0x8971fa3e32994b81396122c3e3b1a4b054c3e3799714f5c2206dd037054319e4
+Historical Stage 3 TreasurerCap: 0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7
 Publish digest: DdQQEcGD8FWmAde2rziBDjwua5CjcwRUtfN4p2Lkoeb
 ```
+
+The historical Stage 3 Treasury/Cap remain valid Stage 3 evidence but are no longer the clean Stage 7 demo defaults because the treasury was later used by failed Stage 6 acceptance attempts.
 
 Exit criteria: **VERIFIED** — a treasurer funded a real Testnet treasury and executed a verified test payout with public Sui evidence.
 
@@ -78,16 +80,7 @@ Required work:
 - [x] zero-live-call fake-client fixture/test set
 - [x] explicit owner-controlled live quality validation for budget and synthetic receipt inputs
 
-Automated verification:
-
-- SDK pinned at `@google/genai` `2.19.0`
-- mock mode selects the deterministic adapter without constructing a Gemini client
-- live client creation is lazy and blocked by the explicit guard/key checks
-- every model response is parsed and Zod-validated before application use
-- invalid or unavailable AI fails safely for manual review
-- 87 unit tests, production build, and 7 Playwright smoke tests pass in mock mode
-
-Exit criteria: **VERIFIED** — mock mode remains default; the owner explicitly validated one live structured budget parse and one live in-memory synthetic receipt extraction with `gemini-2.5-flash`; missing currency correctly required human review; configuration returned to mock mode; deterministic financial rules remained authoritative.
+Exit criteria: **VERIFIED** — mock mode remains default; the owner explicitly validated live structured budget parsing and synthetic receipt extraction with `gemini-2.5-flash`; deterministic financial rules remained authoritative.
 
 ## Stage 5 — Claim and receipt workflow integration — COMPLETE
 
@@ -109,43 +102,73 @@ Required work:
 - [x] immutable approved-but-unpaid Stage 6 payout snapshot
 - [x] owner-controlled live Supabase acceptance gate
 
-Implementation status: **COMPLETE**. Local automated/browser verification and the owner-controlled live Supabase acceptance gate passed. A member submitted synthetic receipts, the treasurer reopened and decided the persisted claim, the immutable payout snapshot was verified, all seven negative checks passed, and no wallet/Sui payout action occurred. PR #18 merged the stage into `main` at `8212881d5e8f999180700d96e3722a5313d1885c`.
+Implementation status: **COMPLETE**. Local automated/browser verification and the owner-controlled live Supabase acceptance gate passed. PR #18 merged the stage into `main` at `8212881d5e8f999180700d96e3722a5313d1885c`.
 
 Exit criteria: **VERIFIED** — a member submitted a claim/receipt and the treasurer received and persisted a validated recommendation and human decision without automatic money movement.
 
-## Stage 6 — Human approval and on-chain payment — CURRENT
+## Stage 6 — Human approval and on-chain payment — COMPLETE
 
-Goal: connect persisted claim approval to the already verified Sui payout foundation.
+Goal: connect persisted human approval to the verified Sui payout foundation without allowing AI or retry ambiguity to create uncontrolled payments.
 
 Required work:
 
-- [x] claim-linked Sui transaction construction
-- [x] wallet confirmation/signature boundary
-- [x] Move payout re-check
+- [x] claim-linked Sui transaction construction from immutable `approved_*` fields only
+- [x] explicit wallet confirmation/signature boundary
+- [x] Move payout authorization/category/custody re-check
 - [x] Testnet USDC payout construction/submission
 - [x] transaction finality/status handling
-- [x] transaction digest/explorer link
+- [x] transaction digest/explorer evidence
 - [x] digest-first database synchronization and retry protection
 - [x] remaining budget changes only after verified on-chain success
-- [x] successful-but-unverifiable transaction outcomes remain `reconciliation_required` and block blind replacement signing
-- [x] Sui payout-event category parsing accepts both UTF-8 string and byte-array `vector<u8>` JSON representations
-- [ ] fresh owner-controlled end-to-end acceptance proving exactly one payout and idempotent same-digest reconciliation
+- [x] one-active-payment-attempt boundary per claim
+- [x] successful-but-unverifiable outcomes remain `reconciliation_required` and block blind replacement signing
+- [x] canonical `PayoutEvent` BCS verification with compatibility handling for Sui JSON representations
+- [x] live claim workspace sourced from persisted Supabase treasury/category data
+- [x] owner-controlled clean end-to-end acceptance proving exactly one payout and idempotent same-digest refresh
 
-Current boundary: the first owner-controlled Stage 6 live acceptance on `stage6/approved-claim-payout` exposed a duplicate-payout defect. A successful Testnet transaction whose event category could not be parsed was incorrectly classified as failed, which released the active-attempt boundary and allowed a second signed payout for the same claim. The affected live claim and both public transaction digests are preserved as failed-acceptance evidence and must not be reused. The repair now accepts the observed Sui category representation and treats successful-but-unverifiable evidence as non-terminal reconciliation-required, keeping the existing digest active and blocking blind retry. GitHub CI run #80 passes lint, strict TypeScript, 169 unit tests, production build, and 7/7 Playwright smoke tests. Stage 6 remains CURRENT until a fresh clean treasury/category/claim with aligned on-chain and database state proves exactly one payout, paid-state synchronization, and idempotent refresh/reconciliation without a second wallet signature.
+The first owner-controlled acceptance exposed a duplicate-payout defect and is preserved as failed evidence. The repaired flow was then tested with a fresh aligned treasury/category/claim.
 
-Exit criteria: the full core payment workflow works end to end, retries cannot produce an uncontrolled second payout, ambiguous/successful-but-unverifiable outcomes remain tied to the existing digest, and AI cannot bypass human approval.
+Verified clean acceptance:
 
-## Stage 7 — Demo hardening and deployment — NOT STARTED
+```text
+Treasury: 0x9d9a0b5a7d58d4efa77419ba891a442f3ad23610b4c824a2fa67c7893917f0f3
+TreasurerCap: 0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101
+Category: events
+Approved payout: 0.10 USDC
+Confirmed digest: DZtb9Td7nfszbBVWj1QdUqd8peeP3FUm2Q6XJEqvVvb7
+Payment attempts: exactly 1
+Final budget: 1.00 allocated / 0.10 spent / 0.90 remaining
+```
 
-Goal: make the live demo reliable under hackathon conditions.
+Refreshing the paid claim preserved the same digest and did not show another payment action or request another wallet signature.
 
-Required work includes web deployment, demo persistence/storage setup, clean Testnet assets, seeded scenario, repeated full-flow rehearsals, failure handling, loading/error polish, backup screenshots/video, and secret-history verification.
+PR #20 merged Stage 6 into `main` at `61fb9c86f5077f9813add6dc94aa69b311aaf4d7`. The exact merged commit then passed GitHub CI with **171/171 unit tests**, production build, lint/typecheck, and **7/7 Playwright smoke tests**.
+
+Exit criteria: **VERIFIED** — the full payment workflow works end to end, retry ambiguity cannot blindly create a replacement transaction, paid/budget state follows verified on-chain evidence, and AI cannot bypass human approval.
+
+## Stage 7 — Demo hardening and deployment — CURRENT
+
+Goal: make the verified core MVP reliable under hackathon conditions and accessible as a deployed demo.
+
+Required work:
+
+- [ ] deploy the Next.js app to Vercel
+- [ ] configure production environment variables and Supabase safely
+- [ ] verify the clean Sui Testnet demo Treasury/Cap and sufficient Testnet assets
+- [ ] define a deterministic reset/seed process for repeated rehearsals
+- [ ] exercise the complete deployed end-to-end flow repeatedly
+- [ ] harden loading/error/recovery UX for Gemini, Supabase, wallet, and Sui failures
+- [ ] verify paid-state refresh/reconciliation remains idempotent after deployment
+- [ ] prepare backup screenshots/video
+- [ ] verify repository/secret safety before submission
+
+Exit criteria: **a public deployment is reachable and the full demo can be repeated reliably from known state with understandable recovery paths, sufficient Testnet assets, and backup evidence.**
 
 ## Stage 8 — Submission and pitch — NOT STARTED
 
 Goal: satisfy all official requirements and optimize both Sui pitches.
 
-Required work includes final README/team/AI disclosures, real Sui IDs, screenshots/live URL, 3–5 minute video, Devfolio submission, and rehearsed Payments & Stablecoins plus AI × Sui pitches.
+Required work includes final README/team/AI disclosures, screenshots/live URL, 3–5 minute video, Devfolio submission, and rehearsed Payments & Stablecoins plus AI × Sui pitches.
 
 ## Stage update rule
 
@@ -156,4 +179,4 @@ Every development PR/commit must update:
 1. `docs/PROJECT_STATUS.md`
 2. this file if stage status changed
 3. `docs/ROADMAP.md`
-4. affected setup/architecture docs
+4. affected setup/architecture/demo docs
