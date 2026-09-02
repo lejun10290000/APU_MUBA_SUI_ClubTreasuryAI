@@ -25,7 +25,7 @@ const publicSchema = z
     NEXT_PUBLIC_SUI_TREASURER_CAP_OBJECT_ID: z
       .string()
       .default(
-        "0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7",
+        "0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101",
       ),
     NEXT_PUBLIC_SUI_USDC_COIN_TYPE: z
       .string()
@@ -35,7 +35,7 @@ const publicSchema = z
     NEXT_PUBLIC_DEMO_TREASURY_OBJECT_ID: z
       .string()
       .default(
-        "0x8971fa3e32994b81396122c3e3b1a4b054c3e3799714f5c2206dd037054319e4",
+        "0x9d9a0b5a7d58d4efa77419ba891a442f3ad23610b4c824a2fa67c7893917f0f3",
       ),
     NEXT_PUBLIC_SUPABASE_URL: optionalUrl,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: optionalString,
