@@ -11,6 +11,7 @@ type ChainTransaction = {
   timestampMs: number | null;
   events?: Array<{
     eventType: string;
+    bcs?: Uint8Array;
     json: Record<string, unknown> | null;
   }>;
 };
