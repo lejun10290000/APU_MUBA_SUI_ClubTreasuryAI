@@ -28,7 +28,7 @@ AI never owns authoritative balances, payout authorization, wallet signing, or S
 
 ## Current Development Stage
 
-**Stage 6 — Human approval and on-chain payment — CURRENT (planning)**
+**Stage 6 — Human approval and on-chain payment — CURRENT (fresh live re-validation required)**
 
 Completed stages:
 
@@ -41,9 +41,32 @@ Completed stages:
 
 Stage 4 implementation and live-validation documentation were merged into `main` through **PR #16** and **PR #17**.
 
-Stage 5 is **COMPLETE**. Its local verification and owner-controlled live Supabase acceptance gate passed, and **PR #18** merged the implementation into `main`. Stage 6 is current for planning; claim-linked payout execution has not been implemented yet.
+Stage 5 is **COMPLETE**. Its local verification and owner-controlled live Supabase acceptance gate passed, and **PR #18** merged the implementation into `main`.
 
-Read `docs/PROJECT_STATUS.md` for the authoritative current task before coding.
+Stage 6 implementation now includes approved-claim payout preparation, explicit wallet signing, digest-first persistence, Sui Testnet submission, exact payout-event verification, reconciliation, paid evidence, and atomic database finalization. The first owner-controlled Stage 6 live acceptance exposed a duplicate-payout safety defect: a successful Testnet payout whose event category was not parsed correctly was treated as failed, allowing a second payout for the same claim. The affected claim and both public Testnet digests are preserved as failed-acceptance evidence. The repair accepts both string and byte-array Sui category representations and keeps successful-but-unverifiable outcomes in `reconciliation_required`, which blocks blind replacement signing.
+
+GitHub CI run #80 passes lint, strict TypeScript, **169 unit tests**, production build, and **7/7 Playwright smoke tests** after the repair. Stage 6 remains CURRENT until a fresh clean aligned claim/treasury proves exactly one payout plus idempotent same-digest reconciliation.
+
+Read `docs/PROJECT_STATUS.md` for the authoritative current task before coding, and `docs/STAGE6_LIVE_VALIDATION.md` before any further live payout.
+
+## Stage 6 Approved-Claim Payout — CURRENT
+
+The Stage 6 branch now provides:
+
+- payout preparation from the immutable human-approved snapshot only
+- one active payment-attempt boundary per claim
+- wallet/Testnet/TreasurerCap authorization checks
+- one explicit wallet signature for the exact approved payout
+- transaction digest derivation and persistence before broadcast
+- Sui Testnet submission without server-side private keys
+- same-digest reconciliation for interrupted/ambiguous outcomes
+- exact typed `PayoutEvent` verification before paid-state finalization
+- category/budget synchronization only after verified on-chain success
+- transaction digest and Testnet explorer evidence after confirmation
+- UTF-8 string and byte-array handling for Sui `vector<u8>` category evidence
+- non-terminal reconciliation handling when a successful chain transaction cannot yet be verified exactly, preventing blind replacement signing
+
+The first live Stage 6 acceptance is intentionally recorded as **FAILED** because it produced two successful Testnet payouts for the same claim before the safety defect was repaired. Do not reuse that affected claim. A fresh clean acceptance scenario is required before Stage 6 can be marked complete.
 
 ## Stage 4 Gemini Adapter — COMPLETE
 
@@ -233,7 +256,7 @@ Claim data defaults to the in-memory mock repository:
 NEXT_PUBLIC_CLAIM_DATA_MODE=mock
 ```
 
-For the owner-controlled Stage 5 live acceptance only, first apply the migration in `supabase/migrations/`, enable Supabase Anonymous Sign-ins, and set these values in untracked `.env.local`:
+For owner-controlled live claim/payment validation, first apply the migrations in `supabase/migrations/`, enable Supabase Anonymous Sign-ins, and set these values in untracked `.env.local`:
 
 ```text
 NEXT_PUBLIC_CLAIM_DATA_MODE=live
@@ -244,6 +267,8 @@ SUPABASE_RECEIPTS_BUCKET=receipts
 ```
 
 Never expose `SUPABASE_SECRET_KEY` with a `NEXT_PUBLIC_` prefix. Return claim mode to `mock` after live validation if the project is not being used as the shared demo backend.
+
+Before any Stage 6 live payout, read `docs/STAGE6_LIVE_VALIDATION.md` and use a fresh clean aligned acceptance scenario. Do not reuse a claim whose prior digest outcome is ambiguous or whose acceptance history contains a successful payout.
 
 ## Verification Commands
 
@@ -279,7 +304,7 @@ sui move test
 - native Circle Sui Testnet USDC
 - mock-first `AIService`
 - verified Google Gemini Developer API adapter with `@google/genai` `2.19.0`
-- Stage 5 persistence/private receipt storage: Supabase PostgreSQL, Auth, RLS, and private Storage
+- Stage 5/6 persistence: Supabase PostgreSQL, Auth, RLS, private Storage, and claim payment-attempt ledger
 
 ## AI Cost-Control Policy
 
@@ -330,8 +355,9 @@ Add every other AI tool used by any teammate before submission.
 - `docs/ARCHITECTURE.md` — architecture and responsibility boundaries
 - `docs/TECH_STACK.md` — technology decisions
 - `docs/DEMO_PLAN.md` — demo flow
-- `docs/STAGE5_LIVE_VALIDATION.md` — owner-controlled migration/private-receipt acceptance checklist
-- `docs/STAGE6_IMPLEMENTATION_PLAN.md` — reviewed boundary required before claim-linked payout work begins
+- `docs/STAGE5_LIVE_VALIDATION.md` — owner-controlled migration/private-receipt acceptance record
+- `docs/STAGE6_IMPLEMENTATION_PLAN.md` — reviewed approved-claim payout safety boundary
+- `docs/STAGE6_LIVE_VALIDATION.md` — Stage 6 live acceptance incident evidence and required fresh re-validation checklist
 
 ## Team Members
 
