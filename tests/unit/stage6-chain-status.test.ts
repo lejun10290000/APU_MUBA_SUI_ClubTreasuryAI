@@ -1,3 +1,4 @@
+import { bcs } from "@mysten/sui/bcs";
 import { toBase58 } from "@mysten/sui/utils";
 import { describe, expect, it } from "vitest";
 import { asMinorAmount } from "@/src/domain/money";
@@ -19,6 +20,15 @@ const snapshot = {
   amountMinor: asMinorAmount(10),
   currency: "USDC" as const,
 };
+
+const payoutEventBcs = bcs.struct("PayoutEvent", {
+  treasury_id: bcs.Address,
+  category_reference: bcs.vector(bcs.u8()),
+  recipient: bcs.Address,
+  amount: bcs.u64(),
+  category_remaining: bcs.u64(),
+  treasury_balance: bcs.u64(),
+});
 
 describe("Sui payment chain status", () => {
   it("returns verified amounts only for a successful transaction with the exact payout event", async () => {
@@ -46,8 +56,43 @@ describe("Sui payment chain status", () => {
     });
   });
 
+  it("verifies canonical BCS even when grpc JSON rendering is unusable", async () => {
+    const event = validEvent();
+    event.json = {
+      treasury_id: { bytes: treasury },
+      category_reference: { bytes: "ZXZlbnRz" },
+      recipient: { address: recipient },
+      amount: { value: "100000" },
+      category_remaining: { value: "9900000" },
+      treasury_balance: { value: "9900000" },
+    };
+    const provider = createSuiPaymentChainStatusProvider(
+      {
+        getTransaction: async () => ({
+          $kind: "Transaction" as const,
+          Transaction: {
+            digest,
+            status: { success: true as const, error: null },
+            timestampMs: 1_788_336_600_000,
+            events: [event],
+          },
+        }),
+      },
+      { packageId, coinType },
+    );
+
+    await expect(provider.getStatus(digest, snapshot)).resolves.toEqual({
+      state: "success",
+      transactionDigest: digest,
+      categoryRemainingMinor: 990,
+      treasuryBalanceMinor: 990,
+      confirmedAt: "2026-09-02T08:10:00.000Z",
+    });
+  });
+
   it("accepts the UTF-8 string representation Sui JSON may use for vector<u8>", async () => {
     const event = validEvent();
+    event.bcs = new Uint8Array();
     event.json.category_reference = "events";
     const provider = createSuiPaymentChainStatusProvider(
       {
@@ -75,6 +120,16 @@ describe("Sui payment chain status", () => {
 
   it("keeps a successful transaction with mismatched payout evidence non-terminal", async () => {
     const event = validEvent();
+    event.bcs = payoutEventBcs
+      .serialize({
+        treasury_id: treasury,
+        category_reference: [...new TextEncoder().encode("events")],
+        recipient: treasury,
+        amount: 100000n,
+        category_remaining: 9900000n,
+        treasury_balance: 9900000n,
+      })
+      .toBytes();
     event.json.recipient = treasury;
     const provider = createSuiPaymentChainStatusProvider(
       {
@@ -131,6 +186,16 @@ describe("Sui payment chain status", () => {
 function validEvent() {
   return {
     eventType: `${packageId}::treasury::PayoutEvent<${coinType}>`,
+    bcs: payoutEventBcs
+      .serialize({
+        treasury_id: treasury,
+        category_reference: [...new TextEncoder().encode("events")],
+        recipient,
+        amount: 100000n,
+        category_remaining: 9900000n,
+        treasury_balance: 9900000n,
+      })
+      .toBytes(),
     json: {
       treasury_id: treasury,
       category_reference: [...new TextEncoder().encode("events")],
