@@ -26,6 +26,7 @@ export type ConfirmedTransaction = WalletTransaction & {
   objectTypes?: Record<string, string>;
   events?: Array<{
     eventType: string;
+    bcs?: Uint8Array;
     json: Record<string, unknown> | null;
   }>;
 };

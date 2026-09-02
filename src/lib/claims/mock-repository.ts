@@ -1,15 +1,22 @@
 import { randomUUID } from "node:crypto";
 import type { DuplicateClaimCandidate } from "@/src/domain/claim-rules";
 import type { ReceiptMimeType } from "@/src/domain/receipt-evidence";
+import { asMinorAmount } from "@/src/domain/money";
 import {
   demoSuiAddress,
   type PersistedClaim,
   type PersistedClaimSubmission,
 } from "@/src/domain/stage5-claims";
+import {
+  isActivePaymentAttemptStatus,
+  parseApprovedPayoutSnapshot,
+  type ConfirmedPaymentInput,
+  type PaymentAttempt,
+} from "@/src/domain/stage6-payments";
 import type {
-  ClaimRepository,
   FinalClaimReview,
   PersistedWorkspace,
+  Stage6ClaimRepository,
   SubmittedClaimInsert,
 } from "./types";
 
@@ -22,6 +29,7 @@ interface MockClaimStore {
   workspaces: MockWorkspace[];
   claims: Map<string, PersistedClaim>;
   receipts: Map<string, Uint8Array>;
+  paymentAttempts: Map<string, PaymentAttempt>;
 }
 
 const mockUserId = "00000000-0000-4000-8000-000000000001";
@@ -35,11 +43,12 @@ function globalStore(): MockClaimStore {
     workspaces: [],
     claims: new Map(),
     receipts: new Map(),
+    paymentAttempts: new Map(),
   };
   return root[storeSymbol];
 }
 
-export class MockClaimRepository implements ClaimRepository {
+export class MockClaimRepository implements Stage6ClaimRepository {
   readonly identity = { userId: mockUserId, walletAddress: demoSuiAddress };
 
   constructor(private readonly store = globalStore()) {}
@@ -135,6 +144,8 @@ export class MockClaimRepository implements ClaimRepository {
       approvedSnapshot: null,
       createdAt: now,
       decidedAt: null,
+      confirmedTransactionDigest: null,
+      paidAt: null,
     };
     this.store.claims.set(claim.id, claim);
     return structuredClone(claim);
@@ -225,6 +236,204 @@ export class MockClaimRepository implements ClaimRepository {
     return structuredClone(updated);
   }
 
+  async preparePaymentAttempt(claimId: string) {
+    const claim = this.requireClaim(claimId);
+    const snapshot = parseApprovedPayoutSnapshot(claim);
+    const existing = [...this.store.paymentAttempts.values()].find(
+      (attempt) =>
+        attempt.claimId === claimId &&
+        isActivePaymentAttemptStatus(attempt.status),
+    );
+    if (existing) {
+      return { attempt: structuredClone(existing), snapshot };
+    }
+
+    const now = new Date().toISOString();
+    const attempt: PaymentAttempt = {
+      id: randomUUID(),
+      claimId,
+      initiatedByUserId: this.identity.userId,
+      snapshot,
+      treasurerCapObjectId: null,
+      transactionDigest: null,
+      status: "prepared",
+      failureCode: null,
+      createdAt: now,
+      updatedAt: now,
+      confirmedAt: null,
+    };
+    this.store.paymentAttempts.set(attempt.id, attempt);
+    return { attempt: structuredClone(attempt), snapshot };
+  }
+
+  async getPaymentAttempt(attemptId: string) {
+    const attempt = this.store.paymentAttempts.get(attemptId);
+    return attempt ? structuredClone(attempt) : null;
+  }
+
+  async getActivePaymentAttemptForClaim(claimId: string) {
+    const attempt = [...this.store.paymentAttempts.values()]
+      .filter(
+        (candidate) =>
+          candidate.claimId === claimId &&
+          isActivePaymentAttemptStatus(candidate.status),
+      )
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
+    return attempt ? structuredClone(attempt) : null;
+  }
+
+  async markPaymentAttemptSigned(
+    attemptId: string,
+    digest: string,
+    treasurerCapObjectId: string,
+  ) {
+    const attempt = this.requireAttempt(attemptId);
+    if (attempt.status !== "prepared") {
+      throw new Error("Only prepared attempts can become signed.");
+    }
+    if (!digest.trim() || !treasurerCapObjectId.trim()) {
+      throw new Error("Signed attempt requires digest and TreasurerCap.");
+    }
+    return this.updateAttempt(attempt, {
+      status: "signed",
+      transactionDigest: digest.trim(),
+      treasurerCapObjectId,
+      failureCode: null,
+    });
+  }
+
+  async markPaymentAttemptSubmitted(attemptId: string) {
+    const attempt = this.requireAttempt(attemptId);
+    if (attempt.status !== "signed" || !attempt.transactionDigest) {
+      throw new Error("Only signed attempts with a digest can become submitted.");
+    }
+    return this.updateAttempt(attempt, { status: "submitted", failureCode: null });
+  }
+
+  async cancelPaymentAttempt(attemptId: string, code?: string) {
+    const attempt = this.requireAttempt(attemptId);
+    if (attempt.status !== "prepared") {
+      throw new Error("Only prepared attempts can be cancelled.");
+    }
+    return this.updateAttempt(attempt, {
+      status: "cancelled",
+      failureCode: code?.trim() || null,
+    });
+  }
+
+  async markPaymentAttemptReconciliationRequired(
+    attemptId: string,
+    code: string,
+  ) {
+    const attempt = this.requireAttempt(attemptId);
+    if (
+      !["signed", "submitted", "reconciliation_required"].includes(
+        attempt.status,
+      ) ||
+      !attempt.transactionDigest
+    ) {
+      throw new Error("Reconciliation requires an existing digest.");
+    }
+    return this.updateAttempt(attempt, {
+      status: "reconciliation_required",
+      failureCode: code.trim() || null,
+    });
+  }
+
+  async markPaymentAttemptFailed(attemptId: string, code: string) {
+    const attempt = this.requireAttempt(attemptId);
+    if (!["prepared", "signed", "submitted"].includes(attempt.status)) {
+      throw new Error("Attempt cannot transition to failed from its current state.");
+    }
+    return this.updateAttempt(attempt, {
+      status: "failed",
+      failureCode: code.trim() || null,
+    });
+  }
+
+  async finalizeConfirmedPayment(input: ConfirmedPaymentInput) {
+    const attempt = this.requireAttempt(input.attemptId);
+    const claim = this.requireClaim(input.claimId);
+    if (attempt.claimId !== claim.id) {
+      throw new Error("Payment attempt does not match claim.");
+    }
+    if (
+      !attempt.transactionDigest ||
+      attempt.transactionDigest !== input.transactionDigest.trim()
+    ) {
+      throw new Error("Confirmed digest does not match payment attempt.");
+    }
+    if (
+      attempt.status === "confirmed" &&
+      claim.status === "paid" &&
+      claim.paymentStatus === "paid" &&
+      claim.confirmedTransactionDigest === attempt.transactionDigest
+    ) {
+      return structuredClone(claim);
+    }
+    if (!["submitted", "reconciliation_required"].includes(attempt.status)) {
+      throw new Error("Payment attempt is not ready for confirmation.");
+    }
+    const snapshot = parseApprovedPayoutSnapshot(claim);
+    if (JSON.stringify(snapshot) !== JSON.stringify(attempt.snapshot)) {
+      throw new Error("Approved payout snapshot mismatch.");
+    }
+    const workspace = this.store.workspaces.find(
+      (candidate) =>
+        candidate.treasuryId === claim.treasuryId &&
+        candidate.categoryId === claim.categoryId,
+    );
+    if (!workspace) throw new Error("Budget category not found.");
+    const expectedRemaining =
+      workspace.categoryAllocatedMinor -
+      workspace.categorySpentMinor -
+      attempt.snapshot.amountMinor;
+    if (expectedRemaining < 0) {
+      throw new Error("Payment exceeds remaining category budget.");
+    }
+    if (input.categoryRemainingMinor !== expectedRemaining) {
+      throw new Error(
+        "Confirmed category remaining does not match database budget state.",
+      );
+    }
+    workspace.categorySpentMinor = asMinorAmount(
+      workspace.categoryAllocatedMinor - input.categoryRemainingMinor,
+    );
+    this.updateAttempt(attempt, {
+      status: "confirmed",
+      failureCode: null,
+      confirmedAt: input.confirmedAt,
+    });
+    const updated: PersistedClaim = {
+      ...claim,
+      status: "paid",
+      paymentStatus: "paid",
+      confirmedTransactionDigest: attempt.transactionDigest,
+      paidAt: input.confirmedAt,
+    };
+    this.store.claims.set(claim.id, updated);
+    return structuredClone(updated);
+  }
+
+  private requireAttempt(attemptId: string) {
+    const attempt = this.store.paymentAttempts.get(attemptId);
+    if (!attempt) throw new Error("Payment attempt not found.");
+    return attempt;
+  }
+
+  private updateAttempt(
+    attempt: PaymentAttempt,
+    update: Partial<PaymentAttempt>,
+  ) {
+    const updated: PaymentAttempt = {
+      ...attempt,
+      ...update,
+      updatedAt: new Date().toISOString(),
+    };
+    this.store.paymentAttempts.set(attempt.id, updated);
+    return structuredClone(updated);
+  }
+
   private requireClaim(claimId: string) {
     const claim = this.store.claims.get(claimId);
     if (!claim) {
@@ -239,4 +448,5 @@ export function resetMockClaimStore() {
   store.workspaces.length = 0;
   store.claims.clear();
   store.receipts.clear();
+  store.paymentAttempts.clear();
 }

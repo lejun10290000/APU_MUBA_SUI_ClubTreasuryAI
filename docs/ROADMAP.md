@@ -93,16 +93,21 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 
 ## Stage 6 — Human approval and on-chain payment — CURRENT
 
-- [ ] Review and approve `docs/STAGE6_IMPLEMENTATION_PLAN.md`
-- [ ] Build a payout action that reads only the immutable approved snapshot
-- [ ] Connect claim approval to Sui payout transaction
-- [ ] Treasurer wallet signs/confirms
-- [ ] Move payout re-checks category budget
-- [ ] Execute Testnet USDC payout
-- [ ] Handle transaction finality/status
-- [ ] Update claim/budget only after success
-- [ ] Show transaction digest/explorer link
-- [ ] Add idempotent synchronization/retry protection
+- [x] Review and approve `docs/STAGE6_IMPLEMENTATION_PLAN.md`
+- [x] Build a payout action that reads only the immutable approved snapshot
+- [x] Connect claim approval to Sui payout transaction
+- [x] Treasurer wallet signs/confirms explicitly
+- [x] Move payout re-checks category budget
+- [x] Implement Testnet USDC payout construction/submission
+- [x] Handle transaction finality/status and same-digest reconciliation
+- [x] Update claim/budget only after verified success in the implementation boundary
+- [x] Show transaction digest/explorer link after confirmed finalization
+- [x] Add digest-first synchronization/retry protection
+- [x] Treat successful-but-unverifiable payout evidence as reconciliation-required so blind replacement signing is blocked
+- [x] Accept both UTF-8 string and byte-array Sui JSON representations of `vector<u8>` payout category evidence
+- [x] Verify repaired implementation with GitHub CI: lint, typecheck, 169 unit tests, build, 7 Playwright smoke tests
+- [ ] Repeat owner-controlled live acceptance with a **fresh clean aligned claim/treasury** after the first acceptance exposed a duplicate-payout defect
+- [ ] Prove exactly one payout, paid-state/budget synchronization, and idempotent refresh/reconciliation with no second wallet signature
 
 ## Stage 7 — Demo hardening and deployment — NOT STARTED
 

@@ -119,18 +119,21 @@ Goal: connect persisted claim approval to the already verified Sui payout founda
 
 Required work:
 
-- claim-linked Sui transaction construction
-- wallet confirmation/signature
-- Move payout re-check
-- Testnet USDC payout
-- transaction finality/status handling
-- transaction digest/explorer link
-- idempotent database synchronization
-- remaining budget changes only after on-chain success
+- [x] claim-linked Sui transaction construction
+- [x] wallet confirmation/signature boundary
+- [x] Move payout re-check
+- [x] Testnet USDC payout construction/submission
+- [x] transaction finality/status handling
+- [x] transaction digest/explorer link
+- [x] digest-first database synchronization and retry protection
+- [x] remaining budget changes only after verified on-chain success
+- [x] successful-but-unverifiable transaction outcomes remain `reconciliation_required` and block blind replacement signing
+- [x] Sui payout-event category parsing accepts both UTF-8 string and byte-array `vector<u8>` JSON representations
+- [ ] fresh owner-controlled end-to-end acceptance proving exactly one payout and idempotent same-digest reconciliation
 
-Current boundary: planning only. Review `docs/STAGE6_IMPLEMENTATION_PLAN.md`, including the payout state machine, transaction idempotency, finality, retry, old-claim treasury/category mismatch, and post-confirmation reconciliation before implementation begins on a dedicated Stage 6 branch.
+Current boundary: the first owner-controlled Stage 6 live acceptance on `stage6/approved-claim-payout` exposed a duplicate-payout defect. A successful Testnet transaction whose event category could not be parsed was incorrectly classified as failed, which released the active-attempt boundary and allowed a second signed payout for the same claim. The affected live claim and both public transaction digests are preserved as failed-acceptance evidence and must not be reused. The repair now accepts the observed Sui category representation and treats successful-but-unverifiable evidence as non-terminal reconciliation-required, keeping the existing digest active and blocking blind retry. GitHub CI run #80 passes lint, strict TypeScript, 169 unit tests, production build, and 7/7 Playwright smoke tests. Stage 6 remains CURRENT until a fresh clean treasury/category/claim with aligned on-chain and database state proves exactly one payout, paid-state synchronization, and idempotent refresh/reconciliation without a second wallet signature.
 
-Exit criteria: the full core payment workflow works end to end and AI cannot bypass human approval.
+Exit criteria: the full core payment workflow works end to end, retries cannot produce an uncontrolled second payout, ambiguous/successful-but-unverifiable outcomes remain tied to the existing digest, and AI cannot bypass human approval.
 
 ## Stage 7 — Demo hardening and deployment — NOT STARTED
 

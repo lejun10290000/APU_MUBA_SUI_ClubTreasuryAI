@@ -34,6 +34,11 @@ const serverSchema = z
       .url()
       .default("https://fullnode.testnet.sui.io:443"),
     NEXT_PUBLIC_SUI_PACKAGE_ID: z.string().trim().min(1).optional(),
+    NEXT_PUBLIC_SUI_TREASURER_CAP_OBJECT_ID: z
+      .string()
+      .default(
+        "0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7",
+      ),
     NEXT_PUBLIC_SUI_USDC_COIN_TYPE: z
       .string()
       .default(
@@ -80,6 +85,8 @@ const parsed = serverSchema.parse({
   NEXT_PUBLIC_SUI_RPC_URL: process.env.NEXT_PUBLIC_SUI_RPC_URL,
   NEXT_PUBLIC_SUI_PACKAGE_ID:
     process.env.NEXT_PUBLIC_SUI_PACKAGE_ID || undefined,
+  NEXT_PUBLIC_SUI_TREASURER_CAP_OBJECT_ID:
+    process.env.NEXT_PUBLIC_SUI_TREASURER_CAP_OBJECT_ID || undefined,
   NEXT_PUBLIC_SUI_USDC_COIN_TYPE: process.env.NEXT_PUBLIC_SUI_USDC_COIN_TYPE,
   NEXT_PUBLIC_DEMO_TREASURY_OBJECT_ID:
     process.env.NEXT_PUBLIC_DEMO_TREASURY_OBJECT_ID,

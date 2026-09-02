@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 
 test("Stage 2 product shell navigates from landing to treasurer dashboard", async ({
@@ -128,21 +129,24 @@ test("Stage 5 mock adapter runs receipt persistence through an unpaid human deci
   await page.getByLabel("Merchant").fill("Campus Bookstore");
   await page.getByLabel("Expense description").fill("Workshop stationery");
   await page.getByLabel("Budget category").selectOption("marketing-3");
-  await page.getByLabel("Requested amount").fill("75.00");
-  await page.getByLabel("Receipt amount").fill("75.00");
-  await page.getByLabel("Receipt reference").fill("BOOK-NEW-104");
+  await page.getByLabel("Requested amount").fill("0.10");
+  await page.getByLabel("Receipt amount").fill("0.10");
+  const uniqueReceiptReference = randomUUID();
+  await page.getByLabel("Receipt reference").fill(uniqueReceiptReference);
   await page.getByLabel("Receipt image").setInputFiles({
     name: "receipt.png",
     mimeType: "image/png",
-    buffer: pngFixture("synthetic-stage5-receipt"),
+    buffer: pngFixture(`synthetic-stage5-receipt-${uniqueReceiptReference}`),
   });
   await page.getByRole("button", { name: "Submit claim for review" }).click();
 
   await expect(
     page.getByRole("heading", { name: "Review the claim" }),
   ).toBeVisible();
-  await expect(page.getByText("Recommendation · approve")).toBeVisible();
-  await expect(page.getByText("Exact amount match")).toBeVisible();
+  await expect(page.getByText("Recommendation · review")).toBeVisible();
+  // Mock AI deterministically extracts 75.00 USDC, overriding the entered
+  // receipt amount and intentionally exercising the human-review mismatch path.
+  await expect(page.getByText("receipt higher")).toBeVisible();
   await page
     .getByLabel("Human decision note")
     .fill("Receipt and category evidence verified.");
@@ -150,8 +154,15 @@ test("Stage 5 mock adapter runs receipt persistence through an unpaid human deci
   await expect(
     page.getByText("Decision saved · approved unpaid"),
   ).toBeVisible();
-  await expect(page.getByText("Approved payout snapshot")).toBeVisible();
-  await expect(page.getByText(/No payment in Stage 5/i)).toBeVisible();
+  const payoutPanel = page
+    .getByText("Stage 6 · Sui Testnet payout")
+    .locator("xpath=ancestor::section");
+  await expect(payoutPanel).toContainText("0.10 USDC");
+  await page.getByRole("button", { name: "Pay approved claim" }).click();
+  await expect(
+    page.getByText("Connect the authorized treasurer wallet before paying."),
+  ).toBeVisible();
+  await expect(page.getByText("Unpaid", { exact: true })).toBeVisible();
 });
 
 test("deterministic review rejects an exact receipt byte duplicate", async ({

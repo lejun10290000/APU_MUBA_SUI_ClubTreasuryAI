@@ -1,6 +1,6 @@
 # Stage 6 Implementation Plan — Approved Claim to Sui Payment
 
-Stage 6 is **CURRENT for planning only**. This document defines the boundary that must be reviewed before implementation begins. It does not authorize a payout, modify Supabase, or change the verified Move deployment.
+Stage 6 is **CURRENT and ready for owner-controlled live acceptance** on `stage6/approved-claim-payout`. This document remains the approved safety boundary. Implementation does not itself authorize a live payout, and the verified Move deployment remains unchanged.
 
 ## Stage 5 Input Contract
 

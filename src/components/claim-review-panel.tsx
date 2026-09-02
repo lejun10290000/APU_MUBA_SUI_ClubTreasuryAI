@@ -7,6 +7,7 @@ import { compareReceiptAmount } from "@/src/domain/claim-rules";
 import { formatUsdcMinor } from "@/src/domain/money";
 import type { PersistedClaim } from "@/src/domain/stage5-claims";
 import { receiptAnalysisSchema } from "@/src/lib/ai/types";
+import { ClaimPayoutPanel } from "./claim-payout-panel";
 import { Icon } from "./icon";
 
 const recommendationStyles = {
@@ -121,7 +122,9 @@ export function ClaimReviewPanel() {
   }
 
   const decisionComplete =
-    claim.status === "approved_unpaid" || claim.status === "rejected";
+    claim.status === "approved_unpaid" ||
+    claim.status === "rejected" ||
+    claim.status === "paid";
   const parsedAnalysis = receiptAnalysisSchema.safeParse(claim.receiptAnalysis);
   const aiAnalysis = parsedAnalysis.success ? parsedAnalysis.data : null;
   return (
@@ -167,7 +170,10 @@ export function ClaimReviewPanel() {
             }
           />
           <Metric label="Category" value={claim.categoryName} />
-          <Metric label="Payment" value="Unpaid" />
+          <Metric
+            label="Payment"
+            value={claim.paymentStatus === "paid" ? "Paid" : "Unpaid"}
+          />
         </div>
 
         <div className="mt-7">
@@ -367,34 +373,16 @@ export function ClaimReviewPanel() {
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/55">
             Human decision boundary
           </p>
-          <h3 className="mt-3 text-xl font-bold">No payment in Stage 5</h3>
+          <h3 className="mt-3 text-xl font-bold">
+            Human approval remains final
+          </h3>
           <p className="mt-3 text-sm leading-6 text-white/65">
-            Approval only writes an immutable payout snapshot for Stage 6. It
-            does not open a wallet, sign a transaction, or move USDC.
+            AI recommends and the treasurer decides. Stage 6 can only build from
+            the approved snapshot, and the connected wallet must explicitly
+            sign.
           </p>
         </section>
-        {claim.approvedSnapshot && (
-          <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-emerald-800">
-              Approved payout snapshot
-            </p>
-            <dl className="mt-4 space-y-3 text-xs text-emerald-950/70">
-              <Snapshot
-                label="Amount"
-                value={formatUsdcMinor(claim.approvedSnapshot.amountMinor)}
-              />
-              <Snapshot
-                label="Category"
-                value={claim.approvedSnapshot.categoryReference}
-              />
-              <Snapshot
-                label="Recipient"
-                value={claim.approvedSnapshot.recipientSuiAddress}
-                mono
-              />
-            </dl>
-          </section>
-        )}
+        <ClaimPayoutPanel claim={claim} onClaimUpdated={setClaim} />
       </aside>
     </div>
   );

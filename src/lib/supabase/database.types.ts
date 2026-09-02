@@ -71,19 +71,53 @@ export type ClaimRow = {
   recommendation: "approve" | "review" | "reject" | null;
   recommendation_reasons: Json;
   recommendation_at: string | null;
-  status: "submitted" | "under_review" | "approved_unpaid" | "rejected";
+  status:
+    | "submitted"
+    | "under_review"
+    | "approved_unpaid"
+    | "rejected"
+    | "paid";
   decision: "approve" | "reject" | null;
   decision_reason: string | null;
   decided_by: string | null;
   decided_at: string | null;
-  payment_status: "unpaid";
+  payment_status: "unpaid" | "paid";
   approved_treasury_object_id: string | null;
   approved_category_reference: string | null;
   approved_recipient_sui_address: string | null;
   approved_amount_minor: number | null;
   approved_currency: "USDC" | null;
+  confirmed_transaction_digest: string | null;
+  paid_at: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type ClaimPaymentAttemptRow = {
+  id: string;
+  claim_id: string;
+  treasury_id: string;
+  category_id: string;
+  initiated_by: string;
+  treasurer_cap_object_id: string | null;
+  expected_treasury_object_id: string;
+  expected_category_reference: string;
+  expected_recipient_sui_address: string;
+  expected_amount_minor: number;
+  expected_currency: "USDC";
+  transaction_digest: string | null;
+  status:
+    | "prepared"
+    | "signed"
+    | "submitted"
+    | "confirmed"
+    | "cancelled"
+    | "failed"
+    | "reconciliation_required";
+  failure_code: string | null;
+  created_at: string;
+  updated_at: string;
+  confirmed_at: string | null;
 };
 
 export interface Database {
@@ -174,6 +208,7 @@ export interface Database {
         >,
         Partial<ClaimRow>
       >;
+      claim_payment_attempts: TableDefinition<ClaimPaymentAttemptRow, never>;
     };
     Views: Record<string, never>;
     Functions: {
@@ -193,6 +228,28 @@ export interface Database {
         };
         Returns: ClaimRow;
       };
+      prepare_claim_payment: {
+        Args: { p_claim_id: string };
+        Returns: ClaimPaymentAttemptRow;
+      };
+      transition_claim_payment_attempt: {
+        Args: {
+          p_attempt_id: string;
+          p_status: ClaimPaymentAttemptRow["status"];
+          p_transaction_digest?: string | null;
+          p_treasurer_cap_object_id?: string | null;
+          p_failure_code?: string | null;
+        };
+        Returns: ClaimPaymentAttemptRow;
+      };
+      finalize_claim_payment: {
+        Args: {
+          p_attempt_id: string;
+          p_transaction_digest: string;
+          p_confirmed_category_remaining_minor: number;
+        };
+        Returns: ClaimRow;
+      };
     };
     Enums: {
       treasury_member_role: "owner" | "treasurer" | "member";
@@ -200,7 +257,8 @@ export interface Database {
         | "submitted"
         | "under_review"
         | "approved_unpaid"
-        | "rejected";
+        | "rejected"
+        | "paid";
       claim_recommendation: "approve" | "review" | "reject";
       claim_decision: "approve" | "reject";
     };
