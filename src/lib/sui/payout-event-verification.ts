@@ -1,4 +1,6 @@
+import { bcs } from "@mysten/sui/bcs";
 import {
+  normalizeStructTag,
   normalizeSuiAddress,
   normalizeSuiObjectId,
 } from "@mysten/sui/utils";
@@ -29,19 +31,40 @@ export interface VerifiedPayoutEvent {
   treasuryBalanceMinor: MinorAmount;
 }
 
+const payoutEventBcs = bcs.struct("PayoutEvent", {
+  treasury_id: bcs.Address,
+  category_reference: bcs.vector(bcs.u8()),
+  recipient: bcs.Address,
+  amount: bcs.u64(),
+  category_remaining: bcs.u64(),
+  treasury_balance: bcs.u64(),
+});
+
 export function verifyPayoutEvent(
   transaction: Pick<ConfirmedTransaction, "events">,
   expected: PayoutEventExpectation,
 ): VerifiedPayoutEvent {
-  const eventType = `${normalizeSuiObjectId(expected.packageId)}::treasury::PayoutEvent<${expected.coinType}>`;
-  const matches = (transaction.events ?? []).filter(
-    (event) => event.eventType === eventType,
+  const eventType = normalizeStructTag(
+    `${normalizeSuiObjectId(expected.packageId)}::treasury::PayoutEvent<${expected.coinType}>`,
   );
+  const matches = (transaction.events ?? []).filter((event) => {
+    try {
+      return normalizeStructTag(event.eventType) === eventType;
+    } catch {
+      return false;
+    }
+  });
   if (matches.length !== 1) {
-    throw new Error("Confirmed transaction must contain exactly one expected PayoutEvent.");
+    throw new Error(
+      "Confirmed transaction must contain exactly one expected PayoutEvent.",
+    );
   }
-  const fields = matches[0]?.json;
-  if (!fields) throw new Error("PayoutEvent fields are missing.");
+
+  const event = matches[0];
+  const fields =
+    event.bcs && event.bcs.byteLength > 0
+      ? parseBcsPayoutEvent(event.bcs)
+      : parseJsonPayoutEvent(event.json);
 
   const treasuryObjectId = normalizeRequiredObjectId(fields.treasury_id);
   const recipientSuiAddress = normalizeRequiredAddress(fields.recipient);
@@ -87,13 +110,32 @@ export function verifyPayoutEvent(
   };
 }
 
+function parseBcsPayoutEvent(bytes: Uint8Array): Record<string, unknown> {
+  const parsed = payoutEventBcs.parse(bytes);
+  return {
+    treasury_id: parsed.treasury_id,
+    category_reference: parsed.category_reference,
+    recipient: parsed.recipient,
+    amount: parsed.amount,
+    category_remaining: parsed.category_remaining,
+    treasury_balance: parsed.treasury_balance,
+  };
+}
+
+function parseJsonPayoutEvent(value: Record<string, unknown> | null | undefined) {
+  if (!value) throw new Error("PayoutEvent fields are missing.");
+  return value;
+}
+
 function normalizeRequiredObjectId(value: unknown) {
-  if (typeof value !== "string") throw new Error("PayoutEvent treasury is invalid.");
+  if (typeof value !== "string")
+    throw new Error("PayoutEvent treasury is invalid.");
   return normalizeSuiObjectId(value);
 }
 
 function normalizeRequiredAddress(value: unknown) {
-  if (typeof value !== "string") throw new Error("PayoutEvent recipient is invalid.");
+  if (typeof value !== "string")
+    throw new Error("PayoutEvent recipient is invalid.");
   return normalizeSuiAddress(value);
 }
 
