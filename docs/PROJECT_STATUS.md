@@ -4,15 +4,15 @@ This file is the **single source of truth for current implementation status, blo
 
 ## Current Snapshot
 
-- Last updated: **2 September 2026 (MYT)**
+- Last updated: **3 September 2026 (MYT)**
 - Default branch: `main`
 - **Current stage: Stage 7 — Demo hardening and deployment**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5; Stage 6**
 - Latest completed milestone: **Stage 6 human-approved claim payout is merged and owner-controlled live acceptance is verified.**
 - Stage 6 merge: **PR #20**, merge commit `61fb9c86f5077f9813add6dc94aa69b311aaf4d7`
-- Current blockers: **None for starting Stage 7.**
-- Open implementation issues before the Stage 7 readiness audit: **none**.
+- Current blockers: **Owner-controlled Vercel authorization and secret entry are pending before deployment verification.**
+- Open implementation issues before the Stage 7 readiness audit: **none; repository-side 7A baseline is recorded, but no deployment has been performed.**
 - Demo readiness: **Core end-to-end MVP works. Stage 7 must now make the live demo repeatable, deployable, recoverable, and presentation-safe.**
 
 ## Stage Progress
@@ -154,7 +154,7 @@ Make the already-working MVP reliable under hackathon/demo conditions. **Do not 
 
 ### Next Recommended Task
 
-Start Stage 7 from latest `main` and perform deployment/readiness hardening in this order:
+Perform the owner-controlled Vercel setup documented in `docs/STAGE7_DEPLOYMENT.md`, then verify the non-secret deployed health response before beginning live Supabase/Sui rehearsal work:
 
 1. establish the Vercel deployment and production environment-variable matrix without exposing secrets
 2. connect the existing Supabase live project safely for the deployed app
@@ -203,6 +203,18 @@ NEXT TASK: Establish the production deployment/configuration baseline, then rehe
 ```
 
 ## Recent Development Log
+
+### 2026-09-03 — Stage 7A repository deployment baseline recorded
+
+- Branch: `stage7/demo-hardening-deployment`
+- Repository implementation commit: `7bb8106`
+- Reconciled server environment defaults with the accepted clean Stage 6 Treasury/Cap and added a production-only HTTPS/non-localhost app URL guard.
+- Added a cache-disabled, non-secret Stage 7 `/api/health` readiness contract; it performs no external service call and reports configuration presence only.
+- Added optional `PLAYWRIGHT_PORT` support so smoke can run beside an active port-3000 development server.
+- Added `docs/STAGE7_DEPLOYMENT.md` with the Vercel matrix, owner-only Supabase/Vercel steps, no-live-payout validation, health check, and rollback constraints.
+- Local verification passed lint, strict typecheck, 35 files / 183 unit tests, and the production build. All 7 Playwright smoke scenarios passed on an isolated mock-only port; on this Windows host the completed Playwright wrapper required manual interruption after its web server had already exited.
+- Deployment, Vercel authorization, live Supabase validation, Testnet asset checks, and any live wallet action remain pending and owner-controlled. Stage 7 remains CURRENT.
+- Exact next task: the owner authorizes the Vercel repository import and enters the documented environment values in Vercel/Supabase dashboards; then Codex verifies the deployed health response without initiating a payout.
 
 ### 2026-09-02 — Stage 6 completed and merged; Stage 7 readiness audit started
 

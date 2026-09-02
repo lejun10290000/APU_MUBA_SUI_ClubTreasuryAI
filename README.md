@@ -272,6 +272,8 @@ http://localhost:3000/dashboard/testnet
 
 Committed `.env.example` contains public Testnet identifiers and blank secret placeholders only. Never commit `.env.local`.
 
+For the Stage 7 Vercel matrix, owner-only steps, non-secret health contract, and rollback/recovery limits, read [`docs/STAGE7_DEPLOYMENT.md`](docs/STAGE7_DEPLOYMENT.md). A production deployment must set `APP_ENV=production` and the exact HTTPS `NEXT_PUBLIC_APP_URL`; localhost and HTTP origins are rejected in that mode.
+
 Safe/default development mode:
 
 ```text

@@ -40,8 +40,12 @@ test("Stage 2 product shell navigates from landing to treasurer dashboard", asyn
   expect(response.ok()).toBeTruthy();
   await expect(response.json()).resolves.toMatchObject({
     ok: true,
-    stage: 5,
-    aiMode: "mock",
+    stage: 7,
+    readiness: {
+      ai: { mode: "mock", liveRequestsEnabled: false },
+      claims: { mode: "mock", supabaseConfigured: false },
+      sui: { network: "testnet", packageConfigured: false },
+    },
   });
 });
 

@@ -9,7 +9,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Product specification, architecture, tech stack, demo plan
 - [x] Gemini mock-first billing policy
 - [x] Staged-development + project-status handoff process
-- [ ] Add all official team members *(Stage 8 submission item)*
+- [ ] Add all official team members _(Stage 8 submission item)_
 
 ## Stage 1 — Application foundation — COMPLETE
 
@@ -119,6 +119,7 @@ Successful Stage 6 acceptance digest:
 ## Stage 7 — Demo hardening and deployment — CURRENT
 
 - [x] Audit merged Stage 0–6 history and current `main` CI before starting Stage 7
+- [x] Establish the repository-side Vercel environment baseline, Stage 7 health readiness contract, and isolated Playwright smoke port
 - [ ] Deploy Next.js app to Vercel
 - [ ] Configure production environment variables without exposing server secrets
 - [ ] Connect the intended Supabase project for the deployed app
