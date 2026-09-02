@@ -1,6 +1,6 @@
 # ClubTreasury AI — Architecture
 
-ClubTreasury AI uses one full-stack Next.js application plus one Sui Move package.
+ClubTreasury AI uses one full-stack Next.js application, one Sui Move package, Supabase for private/persisted application data, and Gemini behind a mock-first AI boundary.
 
 ## High-Level Architecture
 
@@ -12,14 +12,15 @@ Next.js 16 Web Application
   - React UI
   - deterministic financial rules
   - AIService boundary
+  - claim/payment API routes
         |
         +-----------------------+----------------------+-------------------+
         |                       |                      |                   |
         v                       v                      v                   v
 AIService                 Supabase PostgreSQL     Sui Wallet      Private Storage
-  |- MockAIService        + RLS/Auth              (Stage 6 payout) (Supabase receipts)
-  `- GeminiAIService                                 |
-     (@google/genai 2.19.0)                          v
+  |- MockAIService        + Auth / RLS            explicit sign    Supabase receipts
+  `- GeminiAIService      + payment ledger            |
+     (@google/genai)                                  v
                                                 Sui Testnet
                                                 - Move treasury
                                                 - native Testnet USDC
@@ -29,8 +30,8 @@ AIService                 Supabase PostgreSQL     Sui Wallet      Private Storag
 
 ```text
 AI
-→ understand unstructured language/receipt evidence
-→ suggest categories / ambiguity / concise reasons
+→ understand unstructured budget/receipt evidence
+→ suggest categories, ambiguity, concise reasons
 
 Deterministic TypeScript
 → validate schemas
@@ -38,6 +39,7 @@ Deterministic TypeScript
 → budget totals / category limits
 → duplicate logic
 → recommendation policy
+→ signed-transaction and payout-evidence verification
 
 Human treasurer
 → final approve/reject decision
@@ -46,17 +48,17 @@ Human treasurer
 Sui Move
 → treasury custody
 → treasurer authorization
-→ category allocation enforcement
+→ confirmed category allocation enforcement
 → remaining-balance enforcement
 → payout execution
-→ public payout evidence
+→ public typed payout evidence
 ```
 
-AI never owns authoritative financial balances, payout authorization, wallet signing, or Sui transaction execution.
+AI never owns authoritative balances, payout authorization, wallet signing, or Sui transaction execution.
 
-## AI Layer
+## AI Layer — Stage 4 Verified
 
-The app depends on a shared interface:
+The app depends on one shared interface:
 
 ```text
 AIService
@@ -64,30 +66,9 @@ AIService
   `- GeminiAIService
 ```
 
-Mock mode is the default for development, CI, ordinary browser tests, and Sui work. It makes zero Gemini API calls.
+Normal development and CI use `MockAIService` and make zero Gemini API calls. Live Gemini requires explicit server-side configuration and every provider response is independently Zod-validated before application use.
 
-Stage 4 implements `GeminiAIService` with the official `@google/genai` `2.19.0` SDK. The SDK/client is lazy-loaded only for an explicitly enabled live request, and every JSON response is independently validated with Zod before it crosses the service boundary. Owner-controlled budget and synthetic receipt live validation passed on 30 August 2026, after which configuration returned to mock mode.
-
-Budget analysis accepts untrusted natural-language text and requests USDC category amounts directly as integer application minor units. Receipt analysis accepts explicit bounded JPEG/PNG/WebP base64 data; it never reads arbitrary local paths or persists/logs the image. The output includes extracted evidence, category suggestion, missing fields, `needsReview`, and concise reasons.
-
-`AI_MODE=mock` returns `MockAIService` without constructing a Gemini client. Live calls require both the server-side key and `GEMINI_LIVE_REQUESTS_ENABLED=true`. Empty, malformed, schema-invalid, unavailable, or blocked provider responses fail safely so later claim integration can route to manual `Review`.
-
-Gemini may:
-
-- interpret natural-language budgets
-- extract receipt facts
-- suggest categories
-- identify ambiguity
-- provide concise reasons
-
-Gemini may not:
-
-- authorize payment
-- calculate authoritative remaining balance
-- bypass category limits
-- determine authoritative duplicate state by itself
-- sign transactions
-- trigger payouts autonomously
+Gemini may interpret natural-language budgets, extract receipt facts, suggest categories, identify ambiguity, and provide concise reasons. It may not authorize payment, calculate authoritative remaining balance, bypass category limits, determine authoritative duplicates by itself, sign transactions, or trigger payouts autonomously.
 
 ## Deterministic Domain Layer
 
@@ -100,8 +81,11 @@ Pure TypeScript remains authoritative for:
 - receipt/request amount comparison
 - exact/similar duplicate checks
 - final recommendation policy from validated facts/rules
+- approved payout snapshot use
+- signed transaction safety checks
+- exact payout-event comparison
 
-## Sui Layer — Stage 3 Verified
+## Sui Layer — Stage 3 Verified, Stage 6 Reused
 
 Network: **Sui Testnet**
 
@@ -111,22 +95,10 @@ Native Circle Testnet USDC:
 0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC
 ```
 
-Verified package:
+Verified Move package:
 
 ```text
 0xfbb2f939d484b6179f555a6cef8093faa749001184d84adb980de6d88c0e1d4f
-```
-
-Verified demo Treasury:
-
-```text
-0x8971fa3e32994b81396122c3e3b1a4b054c3e3799714f5c2206dd037054319e4
-```
-
-Verified demo TreasurerCap:
-
-```text
-0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7
 ```
 
 Publish digest:
@@ -135,23 +107,42 @@ Publish digest:
 DdQQEcGD8FWmAde2rziBDjwua5CjcwRUtfN4p2Lkoeb
 ```
 
+Historical Stage 3 demo objects:
+
+```text
+Treasury:
+0x8971fa3e32994b81396122c3e3b1a4b054c3e3799714f5c2206dd037054319e4
+
+TreasurerCap:
+0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7
+```
+
+Those objects remain valid historical Stage 3 evidence. The Treasury was later used by failed Stage 6 acceptance attempts, so it is no longer the clean Stage 7 demo default.
+
+Current clean demo/acceptance pair:
+
+```text
+Treasury:
+0x9d9a0b5a7d58d4efa77419ba891a442f3ad23610b4c824a2fa67c7893917f0f3
+
+TreasurerCap:
+0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101
+```
+
 ## Move Object Model
 
 The Move package at `move/club_treasury` provides:
 
 - shared `Treasury<phantom Asset>`
 - address-owned `TreasurerCap<phantom Asset>`
-- explicit capability binding to one treasury ID and treasurer
-- opaque external reference
+- capability binding to one treasury ID and treasurer
 - internal `Balance<Asset>` custody
 - permissionless positive deposits before allocation confirmation
-- one-time opaque category references
-- exact `allocated` and `remaining` `u64` values
+- one-time category references and exact `allocated`/`remaining` `u64` values
 - exact equality between confirmed allocations and custody
 - post-confirmation deposit lock
 - treasurer/capability-authorized payout
-- exact category lookup
-- positive amount / non-zero recipient enforcement
+- positive amount and non-zero recipient enforcement
 - category remaining and custody sufficiency checks
 - pre/post `sum(category_remaining) == custody balance` invariant
 - exact typed `Coin<Asset>` payout
@@ -159,13 +150,11 @@ The Move package at `move/club_treasury` provides:
 
 `TreasurerCap` does not have the `store` ability, and privileged calls additionally require the transaction sender to match the stored treasurer address.
 
-**31/31 Move tests pass** with Sui CLI `1.78.1-722ac4fcf484`.
+**31/31 Move tests passed** with Sui CLI `1.78.1-722ac4fcf484`. The Move package has not changed since the verified Stage 3 deployment.
 
 ## Application-side Sui Integration
 
-The App Router keeps wallet integration behind a client-only dApp Kit provider.
-
-The configured network set contains only Testnet. Automatic wallet connection is disabled. The user must explicitly connect and explicitly approve each transaction.
+The configured network is Testnet only. Automatic wallet connection is disabled. The user explicitly connects and explicitly approves each transaction.
 
 The typed transaction layer builds:
 
@@ -174,138 +163,14 @@ The typed transaction layer builds:
 - `confirm_allocations`
 - `payout`
 
-Runtime package/treasury/capability/source-coin/recipient values are validated inputs. Money values are positive `bigint` inputs checked against Move `u64` limits.
+Runtime object IDs, addresses, category references, and money values are validated. Authoritative money uses integer/minor-unit semantics.
 
-The verified Stage 3 execution boundary is:
-
-```text
-TypeScript builds a deterministic transaction
-        ↓
-Human treasurer reviews/signs in wallet
-        ↓
-App submits signed bytes through configured Sui Testnet client
-        ↓
-App waits for confirmed Testnet result
-        ↓
-Move enforces authorization/custody/category rules
-        ↓
-UI stores/displays public IDs and digest evidence only after confirmation
-```
-
-No application code holds a wallet private key or recovery phrase.
-
-## Stage 6 Claim-linked Payment Boundary
-
-Stage 6 adds a recoverable payment-attempt ledger around the verified Move payout entry point. The immutable human-approved snapshot is the only source of treasury, category, recipient, amount, and currency.
-
-```text
-approved_unpaid claim
-        ↓
-prepare/return one active payment attempt
-        ↓
-verify connected Testnet treasurer + TreasurerCap
-        ↓
-build payout only from approved_* snapshot
-        ↓
-human wallet signs exact transaction
-        ↓
-derive + persist exact digest before broadcast
-        ↓
-broadcast signed transaction to Sui Testnet
-        ↓
-query/reconcile that exact digest
-        ↓
-verify confirmed success + exact typed PayoutEvent
-        ↓
-short atomic DB finalization
-        ↓
-paid claim + synchronized budget + public digest evidence
-```
-
-A digest-bearing attempt is intentionally sticky. Once signed evidence exists, interruption or uncertainty must recover by the existing digest rather than constructing a replacement transaction.
-
-The payout-event verifier accepts the Sui JSON forms observed for Move `vector<u8>` category evidence:
-
-- UTF-8 string, for example `"events"`
-- numeric byte array, for example `[101, 118, 101, 110, 116, 115]`
-
-Both decode to the exact approved category reference before finalization.
-
-### Critical successful-but-unverifiable rule
-
-A Sui transaction can be confirmed successful even when application-side event parsing or exact evidence comparison fails. That state is **not proof that money did not move**.
-
-Therefore:
-
-```text
-Sui execution failed definitively
-→ failed
-→ a later fresh attempt may be allowed
-
-Sui transaction unavailable / not checkpointed
-→ reconciliation_required
-→ keep existing digest active
-→ no replacement signature
-
-Sui transaction succeeded but exact PayoutEvent cannot be verified
-→ reconciliation_required
-→ keep existing digest active
-→ no replacement signature
-→ investigate/reconcile the same digest
-
-Sui transaction succeeded + exact PayoutEvent verified
-→ atomically finalize paid state
-```
-
-The first Stage 6 owner-controlled live acceptance demonstrated why this distinction is required: a successful payout whose category evidence was not parsed correctly had been classified as failed, releasing the active-attempt boundary and allowing a second successful payout for the same claim. That run is preserved as failed-acceptance evidence in `docs/STAGE6_LIVE_VALIDATION.md`. The repaired boundary now keeps successful-but-unverifiable results non-terminal and blocks blind retry.
-
-## Stage 3 Real Testnet Evidence
-
-The project owner completed the dedicated Testnet demo with a browser wallet and native Circle Testnet USDC:
-
-```text
-Create Treasury
-→ confirmed
-
-Deposit 1.00 USDC
-→ confirmed
-
-Confirm events allocation = 1.00 USDC
-→ confirmed
-
-Human-approved payout = 0.10 USDC
-→ confirmed
-```
-
-The application displayed confirmed transaction links for all four steps and the real typed `PayoutEvent`.
-
-A read-only post-payout Treasury refresh returned:
-
-```text
-allocations_confirmed: true
-category_allocated: 1000000
-category_remaining: 900000
-funds: 900000
-```
-
-With Testnet USDC metadata `decimals = 6`, the final on-chain accounting is:
-
-```text
-1.00 USDC allocated
-0.10 USDC paid
-0.90 USDC remaining
-```
-
-This verifies the Stage 3 custody/allocation/payout invariant in a real Testnet flow.
-
-## Claim Decision Pipeline
-
-Stage 5 implements and persists the workflow through the human decision boundary:
+## Claim Decision Pipeline — Stage 5 Verified
 
 ```text
 Receipt + member request
         ↓
-Private receipt upload + hash
+Private receipt validation/upload + SHA-256
         ↓
 AIService (mock or explicitly enabled Gemini)
         ↓
@@ -320,29 +185,84 @@ Treasurer final decision
 Immutable approved_* snapshot + payment_status=unpaid
 ```
 
-Stage 6 begins only after that persisted boundary:
+In live data mode, wallet identity is bound through a signed, single-use challenge and Supabase Auth/RLS. Receipt files remain private; short-lived signed URLs are returned only after authorized claim access.
+
+## Stage 6 Claim-linked Payment Boundary — VERIFIED COMPLETE
+
+The immutable human-approved snapshot is the only source of payout treasury, category, recipient, amount, and currency.
 
 ```text
-Approved-unpaid claim snapshot
+approved_unpaid claim
         ↓
-Explicit wallet signature
+prepare/return one active payment attempt
         ↓
-Digest persisted before broadcast
+verify connected Testnet treasurer + TreasurerCap
         ↓
-Move payout re-check + Sui execution
+build payout only from approved_* snapshot
         ↓
-Same-digest confirmation/reconciliation
+human wallet signs exact transaction
         ↓
-Exact PayoutEvent verification
+validate signed transaction + derive digest
         ↓
-Only after verification: synchronize paid status / remaining budget
+persist digest before broadcast
+        ↓
+submit signed transaction to Sui Testnet
+        ↓
+query/reconcile that exact digest
+        ↓
+verify confirmed success + exact typed PayoutEvent
+        ↓
+short atomic DB finalization
+        ↓
+paid claim + synchronized budget + digest evidence
 ```
 
-The Stage 5 API never imports the Sui transaction execution layer. In live data mode, it first binds an anonymous Supabase Auth session to a Sui address through a signed, single-use, expiring nonce. Standard and zkLogin personal-message signatures are checked against the expected address; network-bound zkLogin verification uses the official Sui Testnet GraphQL service. PostgreSQL RLS then limits treasury, membership, category, and claim access. Receipt objects stay private and the server returns short-lived signed URLs only after an RLS-authorized claim lookup.
+A digest-bearing attempt is intentionally sticky. Once signed evidence exists, interruption or uncertainty recovers by the existing digest rather than constructing a replacement transaction.
 
-Receipt evidence is validated as JPEG/PNG/WebP up to 10 MB, hashed from the exact uploaded bytes with lowercase SHA-256, stored under the authenticated user path, and made immutable after claim creation. A unique external reference protects submission retries. An exact receipt hash or reference cannot receive an Approve recommendation; similar merchant/amount evidence routes to Review.
+### Canonical event verification
 
-AI analysis runs once after explicit submission through `getAIService()`, and its validated result is stored. Provider or output failure leaves the claim persisted and forces manual Review. Deterministic TypeScript checks remain authoritative for amount/category/budget/duplicate/evidence decisions.
+Sui transport JSON can render Move values differently. Stage 6 therefore uses the event's canonical BCS bytes as the primary `PayoutEvent` verification source when available. JSON parsing remains a compatibility fallback and supports observed category representations such as a UTF-8 string (`"events"`) or numeric byte array.
+
+Verification compares the exact expected:
+
+- Move event type/package
+- Treasury ID
+- category reference
+- recipient
+- amount
+- post-payout category remaining
+- post-payout Treasury balance
+
+### Critical successful-but-unverifiable rule
+
+```text
+Confirmed Sui execution failure
+→ failed
+→ a later fresh attempt may be allowed
+
+Transaction unavailable / not checkpointed
+→ reconciliation_required
+→ existing digest remains active
+→ no replacement signature
+
+Transaction succeeded but exact payout evidence is not yet verifiable
+→ reconciliation_required
+→ existing digest remains active
+→ no replacement signature
+
+Transaction succeeded + exact payout evidence verified
+→ atomically finalize paid state and budget
+```
+
+The first Stage 6 live acceptance demonstrated why this distinction matters: a successful payout was once misclassified as failed after event parsing, which allowed another signed payout. That incident is preserved in `docs/STAGE6_LIVE_VALIDATION.md`.
+
+A fresh aligned acceptance subsequently passed with exactly one payment attempt and digest:
+
+```text
+DZtb9Td7nfszbBVWj1QdUqd8peeP3FUm2Q6XJEqvVvb7
+```
+
+The synchronized budget moved from `1.00 allocated / 0 spent` to `0.10 spent / 0.90 remaining`, and refreshing the paid page retained the same digest without offering or signing another payout.
 
 ## On-chain vs Off-chain
 
@@ -361,23 +281,31 @@ AI analysis runs once after explicit submission through `getAIService()`, and it
 - member/claim metadata
 - AI extraction/recommendation
 - duplicate comparison details
-- application synchronization/payment-attempt state
+- human review notes
+- payment-attempt/reconciliation state
 
 ## Failure Handling
 
 - AI unavailable/invalid → manual `Review`
-- unclear receipt → `Review` with missing/conflicting fields
-- wallet rejected before a signed digest exists → no payout; keep the Stage 5 approved-unpaid state
-- confirmed Sui execution failure → do not mark claim paid; a later attempt may be prepared
-- transaction unavailable/not checkpointed → `reconciliation_required`; reconcile the same digest and block blind retry
-- successful Sui transaction with unverified/mismatched event evidence → `reconciliation_required`; never treat this as proof no money moved and never build a replacement transaction automatically
-- database synchronization fails after verified Sui success → reconcile/finalize from the same digest before any retry
+- unclear/conflicting receipt → `Review`
+- wallet rejected before signed digest → no payout; remain approved-unpaid
+- confirmed Sui execution failure → do not mark paid; a later fresh attempt may be allowed
+- transaction unavailable/not checkpointed → `reconciliation_required`; reconcile same digest
+- successful transaction with unverified/mismatched event evidence → `reconciliation_required`; never blind retry
+- database finalization mismatch/failure after chain success → preserve same digest and reconcile/finalize; never create a replacement payment automatically
 
-## Deployment Direction
+## Stage 7 Deployment Direction — CURRENT
 
-- Web app: Vercel (Stage 7)
-- Persistence/private receipt storage/payment-attempt ledger: Supabase
-- Payment network: Sui Testnet
+```text
+Browser
+  ↓
+Vercel-hosted Next.js app
+  ├─ Gemini Developer API (server-side key only when live mode enabled)
+  ├─ Supabase PostgreSQL/Auth/private Storage
+  └─ Sui Testnet + user-controlled wallet
+```
+
+Stage 7 must verify production environment variables, deployed Supabase access, clean demo/reset state, Testnet assets, repeated full-flow rehearsals, and graceful recovery before the project is considered demo-hardened.
 
 ## Architecture Goal for Judging
 
@@ -388,5 +316,5 @@ A judge should clearly see:
 - the treasurer remains accountable for approval and signing.
 - Move enforces authorization/category limits at payout time.
 - Sui executes real Testnet stablecoin movement.
-- digest-first reconciliation prevents the app from blindly repeating an uncertain payout.
+- digest-first reconciliation prevents blind repeated payments.
 - private receipt data remains off-chain.
