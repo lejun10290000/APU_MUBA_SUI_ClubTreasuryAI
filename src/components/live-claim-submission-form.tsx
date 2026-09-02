@@ -4,7 +4,11 @@ import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { publicConfig } from "@/src/config/public-env";
-import { formatUsdcMinor, parseUsdcDisplay } from "@/src/domain/money";
+import {
+  asMinorAmount,
+  formatUsdcMinor,
+  parseUsdcDisplay,
+} from "@/src/domain/money";
 import { ensureWalletIdentity } from "@/src/lib/sui/wallet-identity";
 import type { LiveClaimWorkspace } from "@/src/lib/claims/live-workspace";
 
@@ -211,7 +215,9 @@ export function LiveClaimSubmissionForm() {
               >
                 {category.name} ·{" "}
                 {formatUsdcMinor(
-                  category.allocatedMinor - category.spentMinor,
+                  asMinorAmount(
+                    category.allocatedMinor - category.spentMinor,
+                  ),
                 )}{" "}
                 remaining
               </option>
