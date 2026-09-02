@@ -144,7 +144,9 @@ test("Stage 5 mock adapter runs receipt persistence through an unpaid human deci
     page.getByRole("heading", { name: "Review the claim" }),
   ).toBeVisible();
   await expect(page.getByText("Recommendation · review")).toBeVisible();
-  await expect(page.getByText("Exact amount match")).toBeVisible();
+  // Mock AI deterministically extracts 75.00 USDC, overriding the entered
+  // receipt amount and intentionally exercising the human-review mismatch path.
+  await expect(page.getByText("receipt higher")).toBeVisible();
   await page
     .getByLabel("Human decision note")
     .fill("Receipt and category evidence verified.");
