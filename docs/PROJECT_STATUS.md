@@ -6,14 +6,14 @@ This file is the **single source of truth for current implementation status, blo
 
 - Last updated: **2 September 2026 (MYT)**
 - Default branch: `main`
-- **Current stage: Stage 6 — Human approval and on-chain payment**
+- **Current stage: Stage 7 — Demo hardening and deployment**
 - Stage status: **CURRENT**
-- Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5**
-- Latest completed milestone: **Stage 5 claim/receipt persistence, wallet identity binding, private storage, human decision flow, and the complete owner-controlled live Supabase acceptance gate are verified and merged to `main` through PR #18.**
-- Active implementation branch: **`stage6/approved-claim-payout`**
-- Stage 5 implementation state: **COMPLETE — merged to `main` at merge commit `8212881d5e8f999180700d96e3722a5313d1885c`.**
-- Current blockers: **The first Stage 6 owner-controlled live acceptance exposed a duplicate-payout safety defect: a successful Testnet payout whose event could not be parsed was misclassified as failed, which allowed a second signed payout for the same claim. The code repair is implemented and GitHub CI run #80 is green, but Stage 6 requires a fresh clean owner-controlled acceptance before completion. Do not reuse the affected claim for a success case.**
-- Demo readiness: **The approved-claim payout UI, digest-first recovery path, Sui string/byte-vector event parsing, and non-retryable reconciliation handling for successful-but-unverifiable transactions are implemented. GitHub CI run #80 passes lint, strict TypeScript, 169 unit tests, production build, and 7/7 Playwright smoke tests. Stage 6 remains CURRENT until one fresh aligned claim proves exactly one Testnet payout plus idempotent reconciliation.**
+- Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5; Stage 6**
+- Latest completed milestone: **Stage 6 human-approved claim payout is merged and owner-controlled live acceptance is verified.**
+- Stage 6 merge: **PR #20**, merge commit `61fb9c86f5077f9813add6dc94aa69b311aaf4d7`
+- Current blockers: **None for starting Stage 7.**
+- Open implementation issues before the Stage 7 readiness audit: **none**.
+- Demo readiness: **Core end-to-end MVP works. Stage 7 must now make the live demo repeatable, deployable, recoverable, and presentation-safe.**
 
 ## Stage Progress
 
@@ -25,289 +25,199 @@ This file is the **single source of truth for current implementation status, blo
 | 3     | Sui foundation and Move treasury       | COMPLETE    |
 | 4     | Gemini AI layer                        | COMPLETE    |
 | 5     | Claim and receipt workflow integration | COMPLETE    |
-| 6     | Human approval and on-chain payment    | CURRENT     |
-| 7     | Demo hardening and deployment          | NOT STARTED |
+| 6     | Human approval and on-chain payment    | COMPLETE    |
+| 7     | Demo hardening and deployment          | CURRENT     |
 | 8     | Submission and pitch                   | NOT STARTED |
 
-## Stage 3 — Verified Complete
+## Stage 0–6 Readiness Audit
 
-### Move / Sui foundation
+### Stage 0 — COMPLETE
 
-- Move 2024 package at `move/club_treasury`
-- generic shared `Treasury<Asset>` custody object
-- address-owned `TreasurerCap<Asset>` bound to one treasury and treasurer
-- typed `Balance<Asset>` custody
-- permissionless positive deposits before confirmation
-- one-time exact category allocations
-- category `allocated` and `remaining` accounting
-- post-confirmation deposit lock
-- treasurer/capability-authorized payout
-- exact category lookup and `remaining` enforcement
-- pre/post `sum(category_remaining) == custody balance` invariant checks
-- exact typed coin payout to non-zero recipient
-- typed public `PayoutEvent`
-- hardened abort/error boundaries
-- **31/31 Move tests passing** with Sui CLI `1.78.1-722ac4fcf484`
+Planning, requirements, architecture, technical-stack decisions, AI usage policy, staged-development workflow, and repository handoff rules are present. The remaining team-member placeholders are a **Stage 8 submission item**, not a Stage 0 implementation blocker.
 
-### Browser wallet / transaction execution
+### Stage 1 — COMPLETE
 
-- Wallet Standard-compatible Sui wallet discovery
-- explicit connect/disconnect
-- Sui Testnet-only network guard
-- typed `@mysten/sui` transaction builders for create/fund/allocate/payout
-- exact `bigint`/`u64` validation
-- one explicit wallet approval per action
-- signed transaction execution through the configured Sui Testnet client
-- wait-for-confirmation before the UI reports success
-- real coin metadata / wallet-owned USDC reads
-- public object IDs and explorer evidence stored only after confirmed Testnet responses
-- no private keys, seed phrases, or wallet secrets stored by the app
+PR #5 merged the reproducible Next.js/React/strict-TypeScript foundation with pinned Node/pnpm metadata, frozen lockfile, centralized configuration, mock-first AI boundary, Sui/Supabase boundaries, integer/minor-unit money helpers, loading/error foundations, tests, Playwright, and GitHub Actions CI.
 
-### Verified Sui Testnet deployment
+### Stage 2 — COMPLETE
+
+PRs #6–#9 merged deterministic financial schemas/rules plus the responsive mock treasury, budget, claim, review, human-decision, and history workflow. Mock data remains clearly separated from real Sui evidence.
+
+### Stage 3 — COMPLETE
+
+The Move treasury foundation, funding, allocations, payout enforcement, wallet transaction integration, and Testnet deployment were merged through the Stage 3 PR series ending in PR #15. The verified Move package has **31/31 Move tests** and the deployed package has not been modified by Stages 4–6.
+
+Verified package:
 
 ```text
-Network:
-Sui Testnet
-
-Native Circle Testnet USDC:
-0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC
-
-Package:
 0xfbb2f939d484b6179f555a6cef8093faa749001184d84adb980de6d88c0e1d4f
+```
 
-Publish digest:
-DdQQEcGD8FWmAde2rziBDjwua5CjcwRUtfN4p2Lkoeb
+Native Circle Sui Testnet USDC:
 
-UpgradeCap:
-0x711ea01bd5ed070582897c86b93340723f425e2cee634ef5d0e55adbb1363ce2
+```text
+0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC
+```
 
+Historical Stage 3 demo Treasury/Cap remain valid historical evidence, but that treasury was later used by failed Stage 6 acceptance attempts and is **not the current clean demo default**.
+
+### Stage 4 — COMPLETE
+
+PRs #16 and #17 merged the guarded `@google/genai` `2.19.0` adapter and recorded the owner-controlled `gemini-2.5-flash` live validation. Normal development/CI remains `AI_MODE=mock` and performs zero live Gemini calls.
+
+### Stage 5 — COMPLETE
+
+PR #18 merged Supabase persistence, private receipt storage, wallet identity binding, RLS, deterministic duplicate/recommendation logic, human decision persistence, and the immutable approved-but-unpaid payout snapshot. The owner-controlled live Supabase acceptance and all documented negative checks passed.
+
+### Stage 6 — COMPLETE
+
+PR #20 merged the approved-claim payment flow. The stage includes:
+
+- immutable `approved_*` snapshot as the only payout source
+- one active payment-attempt boundary per claim
+- explicit Testnet wallet signature
+- digest persistence before broadcast
+- exact signed transaction validation
+- Sui Testnet USDC submission
+- canonical `PayoutEvent` BCS verification with safe JSON fallback
+- same-digest reconciliation for ambiguous/interrupted outcomes
+- no blind replacement signing after a successful/ambiguous transaction
+- database paid state and budget synchronization only after verified on-chain success
+- live-mode claim workspace loaded from the persisted Supabase treasury/category relationship
+
+The first live acceptance exposed a duplicate-payout defect and is intentionally preserved as **failed acceptance evidence** in `docs/STAGE6_LIVE_VALIDATION.md`.
+
+A fresh aligned acceptance then passed with:
+
+```text
 Treasury:
-0x8971fa3e32994b81396122c3e3b1a4b054c3e3799714f5c2206dd037054319e4
+0x9d9a0b5a7d58d4efa77419ba891a442f3ad23610b4c824a2fa67c7893917f0f3
 
 TreasurerCap:
-0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7
+0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101
+
+Category:
+events
+
+Approved payout:
+0.10 USDC
+
+Confirmed digest:
+DZtb9Td7nfszbBVWj1QdUqd8peeP3FUm2Q6XJEqvVvb7
 ```
 
-### Verified real Testnet flow
+Before payout the synchronized category was `1.00 USDC allocated / 0 spent`. After exactly one wallet signature and exactly one payment attempt, the claim became `paid`, the attempt became `confirmed`, the category became `0.10 spent / 0.90 remaining`, and refresh preserved the same digest without showing another payment action or opening the wallet.
 
-The project owner completed the dedicated Testnet demo with a browser wallet and native Circle Testnet USDC:
+Stage 6 exit criteria are therefore **VERIFIED**.
 
-1. Create treasury — confirmed
-2. Fund treasury with **1.00 USDC** — confirmed
-3. Confirm `events` category allocation of **1.00 USDC** — confirmed
-4. Human-approved payout of **0.10 USDC** — confirmed
-5. Refresh Treasury object from Testnet — confirmed
+## Latest Automated Verification
 
-The page recorded confirmed explorer links for all four transactions and displayed the typed `PayoutEvent` after payout.
-
-Final refreshed Treasury JSON reported:
+GitHub Actions push run **#100** verified the exact Stage 6 merge commit on `main`:
 
 ```text
-allocations_confirmed: true
-category_allocated[0]: 1000000
-category_remaining[0]: 900000
-funds: 900000
+pnpm install --frozen-lockfile: pass
+pnpm lint: pass
+pnpm typecheck: pass
+pnpm test: 31 files / 171 tests pass
+pnpm build: pass
+Playwright Chromium install: pass
+pnpm test:e2e:smoke: 7/7 pass
 ```
 
-With verified USDC metadata `decimals = 6`, this proves:
+CI used:
 
 ```text
-1.00 USDC deposited
-1.00 USDC allocated
-0.10 USDC paid
-0.90 USDC remaining
+AI_MODE=mock
+GEMINI_LIVE_REQUESTS_ENABLED=false
+NEXT_PUBLIC_SUI_NETWORK=testnet
 ```
 
-Stage 3 exit criteria are therefore **VERIFIED**.
+No live Gemini request and no live Sui payout is part of normal CI.
 
-## Stage 4 — COMPLETE
+## Current Clean Demo Objects
 
-- official `@google/genai` `2.19.0` SDK pinned in the application lockfile
-- `GeminiAIService` implemented behind the existing `AIService` interface
-- `AI_MODE=mock` still selects `MockAIService` and never constructs a Gemini client
-- live SDK loading and client construction are lazy and occur only on an explicitly permitted live request
-- natural-language budget parsing requests JSON structured output in USDC integer application minor units
-- receipt analysis accepts explicit bounded JPEG/PNG/WebP base64 image data without reading arbitrary local paths
-- receipt extraction returns merchant, amount, date, description, category suggestion, missing fields, review state, and concise reasons
-- every provider response is parsed as JSON and independently validated with Zod
-- malformed, empty, schema-invalid, blocked, missing-image, missing-key, disabled-live, and provider-error paths fail safely
-- provider errors are normalized without logging or exposing prompts, keys, or image/base64 payloads
-- prompts prohibit financial authorization and do not enable tools, search grounding, agents, RAG, or automatic payouts
-- deterministic TypeScript, human approval, wallet signing, and Move/Sui enforcement remain authoritative
-- normal verification uses fake clients and makes zero Gemini API calls
-- lint, strict TypeScript, **87/87 unit tests**, production build, and **7/7 Playwright smoke tests** pass in mock mode
-- GitHub CI run 44 passed on the Stage 4 pull request with no Gemini key and zero live calls
-- owner-controlled live validation passed with `gemini-2.5-flash` using exactly one fixed budget request and one in-memory synthetic receipt-image request
-- the live budget response passed Zod validation with all five expected categories and integer minor-unit amounts
-- the live receipt response accepted the synthetic PNG, matched the expected amount, detected intentionally missing currency, and returned `needsReview=true`
-- no key, prompt payload, image base64, or private receipt data was recorded; the temporary runner was deleted and `.env.local` returned to mock mode with its key value cleared
+Stage 7 should use the clean Stage 6 acceptance pair as the default live demo baseline:
 
-Stage 4 exit criteria are **VERIFIED**. Gemini remains advisory; deterministic TypeScript, human approval, wallet signing, and Move/Sui remain authoritative.
+```text
+Treasury:
+0x9d9a0b5a7d58d4efa77419ba891a442f3ad23610b4c824a2fa67c7893917f0f3
 
-## Stage 5 — COMPLETE
+TreasurerCap:
+0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101
+```
 
-- versioned PostgreSQL migration for verified wallet profiles, wallet nonces, treasuries, memberships, budget categories, and claims
-- RLS policies and narrow server functions for treasury access and human claim decisions
-- private `receipts` bucket policy with JPEG/PNG/WebP and 10 MB limits
-- server-side MIME, size, and image-signature validation plus SHA-256 hashing of the exact receipt bytes
-- idempotent claim submission and exact/similar duplicate checks
-- shared `getAIService()` analysis followed by deterministic recommendation rules
-- persisted manual `Review` fallback when AI analysis fails or is invalid
-- wallet-signed nonce identity binding in live mode and a clearly isolated mock repository for local/CI use
-- persisted human Approve/Reject actions with a decision note
-- immutable `approved_*` payout snapshot with `payment_status = unpaid`
-- no wallet popup, Sui transaction construction, payout, digest, or paid state in Stage 5
-- local verification passed: lint, strict TypeScript, 104 unit tests, production build, and 7 Playwright tests
-- owner-controlled Supabase project is active, the Stage 5 migration is applied, Anonymous Sign-ins are enabled, and the live auth challenge endpoint creates a persisted nonce
-- standard and zkLogin wallet identity signatures are routed through Sui Testnet-aware verification; zkLogin uses the official Testnet GraphQL verifier
-- owner-controlled live positive path passed: zkLogin identity, first treasury/member/categories, private PNG upload, one persisted claim, stored `Review` recommendation, private receipt read, human approval, immutable approved payout snapshot, and `payment_status = unpaid`
-- live evidence confirms exactly one claim for the external reference, one private receipt object, RLS on all six public tables, a 10 MB private receipt bucket, and the JPEG/PNG/WebP allowlist
-- all seven live negative checks passed, including same-reference idempotency, exact-duplicate rejection, pre-auth file validation, invalid-recipient rejection, persisted interrupted-AI manual Review, immutable receipt evidence, and immutable approved payout snapshots
-- Supabase security/performance advisors were reviewed after acceptance; current notices are expected for the deny-by-default nonce table, narrowly scoped authenticated `SECURITY DEFINER` helpers/RPC, the intentional anonymous-user MVP bridge, disabled password protection in an anonymous-only flow, and unused indexes in a new one-record project
-- PR #18 passed its required CI, was reviewed by the project owner, and was merged to `main` as `8212881d5e8f999180700d96e3722a5313d1885c`
+These identifiers are public Testnet objects. Do not commit wallet secrets, recovery phrases, signed executable transaction bytes, Gemini keys, or Supabase server secrets.
 
-The real acceptance gate in `docs/STAGE5_LIVE_VALIDATION.md` passed and Stage 5 exit criteria are **VERIFIED**.
+## Stage 7 — Current Goal
 
-## Next Recommended Task
+Make the already-working MVP reliable under hackathon/demo conditions. **Do not expand the product scope unless the core demo is already stable.**
 
-### Stage 6 — Repeat owner-controlled acceptance with a clean aligned scenario
+### Next Recommended Task
 
-1. Do **not** reuse the affected duplicate-paid claim or treat the first Stage 6 acceptance as successful evidence.
-2. Prepare a fresh synthetic claim tied to a clean Testnet Treasury/category whose on-chain allocation, remaining balance, database allocation/spend, recipient, amount, and TreasurerCap are verified to match before approval.
-3. Execute exactly one small Testnet payout, then refresh/reconcile the same digest and prove that no replacement transaction or second wallet signature can occur.
-4. Keep Stage 6 CURRENT until the fresh live acceptance, database synchronization, explorer evidence, and idempotent reconciliation all pass.
+Start Stage 7 from latest `main` and perform deployment/readiness hardening in this order:
+
+1. establish the Vercel deployment and production environment-variable matrix without exposing secrets
+2. connect the existing Supabase live project safely for the deployed app
+3. verify the clean Sui Testnet Treasury/Cap and sufficient SUI + Testnet USDC for rehearsals
+4. create a deterministic demo reset/seed procedure so every rehearsal starts from known state
+5. exercise the full deployed wallet → budget/AI → claim/receipt → human approval → Sui payout flow
+6. harden loading/error/recovery UX for Gemini, Supabase, wallet, and Sui failures discovered during rehearsal
+7. repeat the full demo until it is reliable and comfortably within pitch time
+8. prepare backup screenshots/video and perform a secret-history/public-repository audit
+
+### Stage 7 Exit Gate
+
+Stage 7 is complete only when:
+
+- the public deployed app is reachable
+- required production configuration is documented and safe
+- the complete demo flow succeeds repeatedly from a clean scenario
+- failures have understandable recovery paths
+- the team has enough Testnet assets for the official demo
+- backup demo evidence exists
+- repository/secret checks pass
 
 ## Locked MVP Decisions
 
 - target user: university club treasurers and finance committee members
-- AI is advisory; treasurer approves final payment
-- Sui owns real Testnet custody/authorization/payout enforcement
-- payment asset: native Sui Testnet USDC
-- product AI provider: Google Gemini Developer API
-- default Gemini model: `gemini-2.5-flash`
-- official Stage 4 Gemini SDK: `@google/genai`
+- AI is advisory; human treasurer remains final approver
+- Sui owns Testnet custody/authorization/payout enforcement
+- payment asset: native Circle Sui Testnet USDC
+- product AI: Google Gemini Developer API
+- default model: `gemini-2.5-flash`
 - normal development AI mode: `mock`
-- database/storage later: Supabase PostgreSQL + private Storage
-- raw receipts remain private/off-chain
-- authoritative money values use integer/minor-unit semantics
-- optional features wait until the core demo is stable
+- database/private receipt storage: Supabase
+- authoritative money uses integer/minor-unit semantics
+- raw receipts stay private/off-chain
+- optional features wait until the core deployed demo is stable
 
 ## Mandatory Agent Startup Output
 
-Before development, every coding agent must show:
+Before Stage 7 development, every coding agent must show:
 
 ```text
-CURRENT PROJECT STAGE: Stage 6 — Human approval and on-chain payment
+CURRENT PROJECT STAGE: Stage 7 — Demo hardening and deployment
 STATUS: CURRENT
-COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5
-NEXT TASK: Prepare a fresh aligned Stage 6 acceptance scenario; do not reuse the duplicate-paid claim.
+COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5; Stage 6
+NEXT TASK: Establish the production deployment/configuration baseline, then rehearse and harden the existing end-to-end demo without adding optional features.
 ```
 
 ## Recent Development Log
 
-### 2026-09-02 — First Stage 6 live acceptance exposed duplicate payout; safety repair verified
+### 2026-09-02 — Stage 6 completed and merged; Stage 7 readiness audit started
 
-- The first owner-controlled Stage 6 acceptance must be treated as **FAILED acceptance evidence**, not as a successful completion gate.
-- One approved claim produced two successful Sui Testnet payout transactions for the same treasury, `events` category, recipient, and **0.10 USDC** approved amount because the first successful transaction was incorrectly marked failed after payout-event verification could not parse the returned category representation.
-- Public Testnet digests preserved as incident evidence: `9oZCwv5iLuHYWd5LJoAQUFfy55K8LK1wBe26zxRyx5AH` and `FXzWfw3wwD4AWQKB8Q4pcyWGH3FwJmrP25GCzChvZdEG`. Both were independently confirmed successful in the explorer by the project owner.
-- Added a regression test proving the Sui event reader accepts both UTF-8 string and byte-array representations of the Move `vector<u8>` category reference.
-- Changed successful-but-unverifiable/mismatched payout evidence from definitive `failed` to non-terminal `pending`, which reconciles to `reconciliation_required` and keeps the existing digest active so a replacement transaction cannot be constructed or signed blindly.
-- TDD red run #77 failed exactly the two new safety tests while all pre-existing unit tests remained green; after the repair, GitHub CI run #80 passed lint, strict TypeScript, **169/169 unit tests**, production build, and **7/7 Playwright smoke tests**.
-- The pre-existing Playwright assertion for `Exact amount match` was corrected to the real deterministic mock behavior: mock receipt analysis extracts 75.00 USDC and intentionally drives the mismatch/Review path while the approved payout remains the requested 0.10 USDC.
-- The affected Supabase claim and both payment-attempt records are preserved for audit/debug evidence. They must not be deleted, rewritten into a successful acceptance result, or reused for another payout.
-- No additional live payout is authorized on the affected claim. Stage 6 remains CURRENT until a fresh clean aligned claim proves exactly one payout and idempotent same-digest reconciliation.
+- Fresh aligned Stage 6 live acceptance passed with exactly one `0.10 USDC` payment attempt and confirmed digest `DZtb9Td7nfszbBVWj1QdUqd8peeP3FUm2Q6XJEqvVvb7`.
+- Refresh/idempotency verification preserved the same paid state/digest and did not create a second payment attempt or wallet signature.
+- PR #20 merged Stage 6 into `main` at `61fb9c86f5077f9813add6dc94aa69b311aaf4d7`.
+- `main` push CI run #100 passed 171/171 unit tests and 7/7 Playwright smoke tests plus lint, typecheck, and production build.
+- Stage 7 readiness audit identified stale documentation and historical demo-object defaults as cleanup items before deployment work.
 
-### 2026-09-02 — Stage 6 approved-claim payout UI implemented locally
+### 2026-09-02 — Failed Stage 6 acceptance preserved
 
-- Added the minimal payout panel to the existing claim review page for approved-unpaid claims, with immutable treasury/category/recipient/amount evidence and explicit wallet signing.
-- Separated prepare, signing, signed-byte digest derivation, digest persistence, broadcast, and reconciliation so interrupted responses recover by the existing digest and never create a blind replacement transaction.
-- Added wallet/Testnet/TreasurerCap authorization checks and read-only Testnet reconciliation that requires exactly one matching typed `PayoutEvent` before database finalization can mark a claim paid.
-- Added focused coverage for wallet rejection, immutable snapshot use, digest-before-broadcast ordering, ambiguous submission recovery, exact event verification, failed transactions, paid evidence, and duplicate-action controls.
-- Automated verification passed at that checkpoint: lint, strict TypeScript, 168 unit tests, production build, 7 Playwright smoke tests, and `git diff --check`.
-- No real Sui transaction was executed during implementation or automated verification.
+- The first Stage 6 live acceptance produced duplicate successful Testnet payouts after a successful-but-unverifiable transaction was incorrectly classified as failed.
+- The defect was repaired and covered by regression tests; the affected records/digests remain preserved as incident evidence and are not reused as the success case.
+- Full details remain in `docs/STAGE6_LIVE_VALIDATION.md`.
 
-### 2026-08-31 — Stage 5 completed and merged
+## Handoff Rule
 
-- Confirmed PR #18 merged into `main` at `8212881d5e8f999180700d96e3722a5313d1885c` after the Stage 5 CI and owner-controlled live acceptance gate passed.
-- Marked Stage 5 COMPLETE: positive submission/review/approval, all seven negative checks, private receipt evidence, immutable approved payout snapshot, and Supabase advisor review are verified.
-- Advanced Stage 6 to CURRENT for planning only and added `docs/STAGE6_IMPLEMENTATION_PLAN.md` plus a teammate/Codex handoff. No Stage 6 transaction construction, wallet approval, payout, digest, paid-state synchronization, or implementation branch has been started.
-
-### 2026-08-31 — Live Supabase auth reached zkLogin verification
-
-- Confirmed the active Supabase project accepts anonymous sign-in cookies and the live wallet challenge endpoint returns `200` with a persisted single-use nonce.
-- Diagnosed the initial authentication warning as a network-restricted local development process and restarted the server with Supabase access.
-- Added a Sui Testnet GraphQL client to personal-message verification so zkLogin wallet signatures can be verified instead of failing for a missing Sui client.
-- Added regression coverage asserting that wallet signature verification always receives the Testnet client.
-- Confirmed the owner completed zkLogin verification, then traced claim submission to a first-treasury RLS failure caused by `INSERT ... RETURNING` evaluating the treasury SELECT policy before its helper could observe the new row.
-- Preserved the existing RLS boundary and changed treasury persistence to insert without `RETURNING`, followed by a separate owner-authorized SELECT; a rolled-back live policy test verified the two-statement path and retained no diagnostic data.
-- Verified lint, strict TypeScript, and 103 unit tests; the owner-controlled synthetic receipt/browser acceptance flow remains in progress.
-
-### 2026-08-31 — Stage 5 live positive-path acceptance passed
-
-- Project reference: `arldlnqiywhcuungvgei`.
-- Applied migrations: `stage5_claim_receipt_workflow` and `stage5_security_performance_hardening`.
-- Synthetic claim: `1aa9db3a-2a43-44e2-9628-923c6744ab03` with exactly one row for external reference `c3106fbc-2d6f-4f50-baca-7840b45cfe8b`.
-- Private receipt path: `2f6973e7-1c6d-4bde-b3de-3375ed3ec753/c3106fbc-2d6f-4f50-baca-7840b45cfe8b/receipt`; PNG; 2,218,738 bytes; SHA-256 `15497253e8cc6df6cf550d4354d141bbbb858e13668d14d0d7655a58cf890c78`.
-- Stored recommendation: `review`; human decision: `approve`; final claim state: `approved_unpaid`; final payment state: `unpaid`.
-- Approved snapshot persisted the verified Testnet treasury object, `marketing` category reference, recipient, `1000` USDC application minor units, and `USDC` currency.
-- Supabase evidence showed one wallet profile, one treasury, one owner membership, five categories, one claim, one private receipt object, RLS enabled on all six public tables, and the expected private-bucket limits.
-- Transaction-wrapped live negative checks confirmed that the database rejects receipt-evidence changes with `Receipt evidence is immutable` and approved-payout changes with `Approved payout snapshot is immutable`; the transaction was rolled back and a follow-up read confirmed the accepted claim remained unchanged.
-- Live exact-receipt duplicate check passed: claim `db1a75bc-59ea-4ee2-ba2f-26f8484a5f87` reused the original receipt bytes under a new request reference, persisted the same SHA-256 hash with an `exactIds` link to the original claim, stored `recommendation = reject`, remained `under_review` and `unpaid`, and created no approved payout snapshot or Sui side effect.
-- Live invalid-recipient API check passed with HTTP 400 and `Enter a valid Sui recipient address.`; a follow-up Supabase read confirmed zero matching claim rows and no additional receipt object.
-- The first invalid-file attempt exposed that wallet authentication ran before client receipt validation. Receipt metadata and signature validation now run in the browser before `ensureWalletIdentity`, while the authoritative server checks remain unchanged. A browser retest rejected a text-backed `.png` with `Receipt bytes do not match the selected image type.` before any wallet/auth/claim request; Supabase remained at two claims and two private receipt objects.
-- The same attempt showed that `ensureWalletIdentity` requested a new signature for every claim. It now reuses an authenticated session whose RLS-visible verified wallet profile matches the connected address; a new personal-message challenge is required only for an unbound session or changed wallet.
-- A later valid Opera submission persisted claim `a778ec65-c147-48d9-9379-2e71340e008d` under external reference `8f6192ae-5c0c-48fa-87b5-25b1a8e6d228`; it remained `under_review` and `unpaid`. Opera's DevTools version could not resend the Fetch request, so a temporary local integration replay called the real Stage 5 workflow twice with that live external reference. Both calls returned the existing claim with `idempotentReplay=true`, no mutation/upload method ran, and follow-up Supabase reads remained at exactly three claims and three private receipt objects. The temporary test was removed.
-- The controlled interrupted-AI check ran with `AI_MODE=live` and live Gemini requests deliberately disabled. Synthetic claim `bd74b34d-d0c6-4402-b9c4-d0dbff6b33b5` persisted `receipt_analysis.failed=true` with `Live Gemini requests are disabled by configuration.`, recommendation `review`, status `under_review`, no decision, and `payment_status=unpaid`. The private receipt object persisted normally; no wallet transaction, payout, digest, paid status, or Gemini request occurred. The server was then restored to `AI_MODE=mock` and its health endpoint confirmed normal mode.
-- Security/performance advisors were reviewed. The current notices are expected and documented: no nonce policies because browser roles receive no nonce-table grants; authenticated helper/RPC functions perform explicit `auth.uid()` ownership/role checks; anonymous Auth is intentional for the wallet bridge and still uses ownership-scoped RLS; password protection is not used by the anonymous-only flow; and unused indexes are expected in a fresh one-record project.
-- All Stage 5 live acceptance checks passed. No Sui transaction, payout, digest, or paid state occurred during Stage 5.
-
-### 2026-08-31 — Stage 5 implemented locally; real Supabase acceptance pending
-
-- Added the versioned Stage 5 schema, RLS policies, private receipt bucket policy, wallet identity bridge, and Supabase adapters.
-- Connected multipart receipt submission to byte hashing, private upload, claim persistence, one shared AI analysis, deterministic checks, and stored recommendations.
-- Added persisted human Approve/Reject decisions and an immutable approved-but-unpaid Stage 6 payout snapshot without invoking Sui.
-- Added mock repository coverage for normal development/CI and a live adapter selected only through explicit environment configuration.
-- Verified lint, strict TypeScript, 101 unit tests, production build, and 7 Playwright tests with zero live Gemini calls and zero Sui payouts.
-- Kept Stage 5 CURRENT because the connected Supabase project is inactive and the local Docker engine is unavailable; no real migration/storage acceptance has been claimed.
-
-### 2026-08-30 — Stage 4 cleanup and Stage 5 handoff aligned
-
-- Confirmed Stage 4 implementation and live-validation documentation are merged to `main` through PR #16 and PR #17.
-- Removed stale Stage 4 active-review/merge instructions.
-- Aligned the project handoff with Stage 5 as the current stage.
-
-### 2026-08-30 — Stage 4 completed with owner-controlled live Gemini validation
-
-- Confirmed GitHub CI run 44 passed in mock mode without a Gemini key or live call.
-- Enabled live mode only in ignored local configuration and validated `gemini-2.5-flash` with exactly one budget request and one in-memory synthetic receipt-image request.
-- Verified all five expected budget categories and integer minor-unit values.
-- Verified the receipt image was accepted, the expected amount matched, intentionally missing currency was detected, and `needsReview=true` was returned.
-- Recorded no key, prompt payload, image base64, or private receipt data.
-- Deleted the temporary runner, restored mock mode, disabled the live guard, and cleared the local key value.
-- Stage 4 exit criteria are verified; Stage 5 is now current but implementation has not started.
-
-### 2026-08-30 — Implemented the Stage 4 Gemini adapter; live validation pending
-
-- Pinned official `@google/genai` `2.19.0` and added lazy, guarded live client construction.
-- Implemented structured budget parsing and multimodal receipt extraction behind `AIService`.
-- Added bounded image input, JSON Schema requests, independent Zod validation, and normalized safe errors.
-- Verified mock selection constructs no Gemini client and all normal tests use fake clients with zero network calls.
-- Verification passed: lint, typecheck, 87 unit tests, production build, and 7 Playwright smoke tests.
-- Stage 4 remained CURRENT at that checkpoint because owner-controlled live Gemini validation had not yet been performed.
-
-### 2026-08-30 — Stage 4 teammate handoff prepared
-
-- Confirmed Stage 0–3 are complete on `main` and the post-merge GitHub CI is green.
-- Cleared the stale Stage 3 active-branch handoff state.
-- Stage 4 should start from latest `main` on `stage4/gemini-ai-layer`.
-- Stage 4 implementation can proceed entirely in mock mode; any live Gemini validation remains explicit and owner-controlled.
-
-### 2026-08-30 — Stage 3 completed with verified Sui Testnet treasury flow
-
-- Deployed the Move package to Sui Testnet and recorded the real package, UpgradeCap, Treasury, TreasurerCap, and publish digest.
-- Verified native Circle Testnet USDC metadata with 6 decimals.
-- Completed real browser-wallet create, 1.00 USDC fund, 1.00 USDC allocation confirmation, and 0.10 USDC payout transactions.
-- Confirmed all four transaction evidence links in the application.
-- Refreshed the Treasury object from Sui Testnet and verified 900000 base units / 0.90 USDC remaining after payout.
-- Confirmed the typed payout event was returned from the real Testnet transaction.
-- Stage 3 exit criteria verified; project advances to Stage 4.
+Every Stage 7 development change must update this file, `docs/ROADMAP.md`, and affected setup/architecture/demo documentation. Do not mark Stage 7 COMPLETE until the deployed/rehearsed exit gate is actually verified.
