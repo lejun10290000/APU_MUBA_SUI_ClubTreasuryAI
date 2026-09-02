@@ -12,8 +12,6 @@ describe("public environment configuration", () => {
   });
 
   it("uses the clean Stage 6 acceptance Treasury and TreasurerCap by default", async () => {
-    vi.stubEnv("NEXT_PUBLIC_DEMO_TREASURY_OBJECT_ID", "");
-    vi.stubEnv("NEXT_PUBLIC_SUI_TREASURER_CAP_OBJECT_ID", "");
     vi.resetModules();
 
     const { publicConfig } = await import("@/src/config/public-env");
