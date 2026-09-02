@@ -1,8 +1,10 @@
 # Stage 6 Implementation Plan — Approved Claim to Sui Payment
 
-Stage 6 is **CURRENT and ready for owner-controlled live acceptance** on `stage6/approved-claim-payout`. This document remains the approved safety boundary. Implementation does not itself authorize a live payout, and the verified Move deployment remains unchanged.
+Status: **HISTORICAL PLAN — Stage 6 COMPLETE**
 
-## Stage 5 Input Contract
+Stage 6 was implemented, owner-controlled live acceptance was verified, and the work was merged to `main` through PR #20. This file remains as the approved safety/design boundary. Current live evidence is recorded in `docs/STAGE6_LIVE_VALIDATION.md`; current development status is in `docs/PROJECT_STATUS.md`.
+
+## Verified input contract
 
 Stage 6 starts only from a persisted claim with:
 
@@ -17,177 +19,115 @@ approved_amount_minor
 approved_currency = USDC
 ```
 
-The `approved_*` values are immutable and are the only source for payout treasury, category, recipient, amount, and currency. AI output, editable form data, request payload values, and current receipt extraction must never override the approved snapshot.
+The immutable `approved_*` values are the only source for payout treasury, category, recipient, amount, and currency. AI output, editable form data, current receipt extraction, and request payload values cannot override that snapshot.
 
-## Important Preflight Finding
-
-The current Stage 5 live-positive claim used the `marketing` category, while the previously verified Stage 3 demo Treasury was confirmed with the `events` category. Do **not** attempt to pay that accepted Stage 5 claim unless a read-only Testnet check proves its approved treasury and category match the actual on-chain object.
-
-The Stage 6 live test should preferably use a fresh synthetic claim tied to a clean Testnet Treasury whose object ID, category reference, allocation, remaining balance, and owning TreasurerCap are verified before approval.
-
-## Recommended MVP Architecture
+## Implemented payment architecture
 
 ```text
 Approved-unpaid claim
         ↓
-Server prepares one payment attempt under a row lock
+Server prepares/returns one active payment attempt
         ↓
-Client reads only the immutable approved snapshot
+Client reads immutable approved snapshot only
         ↓
-Connected Testnet treasurer selects a matching wallet-owned TreasurerCap
+Verify connected Testnet treasurer + matching TreasurerCap
         ↓
-App builds exactly one payout transaction
+Build exactly one payout transaction
         ↓
-Wallet explicitly signs once
+Human wallet explicitly signs
         ↓
-Server validates signed transaction semantics and computes its digest
+Validate signed transaction semantics + derive digest
         ↓
-Digest/attempt is persisted before Sui submission
+Persist digest before broadcast
         ↓
-Signed transaction is relayed to Sui Testnet
+Relay signed transaction to Sui Testnet
         ↓
-Finality and exact PayoutEvent fields are verified
+Reconcile the exact digest
         ↓
-One short database transaction marks paid and synchronizes budget state
+Verify finality + exact typed PayoutEvent
+        ↓
+Short atomic database finalization
+        ↓
+Paid claim + synchronized category budget + public digest evidence
 ```
 
-The server may relay a wallet-signed transaction, but it must never hold a private key or sign for the user.
+The server never holds a wallet private key and never signs for the user.
 
-## Payment State Machine
+## Implemented payment-attempt rules
 
-Keep the claim financially truthful:
-
-```text
-approved_unpaid + unpaid
-    └─ confirmed matching Testnet payout → paid + paid
-```
-
-Use a separate payment-attempt record for operational states:
+Operational states include:
 
 ```text
 prepared
-  ├─ wallet rejected → cancelled
-  └─ exact signed bytes validated; digest stored → signed
-       ├─ submitted to Testnet → submitted
-       │    ├─ matching confirmed success → confirmed
-       │    ├─ checkpointed failure → failed
-       │    └─ confirmation unknown → reconciliation_required
-       └─ not broadcast and digest absent after a bounded check → failed
+signed
+submitted
+confirmed
+failed
+cancelled
+reconciliation_required
 ```
 
-Rules:
+Safety rules:
 
 - only one active attempt may exist per claim
-- `unpaid` remains true until a confirmed matching on-chain payout is verified
-- `reconciliation_required` blocks a new transaction; it never means paid or failed
-- a checkpointed failure may be retried through a new attempt
-- an ambiguous submission must be reconciled by its existing digest before any retry
-- once paid, all future prepare/submit/finalize calls return the existing confirmed result
+- `payment_status=unpaid` remains until exact confirmed payout evidence is verified
+- once signed evidence/digest exists, retries recover by the same digest rather than constructing a blind replacement transaction
+- a definitively checkpointed Sui execution failure may permit a later fresh attempt
+- unavailable/not-yet-checkpointed transactions remain `reconciliation_required`
+- successful Sui transactions whose exact application evidence cannot yet be verified remain `reconciliation_required`, not `failed`
+- once paid, later prepare/reconcile actions return the existing confirmed result instead of creating another transaction
 
-## Planned Supabase Migration
+## Incident discovered during first acceptance
 
-Create the migration with the Supabase CLI command discovered through `supabase migration new --help`; do not invent the timestamp manually.
+The first owner-controlled live acceptance exposed a critical unsafe assumption: a Sui transaction that had already succeeded was treated as failed because application-side payout-event parsing failed. That released the active-attempt boundary and allowed a second signed transaction for the same approved claim.
 
-The migration should:
+The failed acceptance and both successful Testnet digests remain preserved in `docs/STAGE6_LIVE_VALIDATION.md`.
 
-1. Extend claim status/payment constraints to allow a terminal paid state while preserving the immutable approved snapshot.
-2. Add public payment evidence to the claim or a joined payment record: confirmed transaction digest and paid timestamp.
-3. Add a `claim_payment_attempts` table with UUID primary key, indexed foreign keys, the initiating user, selected public TreasurerCap object ID, expected approved snapshot fields, transaction digest, attempt status, timestamps, and safe normalized failure metadata.
-4. Add a unique digest constraint and a partial unique index that permits at most one active attempt per claim.
-5. Enable RLS and permit authorized treasury members to read only attempts for accessible treasuries.
-6. Keep attempt writes behind narrowly granted RPCs/server routes. Any `SECURITY DEFINER` function must set an empty search path, check `auth.uid()` and treasurer role explicitly, revoke default `PUBLIC`/`anon` execution, and grant only the intended authenticated call.
-7. Use short database transactions. Never hold a row lock while calling Sui or waiting for wallet input.
-8. Finalize in a single short transaction with a consistent lock order: claim, payment attempt, then budget category.
-9. Make finalization idempotent for the same claim and digest.
-10. Update `budget_categories.spent_minor` only after verified finality, preferably from the confirmed event's `category_remaining` value after validating it against the stored allocation.
+The repair included:
 
-Do not expose signed transaction bytes or wallet signatures through normal table reads. If the relay design temporarily persists executable signed material for crash recovery, keep it server-only, minimize retention, clear it after settlement, and document the risk before implementation.
+1. successful-but-unverifiable evidence stays non-terminal and keeps the existing digest active
+2. canonical `PayoutEvent` BCS bytes are the primary verification source, with JSON only as a compatibility fallback
+3. live claim submission loads the real persisted Supabase treasury/category workspace rather than stale demo budget values
+4. database finalization requires on-chain remaining amounts to match the same persisted budget state
 
-## Planned API Boundaries
+The safety principle is:
 
-Suggested route responsibilities:
+```text
+PayoutEvent verification failed
+        ≠
+Sui payout did not execute
+```
 
-- `POST /api/claims/[claimId]/payment/prepare`
-  - require the verified Supabase wallet session
-  - require owner/treasurer membership
-  - lock and validate the approved-unpaid claim
-  - create or return the one active attempt and immutable snapshot
-- `POST /api/claims/[claimId]/payment/submit`
-  - validate the attempt and authenticated wallet
-  - decode and validate the exact signed transaction against the approved snapshot, configured package, USDC type, Testnet network, and selected TreasurerCap
-  - compute the digest from exact transaction bytes and persist it before broadcast
-  - relay, wait for finality, and validate the exact `PayoutEvent`
-- `POST /api/claims/[claimId]/payment/reconcile`
-  - query the existing digest only
-  - finalize a confirmed matching payout or retain a safe non-terminal state
-  - never build a replacement transaction while the outcome is ambiguous
+## Verified clean acceptance
 
-Every response must use normalized, non-secret errors and must not return signed bytes, signatures, private receipt URLs, or server credentials.
+A fresh aligned Testnet/Supabase scenario passed the Stage 6 exit gate:
 
-## Sui Integration Work
+```text
+Treasury:
+0x9d9a0b5a7d58d4efa77419ba891a442f3ad23610b4c824a2fa67c7893917f0f3
 
-Reuse the verified Stage 3 foundations:
+TreasurerCap:
+0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101
 
-- `treasuryTransactionService.buildPayout()`
-- Testnet-only wallet/network guard
-- configured package and native Testnet USDC type
-- confirmed-transaction wait boundary
-- typed explorer URL helper
+Category:
+events
 
-Required changes:
+Approved payout:
+0.10 USDC
 
-1. Discover a wallet-owned `TreasurerCap<USDC>` and verify on-chain that it belongs to the approved treasury and connected treasurer.
-2. Build the payout exclusively from `approved_*` values plus the verified capability object ID.
-3. Separate signing, digest persistence/submission, and confirmation so a digest is not lost when confirmation is interrupted.
-4. Parse exactly one matching `PayoutEvent` and validate treasury ID, category reference, recipient, amount, category remaining, and treasury balance.
-5. Treat wallet rejection, execution failure, confirmation timeout, event mismatch, and database synchronization failure as distinct states.
+Confirmed digest:
+DZtb9Td7nfszbBVWj1QdUqd8peeP3FUm2Q6XJEqvVvb7
+```
 
-The current Move `PayoutEvent` does not contain a claim reference, and the `payout` entry point has no claim-level idempotency key. The initial Stage 6 implementation should preserve the verified package only if the digest-first attempt ledger and no-blind-retry rule are accepted as sufficient. If safe reconciliation cannot be demonstrated, stop and review a Move package upgrade that adds an opaque claim reference before enabling retries.
+Before signing, the database showed `1.00 USDC allocated`, `0 spent`, and zero payment attempts. After exactly one wallet signature, exactly one payment attempt became `confirmed`, the claim became `paid`, and the category showed `0.10 spent / 0.90 remaining`. Refresh preserved the same paid state/digest and did not offer or sign a second payment.
 
-## UI Work
+## Stage 6 exit result
 
-On the existing claim review page:
+- implementation merged through PR #20
+- merge commit: `61fb9c86f5077f9813add6dc94aa69b311aaf4d7`
+- `main` push CI run #100: lint/typecheck/build passed, **171/171 unit tests** passed, **7/7 Playwright smoke tests** passed
+- owner-controlled clean Testnet acceptance: **PASSED**
+- same-digest refresh/idempotency: **PASSED**
+- failed first acceptance remains preserved as incident evidence
 
-- show the payout action only for `approved_unpaid` claims
-- display the immutable recipient, category, amount, treasury, and currency before signing
-- require a connected Sui Testnet wallet that matches an authorized treasurer
-- show separate states for ready, awaiting signature, submitted, confirming, reconciliation required, failed, and paid
-- disable duplicate clicks while an attempt is active
-- after confirmation, show the transaction digest and Testnet explorer link
-- never show paid before server-side finality/event verification and atomic database finalization succeed
-
-## Automated Verification
-
-Add unit/integration coverage for:
-
-- only approved-unpaid claims can prepare payment
-- non-treasurer and wrong-wallet attempts are rejected
-- payout input uses only immutable approved values
-- wrong network, invalid capability, event mismatch, and insufficient budget fail safely
-- wallet rejection leaves the claim unpaid
-- digest is persisted before broadcast
-- the same digest finalizes idempotently
-- a second active attempt or second payout after paid is rejected
-- ambiguous confirmation routes to reconciliation and blocks blind retry
-- database finalization updates claim/payment evidence and budget exactly once
-- mock mode performs no live Sui transaction
-- existing Stage 3 and Stage 5 behavior remains green
-
-Run lint, strict TypeScript, unit/integration tests, production build, Playwright smoke tests, Move tests when Move code changes, migration validation, RLS/advisor checks, formatting, and `git diff --check`.
-
-## Owner-Controlled Live Acceptance
-
-Use only synthetic data and a small Testnet amount.
-
-1. Verify the new migration, RLS, grants, indexes, and generated database types.
-2. Create or select a clean Testnet Treasury with a matching wallet-owned TreasurerCap and funded/confirmed category.
-3. Submit and approve one new synthetic claim whose approved snapshot exactly matches that on-chain treasury/category.
-4. Sign one explicit wallet transaction.
-5. Confirm one Testnet USDC payout and exact `PayoutEvent`.
-6. Confirm claim/payment status becomes paid only after finality, the digest/explorer link is stored, and budget state changes exactly once.
-7. Refresh and reconcile by the same digest; confirm no second payout occurs.
-8. Exercise wallet rejection, wrong wallet/network, insufficient category balance, duplicate-click, and interrupted-confirmation paths.
-
-## Exit Criteria
-
-Stage 6 is complete only when the approved-claim-to-Testnet-USDC workflow succeeds end to end, retries cannot create an uncontrolled second payout, uncertain outcomes reconcile by digest, database budget state changes only after verified on-chain success, AI cannot bypass approval, and the owner-controlled live evidence is recorded.
+**Stage 6 is COMPLETE. Stage 7 — Demo hardening and deployment — is CURRENT.**
