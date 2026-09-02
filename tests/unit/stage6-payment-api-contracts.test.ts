@@ -5,7 +5,10 @@ import {
   demoSuiAddress,
   type PersistedClaimSubmission,
 } from "@/src/domain/stage5-claims";
-import { MockClaimRepository, resetMockClaimStore } from "@/src/lib/claims/mock-repository";
+import {
+  MockClaimRepository,
+  resetMockClaimStore,
+} from "@/src/lib/claims/mock-repository";
 import {
   prepareClaimPayment,
   reconcilePaymentAttempt,
@@ -24,7 +27,10 @@ describe("Stage 6 payment API contracts", () => {
     const result = await prepareClaimPayment(repository, claim.id);
 
     expect(result).toEqual({
-      attempt: expect.objectContaining({ claimId: claim.id, status: "prepared" }),
+      attempt: expect.objectContaining({
+        claimId: claim.id,
+        status: "prepared",
+      }),
       snapshot: claim.approvedSnapshot,
     });
   });
@@ -51,14 +57,47 @@ describe("Stage 6 payment API contracts", () => {
     const { attempt } = await prepareClaimPayment(repository, claim.id);
     const digest = "digest-submit-123456789012345";
 
-    const submitted = await recordSignedPaymentSubmission(repository, attempt.id, {
-      transactionDigest: digest,
-      treasurerCapObjectId: demoSuiAddress,
-      signedTransactionBase64: "c2lnbmVkLXR4",
-      network: "testnet",
-    });
+    const submitted = await recordSignedPaymentSubmission(
+      repository,
+      attempt.id,
+      {
+        transactionDigest: digest,
+        treasurerCapObjectId: demoSuiAddress,
+        signedTransactionBase64: "c2lnbmVkLXR4",
+        network: "testnet",
+      },
+      async () => digest,
+    );
 
-    expect(submitted).toMatchObject({ status: "submitted", transactionDigest: digest });
+    expect(submitted).toMatchObject({
+      status: "submitted",
+      transactionDigest: digest,
+    });
+  });
+
+  it("rejects a claimed digest that does not match the signed bytes", async () => {
+    const repository = new MockClaimRepository();
+    const claim = await approvedClaim(repository);
+    const { attempt } = await prepareClaimPayment(repository, claim.id);
+
+    await expect(
+      recordSignedPaymentSubmission(
+        repository,
+        attempt.id,
+        {
+          transactionDigest: "digest-claimed-12345678901234",
+          treasurerCapObjectId: demoSuiAddress,
+          signedTransactionBase64: "c2lnbmVkLXR4",
+        },
+        async () => "digest-derived-12345678901234",
+      ),
+    ).rejects.toThrow(/does not match/i);
+    await expect(
+      repository.getPaymentAttempt(attempt.id),
+    ).resolves.toMatchObject({
+      status: "prepared",
+      transactionDigest: null,
+    });
   });
 
   it("reconciles by the already-persisted digest and finalizes verified success", async () => {
@@ -66,11 +105,16 @@ describe("Stage 6 payment API contracts", () => {
     const claim = await approvedClaim(repository);
     const { attempt } = await prepareClaimPayment(repository, claim.id);
     const digest = "digest-success-12345678901234";
-    await recordSignedPaymentSubmission(repository, attempt.id, {
-      transactionDigest: digest,
-      treasurerCapObjectId: demoSuiAddress,
-      signedTransactionBase64: "c2lnbmVkLXR4",
-    });
+    await recordSignedPaymentSubmission(
+      repository,
+      attempt.id,
+      {
+        transactionDigest: digest,
+        treasurerCapObjectId: demoSuiAddress,
+        signedTransactionBase64: "c2lnbmVkLXR4",
+      },
+      async () => digest,
+    );
     const provider: PaymentChainStatusProvider = {
       getStatus: async (requestedDigest) => {
         expect(requestedDigest).toBe(digest);
@@ -84,11 +128,19 @@ describe("Stage 6 payment API contracts", () => {
       },
     };
 
-    const result = await reconcilePaymentAttempt(repository, provider, attempt.id);
+    const result = await reconcilePaymentAttempt(
+      repository,
+      provider,
+      attempt.id,
+    );
 
     expect(result).toMatchObject({
       state: "confirmed",
-      claim: { id: claim.id, status: "paid", confirmedTransactionDigest: digest },
+      claim: {
+        id: claim.id,
+        status: "paid",
+        confirmedTransactionDigest: digest,
+      },
     });
   });
 
@@ -97,16 +149,25 @@ describe("Stage 6 payment API contracts", () => {
     const claim = await approvedClaim(repository);
     const { attempt } = await prepareClaimPayment(repository, claim.id);
     const digest = "digest-pending-12345678901234";
-    await recordSignedPaymentSubmission(repository, attempt.id, {
-      transactionDigest: digest,
-      treasurerCapObjectId: demoSuiAddress,
-      signedTransactionBase64: "c2lnbmVkLXR4",
-    });
+    await recordSignedPaymentSubmission(
+      repository,
+      attempt.id,
+      {
+        transactionDigest: digest,
+        treasurerCapObjectId: demoSuiAddress,
+        signedTransactionBase64: "c2lnbmVkLXR4",
+      },
+      async () => digest,
+    );
     const provider: PaymentChainStatusProvider = {
       getStatus: async () => ({ state: "pending", code: "rpc_timeout" }),
     };
 
-    const result = await reconcilePaymentAttempt(repository, provider, attempt.id);
+    const result = await reconcilePaymentAttempt(
+      repository,
+      provider,
+      attempt.id,
+    );
 
     expect(result).toMatchObject({
       state: "reconciliation_required",
@@ -118,18 +179,34 @@ describe("Stage 6 payment API contracts", () => {
     const repository = new MockClaimRepository();
     const claim = await approvedClaim(repository);
     const { attempt } = await prepareClaimPayment(repository, claim.id);
-    await recordSignedPaymentSubmission(repository, attempt.id, {
-      transactionDigest: "digest-failed-123456789012345",
-      treasurerCapObjectId: demoSuiAddress,
-      signedTransactionBase64: "c2lnbmVkLXR4",
-    });
+    const digest = "digest-failed-123456789012345";
+    await recordSignedPaymentSubmission(
+      repository,
+      attempt.id,
+      {
+        transactionDigest: digest,
+        treasurerCapObjectId: demoSuiAddress,
+        signedTransactionBase64: "c2lnbmVkLXR4",
+      },
+      async () => digest,
+    );
     const provider: PaymentChainStatusProvider = {
-      getStatus: async () => ({ state: "failure", code: "chain_execution_failed" }),
+      getStatus: async () => ({
+        state: "failure",
+        code: "chain_execution_failed",
+      }),
     };
 
-    const result = await reconcilePaymentAttempt(repository, provider, attempt.id);
+    const result = await reconcilePaymentAttempt(
+      repository,
+      provider,
+      attempt.id,
+    );
 
-    expect(result).toMatchObject({ state: "failed", attempt: { status: "failed" } });
+    expect(result).toMatchObject({
+      state: "failed",
+      attempt: { status: "failed" },
+    });
     await expect(repository.getClaim(claim.id)).resolves.toMatchObject({
       status: "approved_unpaid",
       paymentStatus: "unpaid",
@@ -140,11 +217,17 @@ describe("Stage 6 payment API contracts", () => {
     const repository = new MockClaimRepository();
     const claim = await approvedClaim(repository);
     const { attempt } = await prepareClaimPayment(repository, claim.id);
-    await recordSignedPaymentSubmission(repository, attempt.id, {
-      transactionDigest: "digest-original-1234567890123",
-      treasurerCapObjectId: demoSuiAddress,
-      signedTransactionBase64: "c2lnbmVkLXR4",
-    });
+    const digest = "digest-original-1234567890123";
+    await recordSignedPaymentSubmission(
+      repository,
+      attempt.id,
+      {
+        transactionDigest: digest,
+        treasurerCapObjectId: demoSuiAddress,
+        signedTransactionBase64: "c2lnbmVkLXR4",
+      },
+      async () => digest,
+    );
     const provider: PaymentChainStatusProvider = {
       getStatus: async () => ({
         state: "success",
@@ -155,7 +238,11 @@ describe("Stage 6 payment API contracts", () => {
       }),
     };
 
-    const result = await reconcilePaymentAttempt(repository, provider, attempt.id);
+    const result = await reconcilePaymentAttempt(
+      repository,
+      provider,
+      attempt.id,
+    );
 
     expect(result).toMatchObject({
       state: "failed",
@@ -188,12 +275,14 @@ function submissionFixture(): PersistedClaimSubmission {
       name: "Stage 6 API Treasury",
       totalBudgetMinor: asMinorAmount(10_000),
       treasuryObjectId: demoSuiAddress,
-      categories: [{
-        externalReference: "marketing",
-        name: "Marketing",
-        allocatedMinor: asMinorAmount(10_000),
-        spentMinor: asMinorAmount(1_000),
-      }],
+      categories: [
+        {
+          externalReference: "marketing",
+          name: "Marketing",
+          allocatedMinor: asMinorAmount(10_000),
+          spentMinor: asMinorAmount(1_000),
+        },
+      ],
     },
     categoryExternalReference: "marketing",
     submitterName: "Aina Rahman",

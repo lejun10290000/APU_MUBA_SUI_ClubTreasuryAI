@@ -4,6 +4,7 @@ export const suiConfig = {
   network: publicConfig.suiNetwork,
   rpcUrl: publicConfig.suiRpcUrl,
   packageId: publicConfig.suiPackageId,
+  treasurerCapObjectId: publicConfig.suiTreasurerCapObjectId,
   usdcCoinType: publicConfig.suiUsdcCoinType,
 } as const;
 

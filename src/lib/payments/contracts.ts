@@ -1,7 +1,9 @@
 import { isValidSuiAddress, normalizeSuiAddress } from "@mysten/sui/utils";
 import { z } from "zod";
 import { asMinorAmount, type MinorAmount } from "@/src/domain/money";
+import type { ApprovedPayoutSnapshot } from "@/src/domain/stage6-payments";
 import type { Stage6ClaimRepository } from "@/src/lib/claims";
+import { deriveSignedTransactionDigest } from "./signed-transaction";
 
 export const routeIdSchema = z.string().uuid();
 
@@ -42,7 +44,10 @@ export type PaymentChainStatus =
   | { state: "failure"; code: string };
 
 export interface PaymentChainStatusProvider {
-  getStatus(transactionDigest: string): Promise<PaymentChainStatus>;
+  getStatus(
+    transactionDigest: string,
+    snapshot: ApprovedPayoutSnapshot,
+  ): Promise<PaymentChainStatus>;
 }
 
 export async function prepareClaimPayment(
@@ -56,9 +61,18 @@ export async function recordSignedPaymentSubmission(
   repository: Stage6ClaimRepository,
   attemptId: string,
   input: SignedPaymentSubmission,
+  deriveDigest: (
+    signedTransactionBase64: string,
+  ) => Promise<string> = deriveSignedTransactionDigest,
 ) {
   const parsedAttemptId = routeIdSchema.parse(attemptId);
   const evidence = signedPaymentSubmissionSchema.parse(input);
+  const derivedDigest = await deriveDigest(evidence.signedTransactionBase64);
+  if (derivedDigest !== evidence.transactionDigest) {
+    throw new Error(
+      "Persisted transaction digest does not match the signed transaction bytes.",
+    );
+  }
   await repository.markPaymentAttemptSigned(
     parsedAttemptId,
     evidence.transactionDigest,
@@ -81,6 +95,7 @@ export async function reconcilePaymentAttempt(
 
   const chainStatus = await chainStatusProvider.getStatus(
     attempt.transactionDigest,
+    attempt.snapshot,
   );
   if (chainStatus.state === "pending") {
     return {
@@ -115,9 +130,7 @@ export async function reconcilePaymentAttempt(
       claimId: attempt.claimId,
       attemptId: attempt.id,
       transactionDigest: attempt.transactionDigest,
-      categoryRemainingMinor: asMinorAmount(
-        chainStatus.categoryRemainingMinor,
-      ),
+      categoryRemainingMinor: asMinorAmount(chainStatus.categoryRemainingMinor),
       treasuryBalanceMinor: asMinorAmount(chainStatus.treasuryBalanceMinor),
       confirmedAt: chainStatus.confirmedAt,
     }),

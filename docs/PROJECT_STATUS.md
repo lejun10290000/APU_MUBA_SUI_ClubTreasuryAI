@@ -4,16 +4,16 @@ This file is the **single source of truth for current implementation status, blo
 
 ## Current Snapshot
 
-- Last updated: **31 August 2026 (MYT)**
+- Last updated: **2 September 2026 (MYT)**
 - Default branch: `main`
 - **Current stage: Stage 6 — Human approval and on-chain payment**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5**
 - Latest completed milestone: **Stage 5 claim/receipt persistence, wallet identity binding, private storage, human decision flow, and the complete owner-controlled live Supabase acceptance gate are verified and merged to `main` through PR #18.**
-- Active implementation branch: **None. Create the Stage 6 branch only after the payout state machine and implementation boundary are agreed.**
+- Active implementation branch: **`stage6/approved-claim-payout`**
 - Stage 5 implementation state: **COMPLETE — merged to `main` at merge commit `8212881d5e8f999180700d96e3722a5313d1885c`.**
-- Current blockers: **No Stage 5 blocker. Stage 6 requires a reviewed implementation plan before coding begins.**
-- Demo readiness: **The mock product workflow, verified Sui Testnet treasury flow, live-validated Gemini adapter, and live-accepted Stage 5 claim/review workflow are available. Claim-linked Stage 6 payout synchronization is not implemented yet.**
+- Current blockers: **No automated implementation blocker. The remaining Stage 6 exit gate is one owner-controlled payment of the designated synthetic claim; no real payment is authorized during normal development.**
+- Demo readiness: **The approved-claim payout UI and digest-first recovery path are implemented locally and pass lint, strict TypeScript, 168 unit tests, production build, and 7 Playwright smoke tests. A claim is marked paid only after read-only Testnet reconciliation verifies the exact typed payout event and atomic persistence succeeds. Owner-controlled live acceptance is still pending.**
 
 ## Stage Progress
 
@@ -170,11 +170,11 @@ The real acceptance gate in `docs/STAGE5_LIVE_VALIDATION.md` passed and Stage 5 
 
 ## Next Recommended Task
 
-### Stage 6 — Plan approved-claim payout integration
+### Stage 6 — Verify the approved-claim payout integration
 
-1. Review and approve `docs/STAGE6_IMPLEMENTATION_PLAN.md`, including the digest-first recovery boundary and the old live claim's treasury/category mismatch.
-2. Record whether the existing Move package can remain unchanged or needs a reviewed claim-reference upgrade for stronger on-chain idempotency.
-3. Create a dedicated Stage 6 branch and implement only the approved scope; AI must remain advisory and the wallet must require explicit human approval.
+1. Review the resulting diff while preserving the existing migration-alignment and Stage 6 fixture changes.
+2. Only after owner approval, execute and reconcile exactly one small Testnet payout for `STAGE6-EVENT-007`; record only public evidence and verify no second payout can occur.
+3. Keep Stage 6 CURRENT until that live acceptance evidence and idempotent refresh/reconciliation check pass.
 
 ## Locked MVP Decisions
 
@@ -199,10 +199,19 @@ Before development, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 6 — Human approval and on-chain payment
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5
-NEXT TASK: Review and approve docs/STAGE6_IMPLEMENTATION_PLAN.md before creating the Stage 6 implementation branch.
+NEXT TASK: Review the verified local diff, then perform the owner-controlled `STAGE6-EVENT-007` live acceptance only with explicit approval.
 ```
 
 ## Recent Development Log
+
+### 2026-09-02 — Stage 6 approved-claim payout UI implemented locally
+
+- Added the minimal payout panel to the existing claim review page for approved-unpaid claims, with immutable treasury/category/recipient/amount evidence and explicit wallet signing.
+- Separated prepare, signing, signed-byte digest derivation, digest persistence, broadcast, and reconciliation so interrupted responses recover by the existing digest and never create a blind replacement transaction.
+- Added wallet/Testnet/TreasurerCap authorization checks and read-only Testnet reconciliation that requires exactly one matching typed `PayoutEvent` before database finalization can mark a claim paid.
+- Added focused coverage for wallet rejection, immutable snapshot use, digest-before-broadcast ordering, ambiguous submission recovery, exact event verification, failed transactions, paid evidence, and duplicate-action controls.
+- Automated verification passed: lint, strict TypeScript, 168 unit tests, production build, 7 Playwright smoke tests, and `git diff --check`.
+- No real Sui transaction was executed during implementation or automated verification.
 
 ### 2026-08-31 — Stage 5 completed and merged
 

@@ -128,7 +128,7 @@ Required work:
 - idempotent database synchronization
 - remaining budget changes only after on-chain success
 
-Current boundary: planning only. Review `docs/STAGE6_IMPLEMENTATION_PLAN.md`, including the payout state machine, transaction idempotency, finality, retry, old-claim treasury/category mismatch, and post-confirmation reconciliation before implementation begins on a dedicated Stage 6 branch.
+Current boundary: owner-controlled live acceptance on `stage6/approved-claim-payout`. The approved-unpaid UI, explicit wallet-signing boundary, digest-first persistence, exact-event reconciliation, and paid evidence are implemented locally; automated verification passes. Stage 6 remains CURRENT until one owner-controlled payout of the designated synthetic claim proves the full live path and idempotent recovery.
 
 Exit criteria: the full core payment workflow works end to end and AI cannot bypass human approval.
 

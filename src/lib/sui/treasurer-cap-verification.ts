@@ -5,25 +5,20 @@ import {
 } from "@mysten/sui/utils";
 
 type SuiObjectOwner =
-  | { AddressOwner: string }
-  | { Shared: Record<string, unknown> }
-  | { ObjectOwner: string }
-  | "Immutable";
+  | { $kind: "AddressOwner"; AddressOwner: string }
+  | { $kind: "Shared"; Shared: Record<string, unknown> }
+  | { $kind: "ObjectOwner"; ObjectOwner: string }
+  | { $kind: "Immutable"; Immutable: true }
+  | { $kind: string };
 
 export interface TreasurerCapLookupClient {
-  getObject(input: {
-    id: string;
-    options: { showType: true; showOwner: true; showContent: true };
-  }): Promise<{
-    data: {
+  getObject(input: { objectId: string; include: { json: true } }): Promise<{
+    object: {
       objectId: string;
-      type: string | null;
-      owner: SuiObjectOwner | null;
-      content: {
-        dataType: "moveObject" | "package";
-        fields?: Record<string, unknown>;
-      } | null;
-    } | null;
+      type: string;
+      owner: SuiObjectOwner;
+      json: Record<string, unknown> | null;
+    };
   }>;
 }
 
@@ -43,10 +38,10 @@ export async function verifyTreasurerCap(
     throw new Error("TreasurerCap object ID is invalid.");
   }
   const response = await client.getObject({
-    id: normalizeSuiObjectId(expected.capObjectId),
-    options: { showType: true, showOwner: true, showContent: true },
+    objectId: normalizeSuiObjectId(expected.capObjectId),
+    include: { json: true },
   });
-  const object = response.data;
+  const object = response.object;
   if (!object) throw new Error("TreasurerCap object was not found.");
 
   const expectedType = `${normalizeSuiObjectId(expected.packageId)}::treasury::TreasurerCap<${expected.coinType}>`;
@@ -64,19 +59,21 @@ export async function verifyTreasurerCap(
   if (normalizeSuiAddress(object.owner.AddressOwner) !== wallet) {
     throw new Error("Connected wallet does not own the TreasurerCap.");
   }
-  if (object.content?.dataType !== "moveObject" || !object.content.fields) {
+  if (!object.json) {
     throw new Error("TreasurerCap Move fields are unavailable.");
   }
-  const treasuryId = readId(object.content.fields.treasury_id);
+  const treasuryId = readId(object.json.treasury_id);
   if (treasuryId !== normalizeSuiObjectId(expected.approvedTreasuryObjectId)) {
     throw new Error("TreasurerCap does not authorize the approved treasury.");
   }
-  const treasurer = object.content.fields.treasurer;
+  const treasurer = object.json.treasurer;
   if (
     typeof treasurer === "string" &&
     normalizeSuiAddress(treasurer) !== wallet
   ) {
-    throw new Error("TreasurerCap treasurer does not match the connected wallet.");
+    throw new Error(
+      "TreasurerCap treasurer does not match the connected wallet.",
+    );
   }
 
   return {

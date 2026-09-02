@@ -35,21 +35,29 @@ describe("Stage 6 Sui payment safety", () => {
   });
 
   it.each([
-    ["wrong type", `${packageId}::treasury::Treasury<${coinType}>`, demoSuiAddress],
-    ["wrong treasury", `${packageId}::treasury::TreasurerCap<${coinType}>`, packageId],
+    [
+      "wrong type",
+      `${packageId}::treasury::Treasury<${coinType}>`,
+      demoSuiAddress,
+    ],
+    [
+      "wrong treasury",
+      `${packageId}::treasury::TreasurerCap<${coinType}>`,
+      packageId,
+    ],
   ])("rejects a TreasurerCap with %s", async (_label, type, treasuryId) => {
     await expect(
       verifyTreasurerCap(
         {
           getObject: async () => ({
-            data: {
+            object: {
               objectId: capId,
               type,
-              owner: { AddressOwner: demoSuiAddress },
-              content: {
-                dataType: "moveObject" as const,
-                fields: { treasury_id: treasuryId, treasurer: demoSuiAddress },
+              owner: {
+                $kind: "AddressOwner" as const,
+                AddressOwner: demoSuiAddress,
               },
+              json: { treasury_id: treasuryId, treasurer: demoSuiAddress },
             },
           }),
         },
@@ -79,14 +87,14 @@ describe("Stage 6 Sui payment safety", () => {
     const result = await verifyTreasurerCap(
       {
         getObject: async () => ({
-          data: {
+          object: {
             objectId: capId,
             type: `${packageId}::treasury::TreasurerCap<${coinType}>`,
-            owner: { AddressOwner: demoSuiAddress },
-            content: {
-              dataType: "moveObject" as const,
-              fields: { treasury_id: demoSuiAddress, treasurer: demoSuiAddress },
+            owner: {
+              $kind: "AddressOwner" as const,
+              AddressOwner: demoSuiAddress,
             },
+            json: { treasury_id: demoSuiAddress, treasurer: demoSuiAddress },
           },
         }),
       },
@@ -108,25 +116,25 @@ describe("Stage 6 Sui payment safety", () => {
   });
 
   it.each([
-    ["missing", null],
-    ["wrong owner", { AddressOwner: packageId }],
-    ["shared", { Shared: { initial_shared_version: "1" } }],
+    [
+      "wrong owner",
+      { $kind: "AddressOwner" as const, AddressOwner: packageId },
+    ],
+    [
+      "shared",
+      { $kind: "Shared" as const, Shared: { initialSharedVersion: "1" } },
+    ],
   ])("rejects a %s TreasurerCap", async (_label, owner) => {
     await expect(
       verifyTreasurerCap(
         {
           getObject: async () => ({
-            data: owner
-              ? {
-                  objectId: capId,
-                  type: `${packageId}::treasury::TreasurerCap<${coinType}>`,
-                  owner,
-                  content: {
-                    dataType: "moveObject" as const,
-                    fields: { treasury_id: demoSuiAddress },
-                  },
-                }
-              : null,
+            object: {
+              objectId: capId,
+              type: `${packageId}::treasury::TreasurerCap<${coinType}>`,
+              owner,
+              json: { treasury_id: demoSuiAddress },
+            },
           }),
         },
         {
@@ -138,6 +146,21 @@ describe("Stage 6 Sui payment safety", () => {
         },
       ),
     ).rejects.toThrow();
+  });
+
+  it("rejects a missing TreasurerCap", async () => {
+    await expect(
+      verifyTreasurerCap(
+        { getObject: async () => Promise.reject(new Error("not found")) },
+        {
+          capObjectId: capId,
+          connectedWalletAddress: demoSuiAddress,
+          approvedTreasuryObjectId: demoSuiAddress,
+          packageId,
+          coinType,
+        },
+      ),
+    ).rejects.toThrow(/not found/i);
   });
 
   it("verifies the exact existing PayoutEvent fields", () => {
@@ -199,10 +222,16 @@ describe("Stage 6 Sui payment safety", () => {
       recipientSuiAddress: demoSuiAddress,
       amountMinor: asMinorAmount(250),
     };
-    expect(() => verifyPayoutEvent({ events: [] }, expected)).toThrow(/exactly one/i);
+    expect(() => verifyPayoutEvent({ events: [] }, expected)).toThrow(
+      /exactly one/i,
+    );
     expect(() =>
       verifyPayoutEvent(
-        { events: [{ ...validEvent(), eventType: `${packageId}::treasury::Other` }] },
+        {
+          events: [
+            { ...validEvent(), eventType: `${packageId}::treasury::Other` },
+          ],
+        },
         expected,
       ),
     ).toThrow(/exactly one/i);
