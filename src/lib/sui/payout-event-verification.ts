@@ -98,6 +98,7 @@ function normalizeRequiredAddress(value: unknown) {
 }
 
 function decodeCategoryReference(value: unknown) {
+  if (typeof value === "string") return value;
   if (
     !Array.isArray(value) ||
     value.some((byte) => !Number.isInteger(byte) || byte < 0 || byte > 255)
@@ -123,4 +124,3 @@ function readU64(value: unknown, label: string) {
   }
   return normalized;
 }
-
