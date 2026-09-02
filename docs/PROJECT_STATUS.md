@@ -12,8 +12,8 @@ This file is the **single source of truth for current implementation status, blo
 - Latest completed milestone: **Stage 5 claim/receipt persistence, wallet identity binding, private storage, human decision flow, and the complete owner-controlled live Supabase acceptance gate are verified and merged to `main` through PR #18.**
 - Active implementation branch: **`stage6/approved-claim-payout`**
 - Stage 5 implementation state: **COMPLETE — merged to `main` at merge commit `8212881d5e8f999180700d96e3722a5313d1885c`.**
-- Current blockers: **No automated implementation blocker. The remaining Stage 6 exit gate is one owner-controlled payment of the designated synthetic claim; no real payment is authorized during normal development.**
-- Demo readiness: **The approved-claim payout UI and digest-first recovery path are implemented locally and pass lint, strict TypeScript, 168 unit tests, production build, and 7 Playwright smoke tests. A claim is marked paid only after read-only Testnet reconciliation verifies the exact typed payout event and atomic persistence succeeds. Owner-controlled live acceptance is still pending.**
+- Current blockers: **The first Stage 6 owner-controlled live acceptance exposed a duplicate-payout safety defect: a successful Testnet payout whose event could not be parsed was misclassified as failed, which allowed a second signed payout for the same claim. The code repair is implemented and GitHub CI run #80 is green, but Stage 6 requires a fresh clean owner-controlled acceptance before completion. Do not reuse the affected claim for a success case.**
+- Demo readiness: **The approved-claim payout UI, digest-first recovery path, Sui string/byte-vector event parsing, and non-retryable reconciliation handling for successful-but-unverifiable transactions are implemented. GitHub CI run #80 passes lint, strict TypeScript, 169 unit tests, production build, and 7/7 Playwright smoke tests. Stage 6 remains CURRENT until one fresh aligned claim proves exactly one Testnet payout plus idempotent reconciliation.**
 
 ## Stage Progress
 
@@ -170,11 +170,12 @@ The real acceptance gate in `docs/STAGE5_LIVE_VALIDATION.md` passed and Stage 5 
 
 ## Next Recommended Task
 
-### Stage 6 — Verify the approved-claim payout integration
+### Stage 6 — Repeat owner-controlled acceptance with a clean aligned scenario
 
-1. Review the resulting diff while preserving the existing migration-alignment and Stage 6 fixture changes.
-2. Only after owner approval, execute and reconcile exactly one small Testnet payout for `STAGE6-EVENT-007`; record only public evidence and verify no second payout can occur.
-3. Keep Stage 6 CURRENT until that live acceptance evidence and idempotent refresh/reconciliation check pass.
+1. Do **not** reuse the affected duplicate-paid claim or treat the first Stage 6 acceptance as successful evidence.
+2. Prepare a fresh synthetic claim tied to a clean Testnet Treasury/category whose on-chain allocation, remaining balance, database allocation/spend, recipient, amount, and TreasurerCap are verified to match before approval.
+3. Execute exactly one small Testnet payout, then refresh/reconcile the same digest and prove that no replacement transaction or second wallet signature can occur.
+4. Keep Stage 6 CURRENT until the fresh live acceptance, database synchronization, explorer evidence, and idempotent reconciliation all pass.
 
 ## Locked MVP Decisions
 
@@ -199,10 +200,22 @@ Before development, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 6 — Human approval and on-chain payment
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5
-NEXT TASK: Review the verified local diff, then perform the owner-controlled `STAGE6-EVENT-007` live acceptance only with explicit approval.
+NEXT TASK: Prepare a fresh aligned Stage 6 acceptance scenario; do not reuse the duplicate-paid claim.
 ```
 
 ## Recent Development Log
+
+### 2026-09-02 — First Stage 6 live acceptance exposed duplicate payout; safety repair verified
+
+- The first owner-controlled Stage 6 acceptance must be treated as **FAILED acceptance evidence**, not as a successful completion gate.
+- One approved claim produced two successful Sui Testnet payout transactions for the same treasury, `events` category, recipient, and **0.10 USDC** approved amount because the first successful transaction was incorrectly marked failed after payout-event verification could not parse the returned category representation.
+- Public Testnet digests preserved as incident evidence: `9oZCwv5iLuHYWd5LJoAQUFfy55K8LK1wBe26zxRyx5AH` and `FXzWfw3wwD4AWQKB8Q4pcyWGH3FwJmrP25GCzChvZdEG`. Both were independently confirmed successful in the explorer by the project owner.
+- Added a regression test proving the Sui event reader accepts both UTF-8 string and byte-array representations of the Move `vector<u8>` category reference.
+- Changed successful-but-unverifiable/mismatched payout evidence from definitive `failed` to non-terminal `pending`, which reconciles to `reconciliation_required` and keeps the existing digest active so a replacement transaction cannot be constructed or signed blindly.
+- TDD red run #77 failed exactly the two new safety tests while all pre-existing unit tests remained green; after the repair, GitHub CI run #80 passed lint, strict TypeScript, **169/169 unit tests**, production build, and **7/7 Playwright smoke tests**.
+- The pre-existing Playwright assertion for `Exact amount match` was corrected to the real deterministic mock behavior: mock receipt analysis extracts 75.00 USDC and intentionally drives the mismatch/Review path while the approved payout remains the requested 0.10 USDC.
+- The affected Supabase claim and both payment-attempt records are preserved for audit/debug evidence. They must not be deleted, rewritten into a successful acceptance result, or reused for another payout.
+- No additional live payout is authorized on the affected claim. Stage 6 remains CURRENT until a fresh clean aligned claim proves exactly one payout and idempotent same-digest reconciliation.
 
 ### 2026-09-02 — Stage 6 approved-claim payout UI implemented locally
 
@@ -210,7 +223,7 @@ NEXT TASK: Review the verified local diff, then perform the owner-controlled `ST
 - Separated prepare, signing, signed-byte digest derivation, digest persistence, broadcast, and reconciliation so interrupted responses recover by the existing digest and never create a blind replacement transaction.
 - Added wallet/Testnet/TreasurerCap authorization checks and read-only Testnet reconciliation that requires exactly one matching typed `PayoutEvent` before database finalization can mark a claim paid.
 - Added focused coverage for wallet rejection, immutable snapshot use, digest-before-broadcast ordering, ambiguous submission recovery, exact event verification, failed transactions, paid evidence, and duplicate-action controls.
-- Automated verification passed: lint, strict TypeScript, 168 unit tests, production build, 7 Playwright smoke tests, and `git diff --check`.
+- Automated verification passed at that checkpoint: lint, strict TypeScript, 168 unit tests, production build, 7 Playwright smoke tests, and `git diff --check`.
 - No real Sui transaction was executed during implementation or automated verification.
 
 ### 2026-08-31 — Stage 5 completed and merged
