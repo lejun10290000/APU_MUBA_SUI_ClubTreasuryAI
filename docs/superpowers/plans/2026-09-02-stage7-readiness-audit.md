@@ -44,10 +44,10 @@
 - Modify: `docs/ARCHITECTURE.md`
 - Modify: `docs/DEMO_PLAN.md`
 
-- [ ] Mark Stage 6 COMPLETE and Stage 7 CURRENT everywhere authoritative.
-- [ ] Record the successful clean Stage 6 acceptance digest and one-attempt/idempotency evidence.
-- [ ] Preserve the earlier failed acceptance as incident evidence, not current blocker.
-- [ ] Define the first Stage 7 task as deployment/readiness hardening rather than optional feature expansion.
+- [x] Mark Stage 6 COMPLETE and Stage 7 CURRENT everywhere authoritative.
+- [x] Record the successful clean Stage 6 acceptance digest and one-attempt/idempotency evidence.
+- [x] Preserve the earlier failed acceptance as incident evidence, not current blocker.
+- [x] Define the first Stage 7 task as deployment/readiness hardening rather than optional feature expansion.
 
 ### Task 3: Replace polluted historical demo defaults
 
@@ -60,9 +60,9 @@
 - Current clean Treasury: `0x9d9a0b5a7d58d4efa77419ba891a442f3ad23610b4c824a2fa67c7893917f0f3`
 - Matching TreasurerCap: `0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101`
 
-- [ ] Update committed public defaults to the clean Stage 6 acceptance Treasury/Cap.
-- [ ] Keep the verified package and native Testnet USDC type unchanged.
-- [ ] Update public-config coverage to assert the clean defaults.
+- [x] Update committed public defaults to the clean Stage 6 acceptance Treasury/Cap.
+- [x] Keep the verified package and native Testnet USDC type unchanged.
+- [x] Update public-config coverage to assert the clean defaults.
 
 ### Task 4: Remove deterministic verification warnings
 
@@ -71,9 +71,9 @@
 - Create: `vitest.config.mts`
 - Delete: `vitest.config.ts`
 
-- [ ] Add `.next/dev/types/**/*.ts` to committed TypeScript includes so `next build` does not rewrite `tsconfig.json`.
-- [ ] Move Vitest config to ESM `.mts` so Vitest does not warn about ESM syntax loaded as CommonJS.
-- [ ] Keep test aliases/environment/include behavior unchanged.
+- [x] Add `.next/dev/types/**/*.ts` to committed TypeScript includes so `next build` does not rewrite `tsconfig.json`.
+- [x] Move Vitest config to ESM `.mts` so Vitest does not warn about ESM syntax loaded as CommonJS.
+- [x] Keep test aliases/environment/include behavior unchanged.
 
 ### Task 5: Verify readiness branch
 
@@ -83,10 +83,10 @@
 - [ ] Run GitHub CI on the final readiness branch.
 - [ ] Require lint, strict TypeScript, all unit tests, production build, and all 7 Playwright smoke tests to pass.
 - [ ] Inspect logs for the previous Next.js tsconfig rewrite and Vitest config-loader warnings.
-- [ ] Confirm no open PR/issue blocker and no Stage 0–6 status remains incorrectly CURRENT.
+- [ ] Confirm no open issue blocker and no Stage 0–6 status remains incorrectly CURRENT.
 
 ### Task 6: Merge readiness handoff
 
-- [ ] Open a focused PR from `stage7/readiness-audit` to `main`.
-- [ ] Merge only after final CI is green.
+- [x] Open focused PR #21 from `stage7/readiness-audit` to `main`.
+- [ ] Merge only after final CI is green and the project owner chooses the integration option.
 - [ ] Verify `main` push CI is green and the repository handoff says Stage 7 CURRENT.
