@@ -9,7 +9,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Product specification, architecture, tech stack, demo plan
 - [x] Gemini mock-first billing policy
 - [x] Staged-development + project-status handoff process
-- [ ] Add all official team members
+- [ ] Add all official team members *(Stage 8 submission item)*
 
 ## Stage 1 — Application foundation — COMPLETE
 
@@ -91,36 +91,46 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Apply migration and complete the real Supabase/synthetic-receipt acceptance gate
 - [x] Review Supabase security/performance advisors after live migration
 
-## Stage 6 — Human approval and on-chain payment — CURRENT
+## Stage 6 — Human approval and on-chain payment — COMPLETE
 
 - [x] Review and approve `docs/STAGE6_IMPLEMENTATION_PLAN.md`
-- [x] Build a payout action that reads only the immutable approved snapshot
-- [x] Connect claim approval to Sui payout transaction
-- [x] Treasurer wallet signs/confirms explicitly
-- [x] Move payout re-checks category budget
+- [x] Build payout action from immutable approved snapshot only
+- [x] Connect human approval to Sui payout transaction
+- [x] Require explicit treasurer wallet signature
+- [x] Move payout re-checks category budget/custody
 - [x] Implement Testnet USDC payout construction/submission
-- [x] Handle transaction finality/status and same-digest reconciliation
-- [x] Update claim/budget only after verified success in the implementation boundary
-- [x] Show transaction digest/explorer link after confirmed finalization
+- [x] Handle finality/status and same-digest reconciliation
+- [x] Update claim/budget only after verified on-chain success
+- [x] Show transaction digest/explorer evidence after confirmation
 - [x] Add digest-first synchronization/retry protection
-- [x] Treat successful-but-unverifiable payout evidence as reconciliation-required so blind replacement signing is blocked
-- [x] Accept both UTF-8 string and byte-array Sui JSON representations of `vector<u8>` payout category evidence
-- [x] Verify repaired implementation with GitHub CI: lint, typecheck, 169 unit tests, build, 7 Playwright smoke tests
-- [ ] Repeat owner-controlled live acceptance with a **fresh clean aligned claim/treasury** after the first acceptance exposed a duplicate-payout defect
-- [ ] Prove exactly one payout, paid-state/budget synchronization, and idempotent refresh/reconciliation with no second wallet signature
+- [x] Treat successful-but-unverifiable evidence as reconciliation-required and block blind replacement signing
+- [x] Verify canonical `PayoutEvent` BCS with safe JSON compatibility handling
+- [x] Load persisted live Supabase treasury/category values in the live claim form
+- [x] Preserve failed first live acceptance as incident evidence
+- [x] Repeat owner-controlled live acceptance with a fresh clean aligned claim/treasury
+- [x] Prove exactly one 0.10 USDC payout, one attempt, synchronized paid/budget state, and idempotent refresh with the same digest
+- [x] Merge Stage 6 to `main` through PR #20
+- [x] Verify merged `main` CI: 171/171 unit tests, build, lint/typecheck, 7/7 Playwright smoke tests
 
-## Stage 7 — Demo hardening and deployment — NOT STARTED
+Successful Stage 6 acceptance digest:
 
-- [ ] Deploy Next.js app
-- [ ] Configure demo Supabase project
-- [ ] Prepare Testnet SUI + Testnet USDC
-- [ ] Seed clean demo scenario
-- [ ] Prepare sample budget + synthetic receipt
-- [ ] Rehearse complete flow repeatedly
-- [ ] Handle Gemini/wallet/Sui failures gracefully
-- [ ] Improve loading/error states
+`DZtb9Td7nfszbBVWj1QdUqd8peeP3FUm2Q6XJEqvVvb7`
+
+## Stage 7 — Demo hardening and deployment — CURRENT
+
+- [x] Audit merged Stage 0–6 history and current `main` CI before starting Stage 7
+- [ ] Deploy Next.js app to Vercel
+- [ ] Configure production environment variables without exposing server secrets
+- [ ] Connect the intended Supabase project for the deployed app
+- [ ] Verify clean Testnet Treasury/Cap and sufficient SUI + Testnet USDC
+- [ ] Create deterministic demo reset/seed procedure
+- [ ] Prepare known-good synthetic receipt and budget input
+- [ ] Rehearse full deployed flow repeatedly
+- [ ] Handle Gemini/Supabase/wallet/Sui failures gracefully
+- [ ] Improve loading/error/recovery states found during rehearsal
+- [ ] Confirm paid refresh/reconciliation remains idempotent in deployed environment
 - [ ] Prepare backup screenshots/video
-- [ ] Verify no secrets in Git history
+- [ ] Verify no secrets in repository/history before submission
 
 ## Stage 8 — Submission and pitch — NOT STARTED
 
@@ -154,7 +164,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 
 ## Optional — Only If Core Demo Is Stable
 
-- [ ] zkLogin
+- [ ] zkLogin product polish beyond the verified identity bridge
 - [ ] sponsored transactions
 - [ ] advanced PTBs
 - [ ] Walrus/MemWal
