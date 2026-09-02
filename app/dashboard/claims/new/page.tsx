@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ClaimSubmissionForm } from "@/src/components/claim-submission-form";
+import { LiveClaimSubmissionForm } from "@/src/components/live-claim-submission-form";
 import { Icon } from "@/src/components/icon";
+import { publicConfig } from "@/src/config/public-env";
 
 export const metadata: Metadata = {
   title: "Submit claim · ClubTreasury AI",
 };
 
 export default function NewClaimPage() {
+  const live = publicConfig.claimDataMode === "live";
   return (
     <main className="mx-auto max-w-[1280px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10">
       <Link
@@ -26,15 +29,16 @@ export default function NewClaimPage() {
             Submit a claim
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Store private receipt evidence, run one AI analysis, then persist
-            deterministic checks for human review.
+            {live
+              ? "Load the real persisted treasury relationship, store private receipt evidence, and submit the claim for human review."
+              : "Store private receipt evidence, run one AI analysis, then persist deterministic checks for human review."}
           </p>
         </div>
         <span className="w-fit rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-xs font-semibold text-[var(--muted)]">
           Private upload · human final
         </span>
       </section>
-      <ClaimSubmissionForm />
+      {live ? <LiveClaimSubmissionForm /> : <ClaimSubmissionForm />}
     </main>
   );
 }
