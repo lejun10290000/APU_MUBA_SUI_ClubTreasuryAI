@@ -151,13 +151,13 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 
 - [x] Advance project status to Stage 8
 - [x] Add all official team members
-- [ ] Complete final README
+- [x] Complete final README
 - [x] Real Sui Testnet package/object deployment IDs documented
-- [ ] Final setup/install instructions reviewed
-- [ ] Confirm every AI development tool declaration
-- [ ] Document implemented Gemini product AI for judges
-- [ ] Add live demo URL + screenshot placeholders
-- [ ] Create copy-ready Devfolio submission package
+- [x] Final setup/install instructions reviewed
+- [ ] Confirm every AI development tool declaration with all teammates
+- [x] Document implemented Gemini product AI for judges
+- [x] Add live demo URL + screenshot/video placeholders
+- [x] Create copy-ready Devfolio submission package
 - [ ] Verify public repo + no secrets after Stage 8A docs merge
 
 ### 8B — Demo video — NOT STARTED
