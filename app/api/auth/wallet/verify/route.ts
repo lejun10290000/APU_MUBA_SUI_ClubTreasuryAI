@@ -62,17 +62,39 @@ export async function POST(request: Request) {
       throw new Error("Wallet challenge could not be consumed safely.");
     }
 
-    const { error: profileError } = await admin.from("wallet_profiles").upsert(
-      {
-        user_id: userId,
-        wallet_address: walletAddress,
-        display_name: input.displayName,
-        verified_at: consumedAt,
-      },
-      { onConflict: "user_id" },
-    );
-    if (profileError) {
-      throw profileError;
+    const { data: existingProfile, error: existingProfileError } = await admin
+      .from("wallet_profiles")
+      .select("user_id")
+      .eq("wallet_address", walletAddress)
+      .maybeSingle();
+    if (existingProfileError) {
+      throw existingProfileError;
+    }
+
+    if (existingProfile) {
+      const { error: profileError } = await admin
+        .from("wallet_profiles")
+        .update({
+          display_name: input.displayName,
+          verified_at: consumedAt,
+        })
+        .eq("user_id", existingProfile.user_id);
+      if (profileError) {
+        throw profileError;
+      }
+    } else {
+      const { error: profileError } = await admin.from("wallet_profiles").upsert(
+        {
+          user_id: userId,
+          wallet_address: walletAddress,
+          display_name: input.displayName,
+          verified_at: consumedAt,
+        },
+        { onConflict: "user_id" },
+      );
+      if (profileError) {
+        throw profileError;
+      }
     }
 
     return NextResponse.json({ verified: true, walletAddress });
