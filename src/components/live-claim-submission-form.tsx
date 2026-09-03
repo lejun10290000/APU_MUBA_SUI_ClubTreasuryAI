@@ -12,13 +12,15 @@ import {
 import { ensureWalletIdentity } from "@/src/lib/sui/wallet-identity";
 import type { LiveClaimWorkspace } from "@/src/lib/claims/live-workspace";
 
+const DEFAULT_SUBMITTER_NAME = "Stage6 Demo Member";
+
 export function LiveClaimSubmissionForm() {
   const router = useRouter();
   const account = useCurrentAccount();
   const dAppKit = useDAppKit();
   const [workspace, setWorkspace] = useState<LiveClaimWorkspace | null>(null);
   const [categoryReference, setCategoryReference] = useState("");
-  const [submitterName, setSubmitterName] = useState("Stage6 Demo Member");
+  const [submitterName, setSubmitterName] = useState(DEFAULT_SUBMITTER_NAME);
   const [merchant, setMerchant] = useState("Stage 6 Acceptance Merchant");
   const [description, setDescription] = useState(
     "Stage 6 live payout acceptance claim",
@@ -36,7 +38,21 @@ export function LiveClaimSubmissionForm() {
   useEffect(() => {
     let cancelled = false;
     async function load() {
+      setLoading(true);
+      setWorkspace(null);
+      setCategoryReference("");
+      setError(null);
       try {
+        if (!account) {
+          throw new Error(
+            "Connect the member Sui wallet before loading the live treasury.",
+          );
+        }
+        await ensureWalletIdentity({
+          signer: dAppKit,
+          walletAddress: account.address,
+          displayName: DEFAULT_SUBMITTER_NAME,
+        });
         const objectId = publicConfig.demoTreasuryObjectId;
         const response = await fetch(
           `/api/claims/workspace?treasuryObjectId=${encodeURIComponent(objectId)}`,
@@ -72,7 +88,7 @@ export function LiveClaimSubmissionForm() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [account, dAppKit]);
 
   const selectedCategory = useMemo(
     () =>
