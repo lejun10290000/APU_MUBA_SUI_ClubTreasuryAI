@@ -1,6 +1,6 @@
 # ClubTreasury AI — Hackathon Roadmap
 
-This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work before optional features.
+This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Core product scope is frozen; Stage 8 is submission and presentation work.
 
 ## Stage 0 — Planning and repository setup — COMPLETE
 
@@ -9,7 +9,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Product specification, architecture, tech stack, demo plan
 - [x] Gemini mock-first billing policy
 - [x] Staged-development + project-status handoff process
-- [ ] Add all official team members _(Stage 8 submission item)_
+- [x] Add all official team members
 
 ## Stage 1 — Application foundation — COMPLETE
 
@@ -91,11 +91,9 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Refresh/idempotency proof
 - [x] Merge Stage 6 and verify `main` CI
 
-Successful Stage 6 acceptance digest:
+Successful Stage 6 acceptance digest: `DZtb9Td7nfszbBVWj1QdUqd8peeP3FUm2Q6XJEqvVvb7`
 
-`DZtb9Td7nfszbBVWj1QdUqd8peeP3FUm2Q6XJEqvVvb7`
-
-## Stage 7 — Demo hardening and deployment — CURRENT
+## Stage 7 — Demo hardening and deployment — COMPLETE
 
 ### 7A — Production deployment baseline — COMPLETE
 
@@ -117,73 +115,69 @@ Successful Stage 6 acceptance digest:
 - [x] Block wallet signing and downstream effects on mismatch
 - [x] Regression test proves `sign()` is never called on mismatch
 - [x] Preserve Stage 6 finality/reconciliation rules
-- [x] Merge through PR #23 and verify merged `main` CI
 
 ### 7C — Deployed end-to-end live rehearsal — COMPLETE
 
-- [x] Switch production claims to live Supabase while keeping Gemini mock
-- [x] Configure Supabase production Site URL / redirect URLs
-- [x] Verify connected Sui Testnet treasurer wallet
-- [x] Fix live workspace auth-order deadlock with TDD (PR #24)
-- [x] Fix fresh-session canonical wallet identity portability while preserving RLS (PR #25)
-- [x] Apply live `stage7c_wallet_principal_portability` migration
-- [x] Load persisted clean Treasury and `events` category in production
-- [x] Submit a fresh unique synthetic receipt claim
-- [x] Persist human approval and immutable 0.10 USDC payout snapshot
-- [x] Pass Stage 7B pre-sign Supabase ↔ Sui preflight
-- [x] Sign exactly one live Testnet payout
-- [x] Confirm exactly one payment attempt and one digest
-- [x] Confirm claim becomes `paid`
-- [x] Confirm category moves from 0.90 → 0.80 USDC remaining
-- [x] Hard refresh preserves same paid state/digest with no Pay button and no new signature
+- [x] Production live Supabase claim workflow
+- [x] Fresh-session canonical wallet identity portability
+- [x] Unique synthetic receipt claim
+- [x] Human approval + immutable 0.10 USDC payout snapshot
+- [x] Stage 7B pre-sign Supabase ↔ Sui preflight
+- [x] Exactly one live Testnet payout
+- [x] Exactly one payment attempt and one digest
+- [x] Claim becomes `paid`
+- [x] Category moves 0.90 → 0.80 USDC remaining
+- [x] Hard refresh remains idempotently Paid
 
-Successful Stage 7C rehearsal digest:
+Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGPgwL`
 
-`9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGPgwL`
+### 7D — Final reliability hardening + readiness — COMPLETE
 
-### 7D — Final reliability hardening + readiness — LOCAL GATES PASS
+- [x] Failure/recovery hardening
+- [x] Wallet/workspace safe retry UX
+- [x] Same-digest reconciliation hardening
+- [x] Private receipt-preview recovery
+- [x] No-spend backup evidence/runbook
+- [x] Sanitized repository/security audit
+- [x] 201 unit tests
+- [x] 7/7 Playwright smoke
+- [x] Exact-head PR #27 CI green
+- [x] Owner merge PR #27
+- [x] Post-merge `main` CI #140 green
 
-- [x] Rehearse/document likely failure recovery without unnecessary extra payouts
-- [x] Verify wallet disconnect/wrong-network/auth failure recovery
-- [x] Verify Supabase unavailable/error recovery messaging
-- [x] Verify preflight mismatch remains fail-closed before wallet signing
-- [x] Verify ambiguous transaction/reconciliation guidance remains clear
-- [x] Keep success-shaped digest mismatch active for same-digest reconciliation
-- [x] Keep authorized claim review usable when private preview generation fails
-- [x] Review loading/disabled/error states found during live rehearsal
-- [x] Check public Testnet SUI + USDC/Treasury readiness read-only
-- [x] Prepare backup evidence/runbook and owner screenshot/video checklist
-- [x] Update README/demo docs with final production path and live evidence
-- [x] Run sanitized repository secret/history checks
-- [x] Run frozen install, lint, typecheck, 201 unit tests, build, and 7/7 Playwright locally
-- [x] Recheck production health endpoint read-only
-- [x] Complete final Stage 7 readiness audit
-- [ ] Pass GitHub Actions on the exact final Stage 7D PR head
-- [ ] Owner merge Stage 7D; only then mark Stage 7 COMPLETE
+## Stage 8 — Submission and pitch — CURRENT
 
-## Stage 8 — Submission and pitch — NOT STARTED
+### 8A — Submission package — IN PROGRESS
 
-### Submission
-
+- [x] Advance project status to Stage 8
+- [x] Add all official team members
 - [ ] Complete final README
-- [x] Add real Sui Testnet package/object deployment IDs
-- [ ] Add final setup/install instructions
-- [ ] Add all team members
+- [x] Real Sui Testnet package/object deployment IDs documented
+- [ ] Final setup/install instructions reviewed
 - [ ] Confirm every AI development tool declaration
-- [ ] Document implemented Gemini product AI
-- [ ] Add screenshots + live demo URL
-- [ ] Record/upload 3–5 minute YouTube/Loom video
-- [ ] Verify public repo + no secrets
-- [ ] Submit Devfolio before 5 Sep 2026, 11:59 PM MYT
+- [ ] Document implemented Gemini product AI for judges
+- [ ] Add live demo URL + screenshot placeholders
+- [ ] Create copy-ready Devfolio submission package
+- [ ] Verify public repo + no secrets after Stage 8A docs merge
 
-### Payments & Stablecoins pitch
+### 8B — Demo video — NOT STARTED
+
+- [ ] Finalize 3–5 minute script/storyboard
+- [ ] Capture safe production screenshots/video
+- [ ] Show existing Stage 7C payout/explorer proof without unnecessary second payout
+- [ ] Record/upload YouTube or Loom video
+- [ ] Add final video URL to README and submission package
+
+### 8C — Pitch — NOT STARTED
+
+#### Payments & Stablecoins
 
 - [ ] 5-minute script
 - [ ] Emphasize real club treasury + stablecoin management/payout
 - [x] Real Sui Testnet payout evidence available
 - [ ] Prepare Q&A
 
-### AI × Sui pitch
+#### AI × Sui
 
 - [ ] 5-minute script
 - [ ] Emphasize Gemini budget/receipt understanding
@@ -191,17 +185,38 @@ Successful Stage 7C rehearsal digest:
 - [ ] Show AI → human approval → Sui execution
 - [ ] Prepare Q&A
 
+### 8D — Final submission — NOT STARTED
+
+- [ ] Final Devfolio field review
+- [ ] Public repository link verified
+- [ ] Production demo link verified
+- [ ] Video link verified
+- [ ] All AI tools declared accurately
+- [ ] Select intended tracks
+- [ ] Submit before **5 Sep 2026, 11:59 PM MYT**
+- [ ] Save submission confirmation/evidence
+
+## Official Team
+
+| Name | Role | University | GitHub |
+| --- | --- | --- | --- |
+| CHUA LE JUN | Developer | UTM Kuala Lumpur | `lejun10290000` |
+| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le` |
+| LAI YAN QI | Presenter | UTM Kuala Lumpur | `YANKEY-CODE` |
+
 ## Optional — Only If Core Demo Is Stable
 
-- [ ] zkLogin product polish beyond the verified identity bridge
-- [ ] sponsored transactions
-- [ ] advanced PTBs
-- [ ] Walrus/MemWal
-- [ ] multi-signature/dual approval
-- [ ] multi-club support
-- [ ] notifications
-- [ ] advanced analytics/fraud scoring
+Do not add these before submission unless explicitly required:
+
+- zkLogin product polish
+- sponsored transactions
+- advanced PTBs
+- Walrus/MemWal
+- multi-signature/dual approval
+- multi-club support
+- notifications
+- advanced analytics/fraud scoring
 
 ## Team Rule
 
-If an optional feature risks the core demo, skip it. Every coding agent must show the current stage before coding and update project status + roadmap after work changes.
+If an optional feature risks the core demo or submission deadline, skip it. Stage 8 is packaging and presentation, not feature expansion.
