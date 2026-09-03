@@ -21,6 +21,7 @@ export type PaymentReconciliationResult =
 
 export interface ApprovedClaimPayoutDependencies<TTransaction = unknown> {
   prepare(claimId: string): Promise<PreparePaymentResult>;
+  preflight(attemptId: string): Promise<void>;
   authorize(snapshot: ApprovedPayoutSnapshot): Promise<{
     treasurerCapObjectId: string;
   }>;
@@ -58,6 +59,7 @@ export async function executeApprovedClaimPayout<TTransaction>(
     }
   }
 
+  await dependencies.preflight(attempt.id);
   const { treasurerCapObjectId } = await dependencies.authorize(snapshot);
   const transaction = dependencies.build(snapshot);
 

@@ -33,6 +33,7 @@ const preparedAttempt: PaymentAttempt = {
 function dependencies(overrides: Record<string, unknown> = {}) {
   return {
     prepare: vi.fn().mockResolvedValue({ attempt: preparedAttempt, snapshot }),
+    preflight: vi.fn().mockResolvedValue(undefined),
     authorize: vi.fn().mockResolvedValue({
       treasurerCapObjectId:
         "0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7",
@@ -57,6 +58,31 @@ function dependencies(overrides: Record<string, unknown> = {}) {
 }
 
 describe("approved claim payout client flow", () => {
+  it("fails before building or signing when the server preflight reports a Supabase-to-Sui mismatch", async () => {
+    const deps = dependencies({
+      preflight: vi
+        .fn()
+        .mockRejectedValue(
+          new Error(
+            "Payout consistency check failed: persisted and Sui category remaining differ.",
+          ),
+        ),
+    });
+
+    await expect(
+      executeApprovedClaimPayout(preparedAttempt.claimId, deps),
+    ).rejects.toThrow(/persisted and Sui category remaining differ/i);
+
+    expect(deps.preflight).toHaveBeenCalledWith(preparedAttempt.id);
+    expect(deps.authorize).not.toHaveBeenCalled();
+    expect(deps.build).not.toHaveBeenCalled();
+    expect(deps.sign).not.toHaveBeenCalled();
+    expect(deps.deriveDigest).not.toHaveBeenCalled();
+    expect(deps.persistSignedSubmission).not.toHaveBeenCalled();
+    expect(deps.broadcast).not.toHaveBeenCalled();
+    expect(deps.reconcile).not.toHaveBeenCalled();
+  });
+
   it("builds only from the immutable prepared snapshot and persists its digest before broadcast", async () => {
     const deps = dependencies();
 
@@ -115,6 +141,7 @@ describe("approved claim payout client flow", () => {
     );
 
     expect(result).toEqual({ state: "reconciliation_required" });
+    expect(deps.preflight).not.toHaveBeenCalled();
     expect(deps.authorize).not.toHaveBeenCalled();
     expect(deps.sign).not.toHaveBeenCalled();
     expect(deps.broadcast).not.toHaveBeenCalled();

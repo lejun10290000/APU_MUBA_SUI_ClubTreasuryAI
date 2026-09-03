@@ -77,6 +77,10 @@ export function ClaimPayoutPanel({
           requestJson<PreparePaymentResult>(
             `/api/claims/${claimId}/payment/prepare`,
           ),
+        preflight: (attemptId) =>
+          requestJson<{ ok: true }>(
+            `/api/payments/${attemptId}/preflight`,
+          ).then(() => undefined),
         authorize: async (snapshot) => {
           await verifyTreasurerCap(client, {
             capObjectId,

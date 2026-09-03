@@ -271,6 +271,45 @@ export class MockClaimRepository implements Stage6ClaimRepository {
     return attempt ? structuredClone(attempt) : null;
   }
 
+  async loadPaymentPreflightState(attemptId: string) {
+    const attempt = this.store.paymentAttempts.get(attemptId);
+    if (!attempt) return null;
+    const claim = this.store.claims.get(attempt.claimId);
+    const workspace = claim
+      ? this.store.workspaces.find(
+          (candidate) =>
+            candidate.treasuryId === claim.treasuryId &&
+            candidate.categoryId === claim.categoryId,
+        )
+      : null;
+    if (!claim || !workspace) return null;
+    return {
+      attempt: structuredClone(attempt),
+      claim: {
+        id: claim.id,
+        treasuryId: claim.treasuryId,
+        categoryId: claim.categoryId,
+        status: claim.status,
+        decision: claim.decision,
+        paymentStatus: claim.paymentStatus,
+        approvedSnapshot: claim.approvedSnapshot,
+      },
+      treasury: {
+        id: workspace.treasuryId,
+        suiTreasuryObjectId: workspace.treasuryObjectId,
+        currency: "USDC",
+        status: "active",
+      },
+      category: {
+        id: workspace.categoryId,
+        treasuryId: workspace.treasuryId,
+        externalReference: workspace.categoryExternalReference,
+        allocatedMinor: workspace.categoryAllocatedMinor,
+        spentMinor: workspace.categorySpentMinor,
+      },
+    };
+  }
+
   async getActivePaymentAttemptForClaim(claimId: string) {
     const attempt = [...this.store.paymentAttempts.values()]
       .filter(
@@ -305,9 +344,14 @@ export class MockClaimRepository implements Stage6ClaimRepository {
   async markPaymentAttemptSubmitted(attemptId: string) {
     const attempt = this.requireAttempt(attemptId);
     if (attempt.status !== "signed" || !attempt.transactionDigest) {
-      throw new Error("Only signed attempts with a digest can become submitted.");
+      throw new Error(
+        "Only signed attempts with a digest can become submitted.",
+      );
     }
-    return this.updateAttempt(attempt, { status: "submitted", failureCode: null });
+    return this.updateAttempt(attempt, {
+      status: "submitted",
+      failureCode: null,
+    });
   }
 
   async cancelPaymentAttempt(attemptId: string, code?: string) {
@@ -343,7 +387,9 @@ export class MockClaimRepository implements Stage6ClaimRepository {
   async markPaymentAttemptFailed(attemptId: string, code: string) {
     const attempt = this.requireAttempt(attemptId);
     if (!["prepared", "signed", "submitted"].includes(attempt.status)) {
-      throw new Error("Attempt cannot transition to failed from its current state.");
+      throw new Error(
+        "Attempt cannot transition to failed from its current state.",
+      );
     }
     return this.updateAttempt(attempt, {
       status: "failed",

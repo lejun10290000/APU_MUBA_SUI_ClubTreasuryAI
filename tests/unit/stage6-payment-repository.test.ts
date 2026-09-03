@@ -30,6 +30,18 @@ describe("Stage 6 payment repository", () => {
       failureCode: null,
       confirmedAt: null,
     });
+    await expect(
+      repository.loadPaymentPreflightState(result.attempt.id),
+    ).resolves.toMatchObject({
+      attempt: { id: result.attempt.id, claimId: claim.id },
+      claim: { id: claim.id, approvedSnapshot: claim.approvedSnapshot },
+      treasury: {
+        suiTreasuryObjectId: claim.approvedSnapshot?.treasuryObjectId,
+      },
+      category: {
+        externalReference: claim.approvedSnapshot?.categoryReference,
+      },
+    });
   });
 
   it("returns the same active attempt instead of creating a duplicate", async () => {
@@ -43,9 +55,9 @@ describe("Stage 6 payment repository", () => {
     await expect(
       repository.getActivePaymentAttemptForClaim(claim.id),
     ).resolves.toEqual(first.attempt);
-    await expect(repository.getPaymentAttempt(first.attempt.id)).resolves.toEqual(
-      first.attempt,
-    );
+    await expect(
+      repository.getPaymentAttempt(first.attempt.id),
+    ).resolves.toEqual(first.attempt);
   });
 
   it("rejects attempts for claims that are not approved and unpaid", async () => {
@@ -93,9 +105,12 @@ describe("Stage 6 payment repository", () => {
         demoSuiAddress,
       ),
     ).rejects.toThrow("prepared");
-    await expect(repository.markPaymentAttemptSubmitted(attempt.id)).resolves.toMatchObject(
-      { status: "submitted", transactionDigest: digest },
-    );
+    await expect(
+      repository.markPaymentAttemptSubmitted(attempt.id),
+    ).resolves.toMatchObject({
+      status: "submitted",
+      transactionDigest: digest,
+    });
   });
 
   it("supports cancellation, failure, and digest-first reconciliation safely", async () => {
@@ -114,7 +129,10 @@ describe("Stage 6 payment repository", () => {
 
     const replacement = await repository.preparePaymentAttempt(firstClaim.id);
     await expect(
-      repository.markPaymentAttemptFailed(replacement.attempt.id, "build_failed"),
+      repository.markPaymentAttemptFailed(
+        replacement.attempt.id,
+        "build_failed",
+      ),
     ).resolves.toMatchObject({ status: "failed", failureCode: "build_failed" });
 
     const third = await repository.preparePaymentAttempt(firstClaim.id);
@@ -139,7 +157,11 @@ describe("Stage 6 payment repository", () => {
     const claim = await createApprovedClaim(repository);
     const { attempt } = await repository.preparePaymentAttempt(claim.id);
     const digest = "digest-confirmed-123456789012";
-    await repository.markPaymentAttemptSigned(attempt.id, digest, demoSuiAddress);
+    await repository.markPaymentAttemptSigned(
+      attempt.id,
+      digest,
+      demoSuiAddress,
+    );
     await repository.markPaymentAttemptSubmitted(attempt.id);
     const confirmation = {
       claimId: claim.id,
@@ -157,16 +179,18 @@ describe("Stage 6 payment repository", () => {
       confirmedTransactionDigest: digest,
       paidAt: confirmation.confirmedAt,
     });
-    await expect(repository.finalizeConfirmedPayment(confirmation)).resolves.toEqual(
-      paid,
-    );
+    await expect(
+      repository.finalizeConfirmedPayment(confirmation),
+    ).resolves.toEqual(paid);
     await expect(
       repository.finalizeConfirmedPayment({
         ...confirmation,
         transactionDigest: "different-confirmed-digest-12345",
       }),
     ).rejects.toThrow("digest");
-    await expect(repository.getPaymentAttempt(attempt.id)).resolves.toMatchObject({
+    await expect(
+      repository.getPaymentAttempt(attempt.id),
+    ).resolves.toMatchObject({
       status: "confirmed",
       confirmedAt: confirmation.confirmedAt,
     });
@@ -177,7 +201,11 @@ describe("Stage 6 payment repository", () => {
     const claim = await createApprovedClaim(repository);
     const { attempt } = await repository.preparePaymentAttempt(claim.id);
     const digest = "digest-mismatch-1234567890123";
-    await repository.markPaymentAttemptSigned(attempt.id, digest, demoSuiAddress);
+    await repository.markPaymentAttemptSigned(
+      attempt.id,
+      digest,
+      demoSuiAddress,
+    );
     await repository.markPaymentAttemptSubmitted(attempt.id);
 
     await expect(
