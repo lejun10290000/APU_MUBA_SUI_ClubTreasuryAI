@@ -18,13 +18,12 @@ Never put a wallet secret, recovery phrase, signed transaction bytes, Gemini
 key, or Supabase secret in this runbook, a screenshot, the repository, or a
 demo record.
 
-## Recorded Treasury baseline and actual-state branches
+## Named Treasury reference and actual-state branches
 
-The default next-rehearsal path is the persisted Supabase workspace that maps
-exactly to this public Sui Testnet pair. Its values are the recorded state
-*after* the successful Stage 6 payout, not a reset fiction:
+The default path uses the persisted Supabase workspace that maps exactly to
+this public Sui Testnet pair:
 
-| Item | Recorded actual value before the next rehearsal |
+| Item | Public reference |
 | --- | --- |
 | Sui package | `0xfbb2f939d484b6179f555a6cef8093faa749001184d84adb980de6d88c0e1d4f` |
 | Native Testnet USDC type | `0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC` |
@@ -32,26 +31,36 @@ exactly to this public Sui Testnet pair. Its values are the recorded state
 | Sui and Supabase category | `events` |
 | TreasurerCap | `0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101` |
 | TreasurerCap owner | The designated demo treasurer's connected owner wallet; confirm the wallet currently owns the cap before signing. |
-| Category allocation | `1.00 USDC` (`100` minor units) |
-| Category spent before the next rehearsal | `0.10 USDC` (`10` minor units) |
-| Category remaining before the next rehearsal | `0.90 USDC` (`90` minor units) |
 | Rehearsal claim | A newly created claim, `events`, `0.10 USDC` (`10` minor units), approved but unpaid |
 | Recipient | A current, controlled Testnet recipient address, verified against the immutable approved claim snapshot before payment; do not reuse an incident recipient by default. |
 
 The package, USDC type, Treasury, and TreasurerCap above are public Testnet
 values copied from `docs/PROJECT_STATUS.md` and
-`docs/STAGE6_LIVE_VALIDATION.md`. For this named Treasury, the `events`
-category's expected on-chain state before the next `0.10 USDC` rehearsal is
-`100` allocated minor units and `10` spent minor units; its persisted Supabase
-category must equal those actual values. A mismatch is a stop condition: do
-not sign or broadcast.
+`docs/STAGE6_LIVE_VALIDATION.md`.
+
+For every run on the named Treasury, capture its **current reconciled state**
+immediately before payment. Do not use a fixed reset value. Record these
+minor-unit variables from both Sui and Supabase:
+
+| Variable | Required meaning and rule |
+| --- | --- |
+| `A` | Current `events` allocated amount; Sui and Supabase must be exactly equal. |
+| `S` | Current `events` spent amount; Sui and Supabase must be exactly equal. |
+| `R` | Current remaining amount, calculated as `R = A - S`; both systems must yield the same result. |
+| Claim | Exactly `10` minor units (`0.10 USDC`); require `R >= 10` before signing. |
+| Expected post-run | Allocation stays `A`; spent becomes `S + 10`; remaining becomes `R - 10`. |
+
+The first-next-rehearsal reference from the Stage 6 record is an example only:
+`A = 100`, `S = 10`, `R = 90` (`1.00/0.10/0.90 USDC`). One confirmed
+`0.10 USDC` payout would then produce `A = 100`, `S = 20`, `R = 80`
+(`1.00/0.20/0.80 USDC`). A later rehearsal must capture its own current
+values; it is not required to begin at either example state.
 
 There are two explicit preflight branches:
 
-1. **Default recorded-Treasury branch:** use the named Treasury only when Sui
-   and Supabase both show `1.00 USDC` allocated, `0.10 USDC` spent, and
-   `0.90 USDC` remaining. A successful new `0.10 USDC` rehearsal then expects
-   `0.20 USDC` spent and `0.80 USDC` remaining.
+1. **Default recorded-Treasury branch:** use the named Treasury only when the
+   captured `A`, `S`, and calculated `R = A - S` are exactly equal in Sui and
+   Supabase, and `R >= 10`. Its post-run target is `A`, `S + 10`, and `R - 10`.
 2. **Fresh-Treasury branch (owner-only):** if a genuinely fresh `0.00 USDC`
    spent Treasury is required, the owner must create/fund it, establish its
    matching persisted Supabase workspace/category, and record the new public
@@ -72,17 +81,16 @@ rehearsal operator:
    Treasury's intended allocation and one `0.10 USDC` rehearsal payout. Do
    not disclose wallet credentials.
 2. For the default branch, inspect the public named Treasury and its `events`
-   allocation using trusted Sui tooling. Confirm the package/native USDC type,
-   `1.00 USDC` allocated, `0.10 USDC` spent, `0.90 USDC` remaining, and enough
-   balance for the planned `0.10 USDC` payout. For a fresh-Treasury branch,
-   inspect the newly recorded public Treasury against its recorded actual
-   values instead.
+   allocation using trusted Sui tooling. Confirm the package/native USDC type
+   and capture current `A` and `S`; calculate `R = A - S` and require
+   `R >= 10`. For a fresh-Treasury branch, inspect the newly recorded public
+   Treasury with the same capture and calculation.
 3. Inspect the persisted Supabase workspace. For the default branch, select
    the record mapped to the named Treasury and its persisted `events` category
-   and confirm `allocated_minor = 100`, `spent_minor = 10`. For a fresh branch,
-   select only its matching owner-recorded workspace/category and compare it
-   with that Treasury's actual state. Do not substitute the local mock/demo
-   budget.
+   and capture its current `allocated_minor` and `spent_minor`. For a fresh
+   branch, select only its matching owner-recorded workspace/category. In
+   either case, require exact equality with Sui before calculating `R`; do not
+   substitute the local mock/demo budget.
 4. If the public Treasury, cap ownership, gas, USDC balance, or matching
    Supabase data is unsuitable, stop. The owner may prepare a separate
    Treasury and matching persisted workspace only after recording the new
@@ -99,16 +107,16 @@ Complete every item before opening the payment action:
       `0x9d9a0b5a7d58d4efa77419ba891a442f3ad23610b4c824a2fa67c7893917f0f3`.
       For a fresh-Treasury branch, use only the owner-recorded new Treasury
       and its matching persisted workspace/category.
-- [ ] Select one actual-state branch: the default named-Treasury branch has
-      `events` at `100` allocated and `10` spent minor units; a fresh-Treasury
-      branch is valid only after the owner has recorded its new public mapping.
-- [ ] For the default named-Treasury branch, the active persisted Supabase
-      category is `events`, with `100` allocated and `10` spent minor units
-      (`0.90 USDC` remaining).
-- [ ] Public Sui state shows that same Treasury and `events` category with
-      `1.00 USDC` allocated, `0.10 USDC` spent, `0.90 USDC` remaining, and
-      enough remaining USDC for the new payout. For a recorded fresh-Treasury
-      branch, compare Sui to that branch's recorded actual values instead.
+- [ ] Select one actual-state branch. The default named-Treasury branch uses
+      current captured `A`, `S`, and `R`; a fresh-Treasury branch is valid only
+      after the owner has recorded its new public mapping.
+- [ ] Capture the active persisted Supabase `events` category's current
+      `allocated_minor` as `A` and `spent_minor` as `S`, then calculate
+      `R = A - S`.
+- [ ] Capture the active Sui `events` category's current allocation and spent
+      amounts. They must exactly equal Supabase `A` and `S`; its calculated
+      remaining amount must exactly equal `R`. Require `R >= 10` minor units
+      for the new `0.10 USDC` payout. Otherwise stop and reconcile.
 - [ ] For the default branch, the designated connected wallet visibly owns
       `0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101`.
       For a fresh-Treasury branch, it owns that branch's recorded TreasurerCap.
@@ -151,11 +159,10 @@ Complete every item before opening the payment action:
 - [ ] The claim is `paid` only after exact on-chain payout evidence verifies.
 - [ ] There is exactly one payment attempt, it is `confirmed`, and it records
       one confirmed digest.
-- [ ] For the default named-Treasury branch, `events` remains allocated at
-      `1.00 USDC`, has `0.20 USDC` spent, and has `0.80 USDC` remaining in
-      both the verified chain state and Supabase (`allocated_minor = 100`,
-      `spent_minor = 20`). For a fresh-Treasury branch, reconcile the actual
-      recorded preflight state plus the one `0.10 USDC` payout.
+- [ ] The active `events` category has the recorded preflight allocation `A`,
+      spent amount `S + 10`, and remaining amount `R - 10` in both verified
+      chain state and Supabase. Otherwise stop and reconcile; do not treat a
+      fixed historical balance as the expected result.
 - [ ] Refresh the paid-claim page. It stays paid, shows the same digest, offers
       no new payment action, and opens no wallet.
 - [ ] Retain the claim ID and digest as rehearsal evidence. Do not reuse that
@@ -175,12 +182,11 @@ The failed Stage 6 evidence is permanently excluded from rehearsals: claim
 its failed/reconciliation-required attempts are incident evidence, not demo
 fixtures. Do not delete, relabel, manually mark paid, or pay it again.
 
-For every later rehearsal, use the reconciled actual state of the active
-Treasury/category rather than a fixed reset value. With the default named
-Treasury, this run's expected `0.20 USDC` spent / `0.80 USDC` remaining state
-becomes the next preflight's starting record only if Sui and Supabase agree.
-Otherwise stop and reconcile. If a fresh starting balance is genuinely needed,
-ask the owner to establish and record a separately funded Treasury/workspace
-mapping. In all cases, repeat the full preflight and keep each earlier claim
-and digest immutable. These controls prevent duplicate payments while
-preserving the Stage 6 finalization and reconciliation invariants.
+For every later rehearsal, recapture and reconcile `A`, `S`, and `R = A - S`
+from the active Treasury/category rather than carrying forward a fixed reset
+value or an assumed result. If either system differs, stop and reconcile. If a
+fresh starting balance is genuinely needed, ask the owner to establish and
+record a separately funded Treasury/workspace mapping. In all cases, repeat
+the full preflight and keep each earlier claim and digest immutable. These
+controls prevent duplicate payments while preserving the Stage 6 finalization
+and reconciliation invariants.
