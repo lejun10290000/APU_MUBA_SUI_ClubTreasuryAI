@@ -68,7 +68,32 @@ describe("approved claim payout UI", () => {
     expect(
       screen.getByRole("button", { name: /reconcile existing transaction/i }),
     ).toBeEnabled();
+    expect(
+      screen.getByText(
+        /checks the existing digest and never requests a replacement signature/i,
+      ),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/^Paid$/)).not.toBeInTheDocument();
+  });
+
+  it("explains that a pre-sign failure is safe to retry without implying a payment occurred", () => {
+    render(
+      <ClaimPayoutView
+        claim={approvedClaim()}
+        error="Payout consistency check failed: persisted and Sui category remaining differ."
+        onAction={vi.fn()}
+        phase="failed"
+      />,
+    );
+
+    expect(
+      screen.getByText(/no transaction was signed or submitted/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /refresh the authoritative treasury data before retrying/i,
+      ),
+    ).toBeInTheDocument();
   });
 
   it("shows confirmed digest evidence and removes the payout action after payment", () => {

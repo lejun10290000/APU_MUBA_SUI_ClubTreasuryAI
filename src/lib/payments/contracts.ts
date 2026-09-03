@@ -135,8 +135,8 @@ export async function reconcilePaymentAttempt(
   }
   if (chainStatus.transactionDigest !== attempt.transactionDigest) {
     return {
-      state: "failed" as const,
-      attempt: await repository.markPaymentAttemptFailed(
+      state: "reconciliation_required" as const,
+      attempt: await repository.markPaymentAttemptReconciliationRequired(
         attempt.id,
         "chain_result_digest_mismatch",
       ),

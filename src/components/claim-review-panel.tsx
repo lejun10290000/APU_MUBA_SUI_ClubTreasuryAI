@@ -23,6 +23,9 @@ export function ClaimReviewPanel() {
   const [receiptPreviewUrl, setReceiptPreviewUrl] = useState<string | null>(
     null,
   );
+  const [receiptPreviewError, setReceiptPreviewError] = useState<string | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [busyDecision, setBusyDecision] = useState<"approve" | "reject" | null>(
     null,
@@ -37,6 +40,7 @@ export function ClaimReviewPanel() {
         const result = (await response.json()) as {
           claim?: PersistedClaim;
           receiptPreviewUrl?: string | null;
+          receiptPreviewError?: string | null;
           error?: string;
         };
         if (!response.ok || !result.claim) {
@@ -45,6 +49,7 @@ export function ClaimReviewPanel() {
         if (active) {
           setClaim(result.claim);
           setReceiptPreviewUrl(result.receiptPreviewUrl ?? null);
+          setReceiptPreviewError(result.receiptPreviewError ?? null);
         }
       })
       .catch((caught) => {
@@ -294,6 +299,15 @@ export function ClaimReviewPanel() {
           >
             Open private receipt preview
           </a>
+        )}
+
+        {receiptPreviewError && (
+          <p
+            className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800"
+            role="status"
+          >
+            {receiptPreviewError}
+          </p>
         )}
 
         {error && (

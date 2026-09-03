@@ -26,14 +26,15 @@ export function LiveClaimSubmissionForm() {
     "Stage 6 live payout acceptance claim",
   );
   const [requestedAmount, setRequestedAmount] = useState("0.10");
-  const [receiptReference, setReceiptReference] = useState(() =>
-    `STAGE6-${Date.now()}`,
+  const [receiptReference, setReceiptReference] = useState(
+    () => `STAGE6-${Date.now()}`,
   );
   const [recipient, setRecipient] = useState("");
   const [receipt, setReceipt] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,7 +89,7 @@ export function LiveClaimSubmissionForm() {
     return () => {
       cancelled = true;
     };
-  }, [account, dAppKit]);
+  }, [account, dAppKit, loadAttempt]);
 
   const selectedCategory = useMemo(
     () =>
@@ -105,7 +106,9 @@ export function LiveClaimSubmissionForm() {
       return;
     }
     if (!account) {
-      setError("Connect the member Sui wallet before submitting the live claim.");
+      setError(
+        "Connect the member Sui wallet before submitting the live claim.",
+      );
       return;
     }
     const payoutRecipient = recipient.trim() || account.address;
@@ -231,9 +234,7 @@ export function LiveClaimSubmissionForm() {
               >
                 {category.name} ·{" "}
                 {formatUsdcMinor(
-                  asMinorAmount(
-                    category.allocatedMinor - category.spentMinor,
-                  ),
+                  asMinorAmount(category.allocatedMinor - category.spentMinor),
                 )}{" "}
                 remaining
               </option>
@@ -280,9 +281,21 @@ export function LiveClaimSubmissionForm() {
       </div>
 
       {error && (
-        <p className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-          {error}
-        </p>
+        <div
+          className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+          role="alert"
+        >
+          <p className="font-semibold">{error}</p>
+          {!workspace && account && (
+            <button
+              className="mt-3 rounded-lg border border-rose-300 bg-white px-3 py-2 text-xs font-bold"
+              onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+              type="button"
+            >
+              Retry wallet authentication and workspace load
+            </button>
+          )}
+        </div>
       )}
 
       <button
@@ -290,13 +303,11 @@ export function LiveClaimSubmissionForm() {
         disabled={submitting || !workspace}
         type="submit"
       >
-        {submitting
-          ? "Submitting live claim…"
-          : "Submit live claim for review"}
+        {submitting ? "Submitting live claim…" : "Submit live claim for review"}
       </button>
       <p className="mt-3 text-xs text-[var(--muted)]">
-        This form uses persisted Supabase treasury/category values. Payment still
-        requires a separate human approval and wallet signature.
+        This form uses persisted Supabase treasury/category values. Payment
+        still requires a separate human approval and wallet signature.
       </p>
     </form>
   );

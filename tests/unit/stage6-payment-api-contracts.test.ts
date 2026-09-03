@@ -213,7 +213,7 @@ describe("Stage 6 payment API contracts", () => {
     });
   });
 
-  it("fails closed when chain evidence reports a different digest", async () => {
+  it("keeps the original digest active when success-shaped chain evidence reports a different digest", async () => {
     const repository = new MockClaimRepository();
     const claim = await approvedClaim(repository);
     const { attempt } = await prepareClaimPayment(repository, claim.id);
@@ -245,9 +245,17 @@ describe("Stage 6 payment API contracts", () => {
     );
 
     expect(result).toMatchObject({
-      state: "failed",
-      attempt: { failureCode: "chain_result_digest_mismatch" },
+      state: "reconciliation_required",
+      attempt: {
+        status: "reconciliation_required",
+        transactionDigest: digest,
+        failureCode: "chain_result_digest_mismatch",
+      },
     });
+
+    const repeatedPrepare = await prepareClaimPayment(repository, claim.id);
+    expect(repeatedPrepare.attempt.id).toBe(attempt.id);
+    expect(repeatedPrepare.attempt.transactionDigest).toBe(digest);
   });
 });
 
