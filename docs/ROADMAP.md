@@ -45,72 +45,51 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Finish demo-critical work bef
 - [x] Typed create/fund/confirm/payout transaction builders
 - [x] Wallet/build/execution/finality error handling
 - [x] Project-owner manual QA with a real Testnet browser wallet
-- [x] Move package structure
-- [x] Shared treasury object/state
-- [x] Treasurer capability authorization
-- [x] Generic deposit/funding custody
-- [x] Confirmed category allocation state
-- [x] Approved payout flow
-- [x] On-chain category remaining / custody invariant checks
-- [x] Typed payout events
+- [x] Move package/shared treasury/TreasurerCap implementation
+- [x] Generic funding custody and category allocation enforcement
+- [x] Approved payout flow and typed payout events
 - [x] 31/31 Move tests
 - [x] Deploy package to Sui Testnet
-- [x] Record verified package, Treasury, TreasurerCap, UpgradeCap and publish digest
-- [x] Load native Circle Testnet USDC metadata/owned coin data
-- [x] Real create → fund 1.00 USDC → allocate 1.00 USDC → payout 0.10 USDC flow
-- [x] Confirm all four transaction evidence links
-- [x] Refresh treasury and verify 0.90 USDC remaining
+- [x] Record package/Treasury/Cap evidence
+- [x] Use native Circle Testnet USDC
 
 ## Stage 4 — Gemini AI layer — COMPLETE
 
-- [x] Add official `@google/genai` SDK
-- [x] Add live `GeminiAIService` behind existing `AIService`
-- [x] Define structured budget output
-- [x] Build natural-language budget parser
-- [x] Define structured receipt output
-- [x] Build receipt/image extraction
-- [x] Add category suggestion + concise reasons
-- [x] Validate all model output server-side
-- [x] Enforce `docs/AI_USAGE_POLICY.md`
-- [x] Verify live Gemini with small explicit fixture set only
+- [x] Official `@google/genai` SDK adapter
+- [x] Structured budget and receipt outputs
+- [x] Natural-language budget parser
+- [x] Receipt/image extraction
+- [x] Category suggestion + concise reasons
+- [x] Server-side output validation
+- [x] Guarded live Gemini acceptance
+- [x] Normal CI remains mock-first / zero live spend
 
 ## Stage 5 — Claim and receipt workflow integration — COMPLETE
 
-- [x] Create Supabase migrations
-- [x] Configure private receipt bucket policy
-- [x] Secure receipt upload + hash receipt bytes
-- [x] Persist treasury/category relationships, claims, and AI review results
-- [x] Add submission idempotency and exact/similar duplicate checks
-- [x] Run mock/live AI through shared adapter
-- [x] Apply deterministic budget/evidence checks
-- [x] Return Approve / Review / Reject with understandable reasons
-- [x] Manual Review fallback when AI fails
-- [x] Persist human Approve/Reject decisions
-- [x] Persist immutable `approved_*` snapshot while payment remains unpaid
-- [x] Verify mock-mode workflow with unit, build, and Playwright coverage
-- [x] Apply migration and complete the real Supabase/synthetic-receipt acceptance gate
-- [x] Review Supabase security/performance advisors after live migration
+- [x] Supabase migrations and private receipt bucket
+- [x] Secure receipt upload + hashing
+- [x] Persist treasury/category/claim/AI evidence
+- [x] Submission idempotency + exact/similar duplicates
+- [x] Deterministic budget/evidence checks
+- [x] Human review fallback and persisted final decision
+- [x] Immutable `approved_*` unpaid snapshot
+- [x] Real Supabase acceptance and advisor review
 
 ## Stage 6 — Human approval and on-chain payment — COMPLETE
 
-- [x] Review and approve `docs/STAGE6_IMPLEMENTATION_PLAN.md`
-- [x] Build payout action from immutable approved snapshot only
-- [x] Connect human approval to Sui payout transaction
-- [x] Require explicit treasurer wallet signature
-- [x] Move payout re-checks category budget/custody
-- [x] Implement Testnet USDC payout construction/submission
-- [x] Handle finality/status and same-digest reconciliation
-- [x] Update claim/budget only after verified on-chain success
-- [x] Show transaction digest/explorer evidence after confirmation
-- [x] Add digest-first synchronization/retry protection
-- [x] Treat successful-but-unverifiable evidence as reconciliation-required and block blind replacement signing
-- [x] Verify canonical `PayoutEvent` BCS with safe JSON compatibility handling
-- [x] Load persisted live Supabase treasury/category values in the live claim form
-- [x] Preserve failed first live acceptance as incident evidence
-- [x] Repeat owner-controlled live acceptance with a fresh clean aligned claim/treasury
-- [x] Prove exactly one 0.10 USDC payout, one attempt, synchronized paid/budget state, and idempotent refresh with the same digest
-- [x] Merge Stage 6 to `main` through PR #20
-- [x] Verify merged `main` CI: 171/171 unit tests, build, lint/typecheck, 7/7 Playwright smoke tests
+- [x] Payout only from immutable approved snapshot
+- [x] Explicit treasurer wallet signature
+- [x] One active payment-attempt boundary
+- [x] Digest persistence before broadcast
+- [x] Exact signed transaction validation
+- [x] Native Testnet USDC payout
+- [x] Canonical `PayoutEvent` verification
+- [x] Same-digest reconciliation / no blind replacement signing
+- [x] Paid/budget updates only after verified finality
+- [x] Preserve failed first acceptance as incident evidence
+- [x] Fresh aligned live acceptance with exactly one confirmed payout
+- [x] Refresh/idempotency proof
+- [x] Merge Stage 6 and verify `main` CI
 
 Successful Stage 6 acceptance digest:
 
@@ -118,20 +97,65 @@ Successful Stage 6 acceptance digest:
 
 ## Stage 7 — Demo hardening and deployment — CURRENT
 
-- [x] Audit merged Stage 0–6 history and current `main` CI before starting Stage 7
-- [x] Establish the repository-side Vercel environment baseline, Stage 7 health readiness contract, and isolated Playwright smoke port
-- [ ] Deploy Next.js app to Vercel
-- [ ] Configure production environment variables without exposing server secrets
-- [ ] Connect the intended Supabase project for the deployed app
-- [ ] Verify clean Testnet Treasury/Cap and sufficient SUI + Testnet USDC
-- [ ] Create deterministic demo reset/seed procedure
-- [ ] Prepare known-good synthetic receipt and budget input
-- [ ] Rehearse full deployed flow repeatedly
-- [ ] Handle Gemini/Supabase/wallet/Sui failures gracefully
-- [ ] Improve loading/error/recovery states found during rehearsal
-- [ ] Confirm paid refresh/reconciliation remains idempotent in deployed environment
-- [ ] Prepare backup screenshots/video
-- [ ] Verify no secrets in repository/history before submission
+### 7A — Production deployment baseline — COMPLETE
+
+- [x] Deploy Next.js app to Vercel
+- [x] Production branch tracks `main`
+- [x] Configure production environment variables without exposing server secrets
+- [x] Connect the intended Supabase project
+- [x] Add cache-disabled Stage 7 health/readiness endpoint
+- [x] Verify production `/api/health`
+- [x] Document Vercel/Supabase owner-only setup and rollback constraints
+
+### 7B — Repeatable demo preflight + payout safety — COMPLETE
+
+- [x] Deterministic demo reset/preflight runbook
+- [x] Read current Sui Treasury before payout signature
+- [x] Server-authoritative Supabase ↔ Sui comparison
+- [x] Exact Treasury/category/balance consistency checks
+- [x] Sufficient-funds check
+- [x] Block wallet signing and downstream effects on mismatch
+- [x] Regression test proves `sign()` is never called on mismatch
+- [x] Preserve Stage 6 finality/reconciliation rules
+- [x] Merge through PR #23 and verify merged `main` CI
+
+### 7C — Deployed end-to-end live rehearsal — COMPLETE
+
+- [x] Switch production claims to live Supabase while keeping Gemini mock
+- [x] Configure Supabase production Site URL / redirect URLs
+- [x] Verify connected Sui Testnet treasurer wallet
+- [x] Fix live workspace auth-order deadlock with TDD (PR #24)
+- [x] Fix fresh-session canonical wallet identity portability while preserving RLS (PR #25)
+- [x] Apply live `stage7c_wallet_principal_portability` migration
+- [x] Load persisted clean Treasury and `events` category in production
+- [x] Submit a fresh unique synthetic receipt claim
+- [x] Persist human approval and immutable 0.10 USDC payout snapshot
+- [x] Pass Stage 7B pre-sign Supabase ↔ Sui preflight
+- [x] Sign exactly one live Testnet payout
+- [x] Confirm exactly one payment attempt and one digest
+- [x] Confirm claim becomes `paid`
+- [x] Confirm category moves from 0.90 → 0.80 USDC remaining
+- [x] Hard refresh preserves same paid state/digest with no Pay button and no new signature
+
+Successful Stage 7C rehearsal digest:
+
+`9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGPgwL`
+
+### 7D — Final reliability hardening + readiness — NEXT
+
+- [ ] Rehearse/document likely failure recovery without unnecessary extra payouts
+- [ ] Verify wallet disconnect/wrong-network/auth failure recovery
+- [ ] Verify Supabase unavailable/error recovery messaging
+- [ ] Verify preflight mismatch remains fail-closed in production behavior
+- [ ] Verify ambiguous transaction/reconciliation guidance remains clear
+- [ ] Review loading/disabled/error states found during live rehearsal
+- [ ] Check sufficient Testnet SUI + USDC for official demo
+- [ ] Prepare backup screenshots/video/evidence
+- [ ] Update README/demo docs with final production path and live evidence
+- [ ] Run repository secret/history checks
+- [ ] Run final full CI and production health check
+- [ ] Complete final Stage 7 readiness audit
+- [ ] Mark Stage 7 COMPLETE only after all exit criteria pass
 
 ## Stage 8 — Submission and pitch — NOT STARTED
 
