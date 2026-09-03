@@ -183,7 +183,12 @@ export function ClaimPayoutView({
           </h3>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-800">
-          Human signed
+          {paid ||
+          ["submitting", "confirming", "reconciliation_required"].includes(
+            phase,
+          )
+            ? "Human signed"
+            : "Wallet signature required"}
         </span>
       </div>
 

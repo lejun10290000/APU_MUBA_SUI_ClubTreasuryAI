@@ -22,6 +22,8 @@ describe("approved claim payout UI", () => {
     expect(
       screen.getByRole("button", { name: /pay approved claim/i }),
     ).toBeEnabled();
+    expect(screen.getByText("Wallet signature required")).toBeInTheDocument();
+    expect(screen.queryByText("Human signed")).not.toBeInTheDocument();
     expect(screen.getByText("0.10 USDC")).toBeInTheDocument();
     expect(screen.getByText("events")).toBeInTheDocument();
     expect(
@@ -111,6 +113,7 @@ describe("approved claim payout UI", () => {
     );
 
     expect(screen.getByText("Paid")).toBeInTheDocument();
+    expect(screen.getByText("Human signed")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /view on sui testnet explorer/i }),
     ).toHaveAttribute("href", expect.stringContaining(digest));
