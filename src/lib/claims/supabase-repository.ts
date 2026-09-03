@@ -346,6 +346,82 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
     return data ? mapPaymentAttemptRow(data) : null;
   }
 
+  async loadPaymentPreflightState(attemptId: string) {
+    const { data: attemptRow, error: attemptError } = await this.userClient
+      .from("claim_payment_attempts")
+      .select("*")
+      .eq("id", attemptId)
+      .maybeSingle();
+    if (attemptError) throw attemptError;
+    if (!attemptRow) return null;
+
+    const [claimResult, treasuryResult, categoryResult] = await Promise.all([
+      this.userClient
+        .from("claims")
+        .select("*")
+        .eq("id", attemptRow.claim_id)
+        .maybeSingle(),
+      this.userClient
+        .from("treasuries")
+        .select("*")
+        .eq("id", attemptRow.treasury_id)
+        .maybeSingle(),
+      this.userClient
+        .from("budget_categories")
+        .select("*")
+        .eq("id", attemptRow.category_id)
+        .maybeSingle(),
+    ]);
+    if (claimResult.error) throw claimResult.error;
+    if (treasuryResult.error) throw treasuryResult.error;
+    if (categoryResult.error) throw categoryResult.error;
+    const claim = claimResult.data;
+    const treasury = treasuryResult.data;
+    const category = categoryResult.data;
+    if (!claim || !treasury || !category) return null;
+
+    const approvedSnapshot =
+      claim.approved_treasury_object_id &&
+      claim.approved_category_reference &&
+      claim.approved_recipient_sui_address &&
+      claim.approved_amount_minor !== null &&
+      claim.approved_currency
+        ? {
+            treasuryObjectId: claim.approved_treasury_object_id,
+            categoryReference: claim.approved_category_reference,
+            recipientSuiAddress: claim.approved_recipient_sui_address,
+            amountMinor: asMinorAmount(claim.approved_amount_minor),
+            currency: claim.approved_currency,
+          }
+        : null;
+
+    return {
+      attempt: mapPaymentAttemptRow(attemptRow),
+      claim: {
+        id: claim.id,
+        treasuryId: claim.treasury_id,
+        categoryId: claim.category_id,
+        status: claim.status,
+        decision: claim.decision,
+        paymentStatus: claim.payment_status,
+        approvedSnapshot,
+      },
+      treasury: {
+        id: treasury.id,
+        suiTreasuryObjectId: treasury.sui_treasury_object_id,
+        currency: treasury.currency,
+        status: treasury.status,
+      },
+      category: {
+        id: category.id,
+        treasuryId: category.treasury_id,
+        externalReference: category.external_reference,
+        allocatedMinor: asMinorAmount(category.allocated_minor),
+        spentMinor: asMinorAmount(category.spent_minor),
+      },
+    };
+  }
+
   async getActivePaymentAttemptForClaim(claimId: string) {
     const { data, error } = await this.userClient
       .from("claim_payment_attempts")
@@ -397,11 +473,14 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
   }
 
   async finalizeConfirmedPayment(input: ConfirmedPaymentInput) {
-    const { data, error } = await this.userClient.rpc("finalize_claim_payment", {
-      p_attempt_id: input.attemptId,
-      p_transaction_digest: input.transactionDigest,
-      p_confirmed_category_remaining_minor: input.categoryRemainingMinor,
-    });
+    const { data, error } = await this.userClient.rpc(
+      "finalize_claim_payment",
+      {
+        p_attempt_id: input.attemptId,
+        p_transaction_digest: input.transactionDigest,
+        p_confirmed_category_remaining_minor: input.categoryRemainingMinor,
+      },
+    );
     if (error) throw error;
     if (data.id !== input.claimId) {
       throw new Error("Finalized payment does not match the requested claim.");

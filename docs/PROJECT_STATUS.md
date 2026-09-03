@@ -9,11 +9,12 @@ This file is the **single source of truth for current implementation status, blo
 - **Current stage: Stage 7 — Demo hardening and deployment**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5; Stage 6**
-- Latest completed milestone: **Stage 6 human-approved claim payout is merged and owner-controlled live acceptance is verified.**
 - Stage 6 merge: **PR #20**, merge commit `61fb9c86f5077f9813add6dc94aa69b311aaf4d7`
-- Current blockers: **Owner-controlled Vercel authorization and secret entry are pending before deployment verification.**
-- Open implementation issues before the Stage 7 readiness audit: **none; repository-side 7A baseline is recorded, but no deployment has been performed.**
-- Demo readiness: **Core end-to-end MVP works. Stage 7 must now make the live demo repeatable, deployable, recoverable, and presentation-safe.**
+- Latest completed milestone: **Stage 7A production deployment is verified at `https://apumubasuiclubtreasuryai000.vercel.app`.**
+- Stage 7A production baseline: **commit `af23711811867ec106b870bc2dae6a335992ffea`; `/api/health` reports `ok=true`, `ready=true`, `stage=7`, mock AI/claims, Sui Testnet, and a configured package.**
+- Current blockers: **none for Stage 7B repository implementation; any later wallet signature, Testnet funding, or live payout remains owner-only.**
+- Open implementation issues: **Stage 7B must establish a repeatable demo baseline and enforce Supabase-to-Sui consistency before wallet signing.**
+- Demo readiness: **The production app is reachable and configuration-ready. Stage 7B now hardens repeatable preflight, mismatch recovery, and rehearsal safety without performing a live payout.**
 
 ## Stage Progress
 
@@ -154,16 +155,14 @@ Make the already-working MVP reliable under hackathon/demo conditions. **Do not 
 
 ### Next Recommended Task
 
-Perform the owner-controlled Vercel setup documented in `docs/STAGE7_DEPLOYMENT.md`, then verify the non-secret deployed health response before beginning live Supabase/Sui rehearsal work:
+Stage 7A deployment setup and non-secret health verification are complete. Implement Stage 7B demo preflight and consistency hardening next:
 
-1. establish the Vercel deployment and production environment-variable matrix without exposing secrets
-2. connect the existing Supabase live project safely for the deployed app
-3. verify the clean Sui Testnet Treasury/Cap and sufficient SUI + Testnet USDC for rehearsals
-4. create a deterministic demo reset/seed procedure so every rehearsal starts from known state
-5. exercise the full deployed wallet → budget/AI → claim/receipt → human approval → Sui payout flow
-6. harden loading/error/recovery UX for Gemini, Supabase, wallet, and Sui failures discovered during rehearsal
-7. repeat the full demo until it is reliable and comfortably within pitch time
-8. prepare backup screenshots/video and perform a secret-history/public-repository audit
+1. document a deterministic demo reset/preflight procedure that respects immutable on-chain history
+2. compare the persisted Supabase treasury/category state with current Sui state before wallet signing
+3. block signing and broadcasting on any mismatch, with a clear recovery path
+4. prove by regression test that the wallet `sign()` function is never called on mismatch
+5. run the complete mock-only lint, typecheck, unit, build, and Playwright verification suite
+6. reserve live wallet signatures, Testnet funding, and payout rehearsal for explicit owner-controlled acceptance
 
 ### Stage 7 Exit Gate
 
@@ -199,10 +198,18 @@ Before Stage 7 development, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 7 — Demo hardening and deployment
 STATUS: CURRENT
 COMPLETED STAGES: Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5; Stage 6
-NEXT TASK: Establish the production deployment/configuration baseline, then rehearse and harden the existing end-to-end demo without adding optional features.
+NEXT TASK: Implement Stage 7B repeatable demo preflight and Supabase-to-Sui pre-sign consistency checks without performing a live payout.
 ```
 
 ## Recent Development Log
+
+### 2026-09-03 — Stage 7A production deployment verified
+
+- Production deployment: `https://apumubasuiclubtreasuryai000.vercel.app`
+- Verified production commit: `af23711811867ec106b870bc2dae6a335992ffea`
+- The cache-disabled `/api/health` response reports `ok=true`, `ready=true`, `stage=7`, `AI_MODE=mock`, `CLAIMS_MODE=mock`, Sui `testnet`, and `packageConfigured=true`.
+- No live Gemini request, Sui payout, new Treasury creation, or historical Stage 6 evidence mutation was required for deployment verification.
+- Stage 7A is COMPLETE. Stage 7 remains CURRENT and proceeds to Stage 7B demo reset/preflight and pre-sign consistency hardening.
 
 ### 2026-09-03 — Stage 7A repository deployment baseline recorded
 

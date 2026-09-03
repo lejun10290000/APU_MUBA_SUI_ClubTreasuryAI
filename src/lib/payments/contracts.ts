@@ -4,6 +4,10 @@ import { asMinorAmount, type MinorAmount } from "@/src/domain/money";
 import type { ApprovedPayoutSnapshot } from "@/src/domain/stage6-payments";
 import type { Stage6ClaimRepository } from "@/src/lib/claims";
 import { deriveSignedTransactionDigest } from "./signed-transaction";
+import {
+  preflightPaymentAttempt,
+  type PaymentPreflightTreasuryReader,
+} from "./preflight";
 
 export const routeIdSchema = z.string().uuid();
 
@@ -55,6 +59,20 @@ export async function prepareClaimPayment(
   claimId: string,
 ) {
   return repository.preparePaymentAttempt(routeIdSchema.parse(claimId));
+}
+
+export async function preflightClaimPayment(
+  repository: Stage6ClaimRepository,
+  reader: PaymentPreflightTreasuryReader,
+  config: { packageId: string; coinType: string },
+  attemptId: string,
+) {
+  return preflightPaymentAttempt(
+    repository,
+    reader,
+    config,
+    routeIdSchema.parse(attemptId),
+  );
 }
 
 export async function recordSignedPaymentSubmission(

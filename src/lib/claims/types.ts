@@ -15,6 +15,10 @@ import type {
   PreparePaymentResult,
 } from "@/src/domain/stage6-payments";
 import type { ReceiptAnalysis } from "@/src/lib/ai/types";
+import type {
+  PaymentPreflightPersistedState,
+  PaymentPreflightRepository,
+} from "@/src/lib/payments/preflight";
 
 export interface ClaimIdentity {
   userId: string;
@@ -77,7 +81,9 @@ export interface ClaimRepository {
   ): Promise<PersistedClaim>;
 }
 
-export interface Stage6ClaimRepository extends ClaimRepository {
+export interface Stage6ClaimRepository
+  extends ClaimRepository,
+    PaymentPreflightRepository {
   preparePaymentAttempt(claimId: string): Promise<PreparePaymentResult>;
   getPaymentAttempt(attemptId: string): Promise<PaymentAttempt | null>;
   getActivePaymentAttemptForClaim(
@@ -101,5 +107,9 @@ export interface Stage6ClaimRepository extends ClaimRepository {
     attemptId: string,
     code: string,
   ): Promise<PaymentAttempt>;
-  finalizeConfirmedPayment(input: ConfirmedPaymentInput): Promise<PersistedClaim>;
+  finalizeConfirmedPayment(
+    input: ConfirmedPaymentInput,
+  ): Promise<PersistedClaim>;
 }
+
+export type { PaymentPreflightPersistedState };
