@@ -183,7 +183,12 @@ export function ClaimPayoutView({
           </h3>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-800">
-          Human signed
+          {paid ||
+          ["submitting", "confirming", "reconciliation_required"].includes(
+            phase,
+          )
+            ? "Human signed"
+            : "Wallet signature required"}
         </span>
       </div>
 
@@ -253,8 +258,12 @@ export function ClaimPayoutView({
       )}
       {eligible && (
         <p className="mt-3 text-xs leading-5 text-emerald-950/65">
-          The wallet must show and approve this exact Testnet USDC payout. The
-          claim stays unpaid until its PayoutEvent is confirmed.
+          {phase === "reconciliation_required"
+            ? "This checks the existing digest and never requests a replacement signature. Do not start another payout while the chain result is uncertain."
+            : phase === "failed" &&
+                error?.startsWith("Payout consistency check failed:")
+              ? "No transaction was signed or submitted. Refresh the authoritative Treasury data before retrying this read-only pre-sign check."
+              : "The wallet must show and approve this exact Testnet USDC payout. The claim stays unpaid until its PayoutEvent is confirmed."}
         </p>
       )}
     </section>

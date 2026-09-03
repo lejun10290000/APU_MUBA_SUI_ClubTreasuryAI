@@ -1,4 +1,10 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LiveClaimSubmissionForm } from "@/src/components/live-claim-submission-form";
 
@@ -95,6 +101,27 @@ describe("live claim submission authentication ordering", () => {
     expect(
       await screen.findByText("Stage 6 Live Acceptance"),
     ).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: /Events · 0\.90 USDC remaining/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: /Events · 0\.90 USDC remaining/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("offers a safe retry when wallet authentication is rejected before workspace loading", async () => {
+    state.ensureWalletIdentity
+      .mockRejectedValueOnce(new Error("Wallet authentication was cancelled."))
+      .mockResolvedValueOnce(undefined);
+    render(<LiveClaimSubmissionForm />);
+
+    expect(
+      await screen.findByText("Wallet authentication was cancelled."),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: /retry wallet authentication/i }),
+    );
+
+    expect(
+      await screen.findByText("Stage 6 Live Acceptance"),
+    ).toBeInTheDocument();
+    expect(state.ensureWalletIdentity).toHaveBeenCalledTimes(2);
   });
 });

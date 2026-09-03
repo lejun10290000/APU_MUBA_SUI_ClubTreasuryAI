@@ -307,6 +307,13 @@ Vercel-hosted Next.js app
 
 Stage 7 must verify production environment variables, deployed Supabase access, clean demo/reset state, Testnet assets, repeated full-flow rehearsals, and graceful recovery before the project is considered demo-hardened.
 
+Stage 7D preserves two additional degradation boundaries:
+
+- a success-shaped chain result with a different digest is reconciliation-required, never terminal failure; the original digest stays active and blocks a replacement signature
+- failure to generate a short-lived private receipt preview does not hide the already authorized persisted claim; review remains possible without making Storage public or bypassing RLS
+
+The demo UI distinguishes an unsigned Ready state from a previously signed transaction and tells the operator whether to retry wallet/workspace authentication, repeat a read-only pre-sign check, or reconcile an existing digest.
+
 ## Architecture Goal for Judging
 
 A judge should clearly see:

@@ -15,8 +15,17 @@ export async function GET(
     if (!claim) {
       return NextResponse.json({ error: "Claim not found." }, { status: 404 });
     }
-    const receiptPreviewUrl = await createAuthorizedReceiptUrl(claimId);
-    return NextResponse.json({ claim, receiptPreviewUrl });
+    try {
+      const receiptPreviewUrl = await createAuthorizedReceiptUrl(claimId);
+      return NextResponse.json({ claim, receiptPreviewUrl });
+    } catch {
+      return NextResponse.json({
+        claim,
+        receiptPreviewUrl: null,
+        receiptPreviewError:
+          "Private receipt preview is temporarily unavailable. The persisted claim can still be reviewed.",
+      });
+    }
   } catch (error) {
     return NextResponse.json(
       {

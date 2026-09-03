@@ -9,14 +9,14 @@ This file is the **single source of truth for current implementation status, blo
 - **Current stage: Stage 7 — Demo hardening and deployment**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0; Stage 1; Stage 2; Stage 3; Stage 4; Stage 5; Stage 6**
-- Completed Stage 7 sub-stages: **7A, 7B, 7C**
-- Remaining Stage 7 sub-stage: **7D — final reliability hardening, recovery/evidence, and readiness audit**
+- Completed Stage 7 sub-stages: **7A, 7B, 7C; 7D repository work locally verified**
+- Remaining Stage 7 integration gate: **green exact-head PR CI and owner merge**
 - Production app: `https://apumubasuiclubtreasuryai000.vercel.app`
 - Production claims mode: **live Supabase**
 - Production AI mode for rehearsal: **deterministic mock** (`AI_MODE=mock`, live Gemini disabled)
 - Sui network: **Testnet**
-- Current blockers: **none for starting 7D**
-- Latest completed milestone: **Stage 7C deployed end-to-end live rehearsal passed with one confirmed 0.10 USDC payout and idempotent paid refresh.**
+- Current blockers: **none; Stage 7 remains CURRENT until Stage 7D is green and owner-merged**
+- Latest completed milestone: **Stage 7D local reliability, recovery, backup-evidence, secret, and readiness gates passed without a live transaction.**
 
 ## Stage Progress
 
@@ -35,15 +35,19 @@ This file is the **single source of truth for current implementation status, blo
 ## Stage 0–6 Readiness Summary
 
 ### Stage 0 — COMPLETE
+
 Planning, requirements, architecture, tech-stack decisions, AI usage policy, staged-development workflow, and repository handoff rules are present. Team-member placeholders remain a Stage 8 submission item.
 
 ### Stage 1 — COMPLETE
+
 Reproducible Next.js/React/strict-TypeScript foundation with pinned pnpm/Node tooling, frozen lockfile, centralized config, tests, Playwright, GitHub Actions CI, mock-first AI, and Sui/Supabase service boundaries.
 
 ### Stage 2 — COMPLETE
+
 Deterministic financial rules plus the responsive mock treasury, budget, claim, review, human-decision, and history workflow.
 
 ### Stage 3 — COMPLETE
+
 Sui Testnet Move treasury, wallet integration, native Circle Testnet USDC, capability authorization, category allocations, payout enforcement, typed events, and 31/31 Move tests.
 
 Verified package:
@@ -59,12 +63,15 @@ Native Circle Sui Testnet USDC:
 ```
 
 ### Stage 4 — COMPLETE
+
 Guarded Gemini adapter using `@google/genai`, structured outputs, server-side validation, mock-first billing policy, and explicit owner-controlled live validation.
 
 ### Stage 5 — COMPLETE
+
 Live Supabase claim persistence, private receipt storage, wallet identity binding, RLS, duplicate checks, advisory AI/recommendation state, human decisions, and immutable approved-but-unpaid payout snapshots.
 
 ### Stage 6 — COMPLETE
+
 Human-approved Sui payout flow with immutable snapshot execution, explicit wallet signature, digest-first persistence, same-digest reconciliation, exact signed-transaction verification, canonical `PayoutEvent` verification, finality-gated database updates, and no blind retries.
 
 The first failed live acceptance remains preserved as incident evidence in `docs/STAGE6_LIVE_VALIDATION.md`. A later aligned acceptance passed with exactly one 0.10 USDC payout.
@@ -175,42 +182,52 @@ A hard browser refresh preserved the same `Paid` state and digest, did not show 
 
 Detailed rehearsal evidence: `docs/STAGE7C_LIVE_REHEARSAL.md`.
 
+### Stage 7D — REPOSITORY WORK LOCALLY VERIFIED — final reliability and readiness
+
+- success-shaped digest mismatch now remains `reconciliation_required`, preserving the existing attempt/digest boundary
+- transient private receipt-preview failure no longer hides an otherwise authorized persisted claim
+- live wallet-auth/workspace failure has an explicit safe retry
+- payout recovery copy distinguishes read-only preflight retry from same-digest reconciliation
+- unsigned Ready state no longer incorrectly says `Human signed`
+- final demo runbook, no-spend backup evidence checklist, and sanitized security audit are recorded
+- fresh read-only production health and public Sui state checks passed
+- frozen install, lint, typecheck, 41 files / 201 unit tests, build, and 7/7 Playwright smoke passed locally
+
+Stage 7D made no live Gemini request, wallet signature, Treasury mutation, or Sui transaction. See `docs/STAGE7_FINAL_READINESS.md`.
+
 ## Latest Automated Verification
 
-Latest Stage 7C hotfix merge commit on `main`:
+Stage 7C docs-only PR #26 merged at:
 
 ```text
-4d4d18f6fdf3cb826c0488c285b6ea222b50bcb4
+bd7f52bc75a35483ea672e73d675a87ea5328fa6
 ```
 
-Post-merge GitHub Actions run #136 passed:
+PR #26 GitHub Actions run #137 passed. Fresh Stage 7D local verification passed:
 
 ```text
 pnpm install --frozen-lockfile: pass
 pnpm lint: pass
 pnpm typecheck: pass
-pnpm test: pass
+pnpm test: pass (41 files / 201 tests)
 pnpm build: pass
-Playwright Chromium install: pass
-pnpm test:e2e:smoke: pass
+pnpm test:e2e:smoke: pass (7/7)
+production /api/health: pass (HTTP 200, ready=true)
+sanitized secret/history audit: pass
 ```
 
-Normal CI remains mock-only and performs no live Gemini request and no live Sui payout.
+The Stage 7D exact-head PR CI is the final integration gate. Normal CI remains mock-only and performs no live Gemini request and no live Sui payout.
 
 ## Stage 7 — Current Goal
 
-Finish **Stage 7D** only. Do not expand product scope unless needed to make the official demo reliable.
+Complete the Stage 7D PR gate, then begin Stage 8 submission/pitch work. Do not expand product scope.
 
-### Next Recommended Task — Stage 7D
+### Next Recommended Task — Stage 7D integration
 
-1. rehearse and document recovery for the most likely demo failures without creating unnecessary extra payouts
-2. verify user-facing error/loading/recovery states for wallet disconnect, auth failure, Supabase failure, preflight mismatch, and ambiguous transaction outcome
-3. verify the production health endpoint and deployment baseline still match `main`
-4. prepare backup screenshots/video/evidence for the successful Stage 7C flow
-5. verify sufficient Testnet SUI/USDC remains for the official demo
-6. run secret/repository/history checks
-7. update README/demo documentation with the final deployed path and evidence
-8. run the final Stage 7 readiness audit and only then mark Stage 7 COMPLETE
+1. push `stage7/final-reliability-hardening` and open a draft PR to `main`
+2. require green CI on the exact head and review the final diff
+3. mark the PR ready and ask the owner for explicit merge authorization
+4. after merge, Stage 7 is COMPLETE and Stage 8 becomes CURRENT
 
 ### Stage 7 Exit Gate
 
@@ -241,16 +258,26 @@ Stage 7 is complete only when:
 
 ## Mandatory Agent Startup Output
 
-Before further Stage 7 development, every coding agent must show:
+Before further work, every coding agent must show:
 
 ```text
 CURRENT PROJECT STAGE: Stage 7 — Demo hardening and deployment
 STATUS: CURRENT
-COMPLETED SUB-STAGES: 7A, 7B, 7C
-NEXT TASK: Stage 7D final reliability hardening, recovery/evidence, and readiness audit. Do not perform an unnecessary live payout.
+COMPLETED SUB-STAGES: 7A, 7B, 7C; 7D locally verified
+NEXT TASK: Complete the Stage 7D PR/CI/owner-merge gate, then begin Stage 8. Do not perform an unnecessary live payout.
 ```
 
 ## Recent Development Log
+
+### 2026-09-04 — Stage 7D local readiness gates passed
+
+- Hardened success-shaped digest mismatch to retain same-digest reconciliation.
+- Made claim review resilient to private preview failure and added safe wallet/workspace retry guidance.
+- Clarified unsigned versus signed payout UI states.
+- Added final demo/no-spend fallback runbooks and sanitized repository/security audit.
+- Confirmed production health read-only and public Testnet gas/USDC/Treasury state without signing or transacting.
+- Passed frozen install, lint, strict typecheck, 201 unit tests, production build, and 7 Playwright smoke tests.
+- Stage 7 remains CURRENT until the exact Stage 7D PR head is green and owner-merged.
 
 ### 2026-09-04 — Stage 7C deployed live rehearsal completed
 
