@@ -169,7 +169,9 @@ Move tests: retained verified 31/31
 
 ## AI Development Tools Declaration
 
-Known development AI tools used:
+The team confirmed that **no development AI tools beyond ChatGPT and OpenAI Codex were used**.
+
+Development AI tools used:
 
 - **ChatGPT** — ideation, planning, architecture, documentation, implementation/debugging assistance, repository review
 - **OpenAI Codex** — coding assistance, implementation, debugging, repository work and verification
@@ -177,8 +179,6 @@ Known development AI tools used:
 Product AI:
 
 - **Google Gemini Developer API** — natural-language budget parsing and receipt/image analysis
-
-**Owner check before submission:** confirm whether any teammate used any additional AI tool. If yes, add it here and to the final Devfolio declaration.
 
 ## Suggested Devfolio Highlights
 
@@ -212,7 +212,7 @@ Recommended final submission screenshots:
 2. persisted live Treasury and category balance
 3. claim review with AI recommendation + deterministic checks
 4. human approval boundary
-5. Stage 6 payout Ready state
+5. payout Ready state
 6. Paid state with confirmed digest
 7. Sui explorer transaction/event proof
 8. `/api/health` production readiness proof
@@ -254,8 +254,8 @@ Current MVP deliberately focuses on a safe auditable core. Post-hackathon opport
 
 ## Final Owner Checklist
 
-- [ ] confirm all team information is accurate
-- [ ] confirm every AI development tool used by every teammate is declared
+- [x] confirm all team information is accurate
+- [x] confirm every AI development tool used by every teammate is declared
 - [ ] add final screenshots
 - [ ] add final 3–5 minute YouTube/Loom URL
 - [ ] verify live production URL
