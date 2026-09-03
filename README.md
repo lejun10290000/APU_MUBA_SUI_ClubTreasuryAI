@@ -38,6 +38,8 @@ Completed:
 - Stage 5 — Claim and receipt workflow integration
 - Stage 6 — Human approval and on-chain payment
 
+Stage 7A deployment, 7B pre-sign safety, and 7C deployed live rehearsal are complete. Stage 7D repository/local readiness gates pass; Stage 7 remains CURRENT until the exact Stage 7D PR head is green and owner-merged.
+
 Stage 6 merged to `main` through **PR #20** at merge commit:
 
 ```text
@@ -335,22 +337,18 @@ Playwright smoke: 7/7 pass
 
 ## Stage 7 — Current Work
 
-Stage 7 does **not** need more core payment features. The current priority is reliability:
+Stage 7 has a verified production deployment, live Supabase claim workflow, server-authoritative Supabase-to-Sui pre-sign gate, and successful Stage 7C `0.10 USDC` rehearsal with idempotent refresh. Stage 7D adds fail-closed digest reconciliation, resilient private-preview/workspace recovery, clearer signature states, a no-spend backup path, and a sanitized repository/security audit.
 
-1. deploy the Next.js app to Vercel
-2. configure production environment variables safely
-3. connect the intended Supabase live project
-4. verify clean Testnet assets and wallet/TreasurerCap
-5. define a deterministic demo reset/seed procedure
-6. rehearse the complete deployed flow repeatedly
-7. harden loading/error/recovery states discovered during rehearsal
-8. verify paid-state refresh/reconciliation remains idempotent
-9. prepare backup screenshots/video
-10. perform repository/secret safety checks before submission
+Final local Stage 7D verification passes with **201 unit tests** and **7/7 Playwright smoke tests**. The remaining gate is green exact-head PR CI plus owner merge; core product scope remains frozen.
 
-See `docs/DEMO_PLAN.md` for the Stage 7 rehearsal checklist.
+Live application: [https://apumubasuiclubtreasuryai000.vercel.app](https://apumubasuiclubtreasuryai000.vercel.app)
 
-Live application URL: **TBD during Stage 7 deployment**.
+Demo operations and evidence:
+
+- `docs/STAGE7_DEMO_RUNBOOK.md`
+- `docs/STAGE7_BACKUP_EVIDENCE.md`
+- `docs/STAGE7_FINAL_READINESS.md`
+- `docs/STAGE7C_LIVE_REHEARSAL.md`
 
 ## Technology Stack
 

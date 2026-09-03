@@ -141,21 +141,25 @@ Successful Stage 7C rehearsal digest:
 
 `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGPgwL`
 
-### 7D — Final reliability hardening + readiness — NEXT
+### 7D — Final reliability hardening + readiness — LOCAL GATES PASS
 
-- [ ] Rehearse/document likely failure recovery without unnecessary extra payouts
-- [ ] Verify wallet disconnect/wrong-network/auth failure recovery
-- [ ] Verify Supabase unavailable/error recovery messaging
-- [ ] Verify preflight mismatch remains fail-closed in production behavior
-- [ ] Verify ambiguous transaction/reconciliation guidance remains clear
-- [ ] Review loading/disabled/error states found during live rehearsal
-- [ ] Check sufficient Testnet SUI + USDC for official demo
-- [ ] Prepare backup screenshots/video/evidence
-- [ ] Update README/demo docs with final production path and live evidence
-- [ ] Run repository secret/history checks
-- [ ] Run final full CI and production health check
-- [ ] Complete final Stage 7 readiness audit
-- [ ] Mark Stage 7 COMPLETE only after all exit criteria pass
+- [x] Rehearse/document likely failure recovery without unnecessary extra payouts
+- [x] Verify wallet disconnect/wrong-network/auth failure recovery
+- [x] Verify Supabase unavailable/error recovery messaging
+- [x] Verify preflight mismatch remains fail-closed before wallet signing
+- [x] Verify ambiguous transaction/reconciliation guidance remains clear
+- [x] Keep success-shaped digest mismatch active for same-digest reconciliation
+- [x] Keep authorized claim review usable when private preview generation fails
+- [x] Review loading/disabled/error states found during live rehearsal
+- [x] Check public Testnet SUI + USDC/Treasury readiness read-only
+- [x] Prepare backup evidence/runbook and owner screenshot/video checklist
+- [x] Update README/demo docs with final production path and live evidence
+- [x] Run sanitized repository secret/history checks
+- [x] Run frozen install, lint, typecheck, 201 unit tests, build, and 7/7 Playwright locally
+- [x] Recheck production health endpoint read-only
+- [x] Complete final Stage 7 readiness audit
+- [ ] Pass GitHub Actions on the exact final Stage 7D PR head
+- [ ] Owner merge Stage 7D; only then mark Stage 7 COMPLETE
 
 ## Stage 8 — Submission and pitch — NOT STARTED
 

@@ -152,17 +152,20 @@ Goal: make the verified core MVP reliable under hackathon conditions and accessi
 
 Required work:
 
-- [ ] deploy the Next.js app to Vercel
-- [ ] configure production environment variables and Supabase safely
-- [ ] verify the clean Sui Testnet demo Treasury/Cap and sufficient Testnet assets
-- [ ] define a deterministic reset/seed process for repeated rehearsals
-- [ ] exercise the complete deployed end-to-end flow repeatedly
-- [ ] harden loading/error/recovery UX for Gemini, Supabase, wallet, and Sui failures
-- [ ] verify paid-state refresh/reconciliation remains idempotent after deployment
-- [ ] prepare backup screenshots/video
-- [ ] verify repository/secret safety before submission
+- [x] deploy the Next.js app to Vercel
+- [x] configure production environment variables and Supabase safely
+- [x] verify the clean Sui Testnet demo Treasury/Cap and sufficient Testnet assets
+- [x] define a deterministic reset/seed process for repeated rehearsals
+- [x] exercise the complete deployed end-to-end flow
+- [x] harden loading/error/recovery UX for Gemini, Supabase, wallet, and Sui failures
+- [x] verify paid-state refresh/reconciliation remains idempotent after deployment
+- [x] prepare backup evidence/runbook and an owner screenshot/video capture checklist
+- [x] verify repository/secret safety before submission
+- [ ] pass exact-head Stage 7D PR CI and receive owner merge approval
 
 Exit criteria: **a public deployment is reachable and the full demo can be repeated reliably from known state with understandable recovery paths, sufficient Testnet assets, and backup evidence.**
+
+Stage 7D repository work and local exit gates pass. Stage 7 remains CURRENT until the final Stage 7D pull request passes exact-head CI and is merged to `main` by the owner.
 
 ## Stage 8 — Submission and pitch — NOT STARTED
 

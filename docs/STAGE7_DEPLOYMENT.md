@@ -1,6 +1,10 @@
-# Stage 7A — Vercel deployment baseline
+# Stage 7A — Verified Vercel deployment baseline
 
-Stage 7 remains **CURRENT**. This document records the repository-side deployment baseline only; it does not prove that a Vercel deployment, Supabase connection, wallet session, or Sui payout has occurred.
+Stage 7 remains **CURRENT** until Stage 7D is owner-merged. The production deployment and live Supabase/Sui rehearsal are now verified; see `docs/STAGE7C_LIVE_REHEARSAL.md` and `docs/STAGE7_FINAL_READINESS.md`. This document remains the configuration and rollback contract.
+
+Production URL:
+
+`https://apumubasuiclubtreasuryai000.vercel.app`
 
 ## Safety boundary
 

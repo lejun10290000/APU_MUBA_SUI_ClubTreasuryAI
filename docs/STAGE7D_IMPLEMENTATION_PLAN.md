@@ -1,7 +1,9 @@
 # Stage 7D Implementation Plan — Final Reliability Hardening
 
-Status: **TASK 1 BASELINE AUDIT COMPLETE — implementation pending**  
-Branch: `stage7/final-reliability-hardening`  
+Status: **TASKS 1–5 COMPLETE; TASK 6 LOCAL GATES PASS — PR CI/OWNER MERGE PENDING**
+
+Branch: `stage7/final-reliability-hardening`
+
 Base commit: `bd7f52bc75a35483ea672e73d675a87ea5328fa6`
 
 ## Scope and safety boundary
@@ -113,3 +115,13 @@ corepack pnpm test:e2e:smoke
 ```
 
 Run focused Vitest files during RED/GREEN cycles. Run `sui move test` only if the installed CLI is available; never publish or execute a transaction. The production check is a read-only GET of `/api/health`.
+
+## Execution record
+
+- Task 1: baseline audit/plan — complete
+- Task 2: failure/recovery hardening — complete with regression-first RED/GREEN evidence
+- Task 3: demo UX/recovery polish — complete; 7/7 Playwright smoke passed
+- Task 4: no-spend demo runbook/evidence checklist — complete
+- Task 5: sanitized repository/secret/finality audit — complete
+- Task 6 local gates: frozen install, lint, typecheck, 41 files / 201 unit tests, build, 7/7 Playwright, production health, and read-only Testnet state — pass
+- Remaining: push draft PR, exact-head GitHub CI, final diff review, ready-for-review transition, and explicit owner merge decision

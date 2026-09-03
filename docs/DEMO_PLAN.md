@@ -37,6 +37,8 @@ DZtb9Td7nfszbBVWj1QdUqd8peeP3FUm2Q6XJEqvVvb7
 
 For repeated Stage 7 rehearsals, prefer a **fresh deterministic demo treasury/reset procedure** rather than spending the clean acceptance treasury repeatedly. Stage 7 should record the final rehearsal Treasury/Cap once the reset/seed process is chosen.
 
+Stage 7C subsequently used the same reconciled Treasury for exactly one additional verified `0.10 USDC` payout. Its current accepted state is `1.00 allocated / 0.20 spent / 0.80 remaining USDC`, with digest `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGPgwL`. The Stage 7D default is now the no-spend evidence path in `docs/STAGE7_DEMO_RUNBOOK.md`; do not create another Treasury or payout merely to rehearse screenshots.
+
 ## Product Story
 
 Recommended club/event story:
