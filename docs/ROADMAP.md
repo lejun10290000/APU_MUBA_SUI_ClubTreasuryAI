@@ -154,7 +154,7 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 - [x] Complete final README
 - [x] Real Sui Testnet package/object deployment IDs documented
 - [x] Final setup/install instructions reviewed
-- [ ] Confirm every AI development tool declaration with all teammates
+- [x] Confirm every AI development tool declaration with all teammates — **ChatGPT + OpenAI Codex only**
 - [x] Document implemented Gemini product AI for judges
 - [x] Add live demo URL + screenshot/video placeholders
 - [x] Create copy-ready Devfolio submission package
