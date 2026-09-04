@@ -276,13 +276,30 @@ The synchronized budget moved from `1.00 allocated / 0 spent` to `0.10 spent / 0
 
 ### Off-chain
 
-- club/event display metadata
+- persisted app treasury workspace, join code, membership, and category-budget metadata
 - raw receipt images
 - member/claim metadata
 - AI extraction/recommendation
 - duplicate comparison details
 - human review notes
 - payment-attempt/reconciliation state
+
+## A1 Persisted Workflow Continuity — IMPLEMENTED LOCALLY, MIGRATION PENDING
+
+In live data mode, the app treasury UUID is the operational workspace identity. A treasurer creates it in Supabase, persists a balanced category budget, and members join it through an authenticated short-code flow. Claims select that same persisted treasury and categories; claim submission never creates or mutates Treasury/Budget records.
+
+An app treasury starts with `sui_treasury_object_id = null`. While unlinked, claim submission, AI-assisted analysis, human review, and rejection remain available, but approval cannot create an immutable payout snapshot and no prepare, preflight, wallet-sign, submit, or reconcile action is available.
+
+The owner-controlled link endpoint accepts an existing Testnet Treasury and TreasurerCap pair only after verifying:
+
+- the object is the deployed shared `Treasury<USDC>` type;
+- the connected verified wallet owns the TreasurerCap;
+- the capability authorizes exactly that Treasury;
+- the workspace is not overwriting or reusing another link, including the Stage 6/7 rehearsal Treasury.
+
+Once linked, A1 reuses the unchanged Stage 6/7 immutable-snapshot, pre-sign consistency, explicit wallet-signature, finality, event-verification, and same-digest reconciliation pipeline.
+
+The migration in `supabase/migrations/20260904170000_stage8_a1_workflow_continuity.sql` has not yet been applied to production. Therefore this section describes the reviewed branch implementation, not current production deployment state. Production remains `AI_MODE=mock` with `GEMINI_LIVE_REQUESTS_ENABLED=false`.
 
 ## Failure Handling
 
@@ -294,7 +311,7 @@ The synchronized budget moved from `1.00 allocated / 0 spent` to `0.10 spent / 0
 - successful transaction with unverified/mismatched event evidence → `reconciliation_required`; never blind retry
 - database finalization mismatch/failure after chain success → preserve same digest and reconcile/finalize; never create a replacement payment automatically
 
-## Stage 7 Deployment Direction — CURRENT
+## Stage 7 Deployment Direction — COMPLETE
 
 ```text
 Browser
@@ -305,7 +322,7 @@ Vercel-hosted Next.js app
   └─ Sui Testnet + user-controlled wallet
 ```
 
-Stage 7 must verify production environment variables, deployed Supabase access, clean demo/reset state, Testnet assets, repeated full-flow rehearsals, and graceful recovery before the project is considered demo-hardened.
+Stage 7 verified production environment variables, deployed Supabase access, clean demo/reset state, Testnet assets, the full deployed flow, and graceful recovery.
 
 Stage 7D preserves two additional degradation boundaries:
 

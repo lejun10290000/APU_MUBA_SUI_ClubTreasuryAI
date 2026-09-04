@@ -15,8 +15,8 @@ This file is the **single source of truth for current implementation status, blo
 - Production claims: **live Supabase**
 - Production rehearsal AI mode: **deterministic mock** (`AI_MODE=mock`, live Gemini disabled)
 - Sui network: **Testnet**
-- Current blocker: **none**
-- Current priority: **finish submission package, demo video, pitch, Q&A, and Devfolio submission without expanding product scope**
+- Current blocker: **A1 live Supabase migration and controlled no-payout acceptance require owner authorization/action**
+- Current priority: **finish A1 production-safe acceptance, then return to submission/video/pitch work without performing an unnecessary payout**
 
 ## Stage Progress
 
@@ -94,15 +94,40 @@ Stage 7D also verified recovery messaging, same-digest reconciliation, private r
 
 ## Official Team
 
-| Name | Role | University | GitHub |
-| --- | --- | --- | --- |
-| CHUA LE JUN | Developer | UTM Kuala Lumpur | `lejun10290000` |
-| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le` |
-| LAI YAN QI | Presenter | UTM Kuala Lumpur | `YANKEY-CODE` |
+| Name          | Role      | University       | GitHub          |
+| ------------- | --------- | ---------------- | --------------- |
+| CHUA LE JUN   | Developer | UTM Kuala Lumpur | `lejun10290000` |
+| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le`         |
+| LAI YAN QI    | Presenter | UTM Kuala Lumpur | `YANKEY-CODE`   |
 
 ## Stage 8 Current Goal
 
 Package the already-working product for judging. **Do not add optional features unless they are required for submission.**
+
+### A1 workflow continuity — local implementation complete, production pending
+
+The `stage8/a1-workflow-continuity` branch now implements:
+
+- persisted app treasury creation and exact-sum category budgets in live mode;
+- Claims using the same persisted treasury UUID and categories without mutating them;
+- Member wallet verification, join-code membership, and claim entry;
+- explicit unlinked status with approval, payout preparation, preflight, signing, submission, and reconciliation blocked;
+- owner-only verification of an existing shared Sui `Treasury<USDC>` plus the exact wallet-owned `TreasurerCap` before linking;
+- preservation of the existing Stage 7C treasury, claim, payment attempt, digest, and no-blind-retry safety pipeline.
+
+Local verification on 4 September 2026:
+
+```text
+lint: PASS
+typecheck: PASS
+unit tests: PASS (51 files / 231 tests)
+build: PASS
+Playwright assertions: 9/9 scenarios completed without assertion failure
+Playwright process: NOT a clean exit; Windows Next.js web-server cleanup hung and was terminated
+Move tests: NOT RUN locally; Sui CLI unavailable
+```
+
+The A1 migration is **not applied** and controlled production acceptance is **not performed**. Production remains the verified Stage 7 baseline with deterministic mock AI (`AI_MODE=mock`, `GEMINI_LIVE_REQUESTS_ENABLED=false`).
 
 ### Stage 8A — Submission package
 
@@ -159,7 +184,7 @@ Before further work, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 8 — Submission and pitch
 STATUS: CURRENT
 COMPLETED STAGES: 0–7
-NEXT TASK: Finish submission/pitch materials. Do not expand product scope or perform unnecessary live payouts.
+NEXT TASK: Owner-authorized A1 Supabase migration, read-only preservation checks, and controlled no-payout production acceptance. Do not perform a live payout.
 ```
 
 ## Handoff Rule

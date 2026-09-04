@@ -42,11 +42,13 @@ Owner/operator checklist:
 ## Recommended five-minute path
 
 1. **Problem and responsibility split:** show the landing/dashboard and explain `AI understands → deterministic rules verify → human approves → wallet signs → Sui executes`.
-2. **Treasury and budget:** show the persisted Treasury and `events` category. Explain that USDC custody and category limits are enforced by Move.
+2. **Treasury and budget:** on the verified Stage 7 production baseline, show the existing persisted Treasury and `events` category. After A1 migration/acceptance is complete, create a persisted app treasury and balanced budget, explain that it starts unlinked, and show that the same treasury/categories continue into Claims. Do not claim this A1 path is deployed before owner acceptance.
 3. **Claim evidence:** show a synthetic claim review, the private/off-chain receipt model, AI recommendation label, deterministic amount/budget/duplicate checks, and the human decision note.
 4. **Payment boundary:** show the immutable amount/category/Treasury/recipient snapshot and explain the server-authoritative Supabase-to-Sui pre-sign check plus TreasurerCap ownership check.
 5. **Verified execution:** use the already paid Stage 7C claim and digest. Show `Paid`, the explorer evidence, `0.80 USDC` remaining, and the same state after refresh. Do not create another payout merely for presentation.
 6. **Recovery story:** explain that an ambiguous signed result stays `reconciliation_required`; the button checks the existing digest and never asks for a replacement signature.
+
+For the A1 flow, claims and review may happen before chain setup, but approval and every payout/signing action remain blocked until the owner verifies and links that workspace's own Sui Treasury and TreasurerCap. Never link a new workspace to the Stage 7C rehearsal Treasury.
 
 ## Optional owner-authorized live payout path
 

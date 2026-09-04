@@ -158,6 +158,15 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 - [x] Document implemented Gemini product AI for judges
 - [x] Add live demo URL + screenshot/video placeholders
 - [x] Create copy-ready Devfolio submission package
+- [x] Implement local persisted Treasury → Budget → Claims continuity
+- [x] Enable authenticated Member join-code claim path
+- [x] Block approval/payment/signing until verified Sui link
+- [x] Add owner-only verified Treasury/TreasurerCap link step
+- [x] Pass A1 local lint, typecheck, 231 unit tests, and production build
+- [x] Run all 9 Playwright scenarios without assertion failure; Windows cleanup hang remains accurately recorded
+- [ ] Apply A1 Supabase migration with owner authorization
+- [ ] Perform controlled production A1 acceptance without payout
+- [ ] Verify Stage 7C paid evidence remains unchanged after migration
 - [ ] Verify public repo + no secrets after Stage 8A docs merge
 
 ### 8B — Demo video — NOT STARTED
@@ -198,11 +207,11 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 
 ## Official Team
 
-| Name | Role | University | GitHub |
-| --- | --- | --- | --- |
-| CHUA LE JUN | Developer | UTM Kuala Lumpur | `lejun10290000` |
-| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le` |
-| LAI YAN QI | Presenter | UTM Kuala Lumpur | `YANKEY-CODE` |
+| Name          | Role      | University       | GitHub          |
+| ------------- | --------- | ---------------- | --------------- |
+| CHUA LE JUN   | Developer | UTM Kuala Lumpur | `lejun10290000` |
+| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le`         |
+| LAI YAN QI    | Presenter | UTM Kuala Lumpur | `YANKEY-CODE`   |
 
 ## Optional — Only If Core Demo Is Stable
 
