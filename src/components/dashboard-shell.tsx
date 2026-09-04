@@ -115,9 +115,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             </div>
             <div className="flex items-center gap-3">
               <SuiWalletControl />
-              <span className="hidden size-9 place-items-center rounded-full bg-[var(--brand)] text-sm font-bold text-white sm:grid">
-                YX
-              </span>
               <span className="hidden text-sm font-semibold sm:inline">
                 Treasurer demo
               </span>

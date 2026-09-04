@@ -261,7 +261,7 @@ export function ClaimPayoutView({
             : phase === "failed" &&
                 error?.startsWith("Payout consistency check failed:")
               ? "No transaction was signed or submitted. Refresh the authoritative Treasury data before retrying this read-only pre-sign check."
-              : "The wallet must show and approve this exact Testnet USDC payout. The claim stays unpaid until its PayoutEvent is confirmed."}
+              : "The wallet must show and approve this exact Sui Testnet USDC payout. The claim stays unpaid until its PayoutEvent is confirmed."}
         </p>
       )}
     </section>

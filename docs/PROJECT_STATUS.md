@@ -140,7 +140,8 @@ Package the already-working product for judging. **Do not add optional features 
 
 The submission-facing workflow was polished on 4 September 2026 without changing the frozen product scope or performing a live Gemini request, wallet signature, or Sui payout.
 
-- stale stage labels and contradictory deployment messages removed from user-facing pages
+- stale stage labels, generic profile initials, and contradictory deployment messages removed from user-facing pages
+- user-facing product terminology follows sentence case while preserving proper names such as AI, USDC, Sui, Sui Testnet, Supabase, and Gemini
 - mobile navigation changed to a complete two-row grid with no hidden routes
 - dashboard reduced to a clear four-step judge flow
 - verified Stage 7C payout proof surfaced in the dashboard, history, and Sui Testnet views

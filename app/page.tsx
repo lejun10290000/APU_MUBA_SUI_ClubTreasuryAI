@@ -22,7 +22,7 @@ const steps = [
   {
     number: "03",
     title: "Approve with confidence",
-    copy: "A human approves first. The verified Testnet flow then asks the connected treasurer wallet to sign the Sui transaction explicitly.",
+    copy: "A human approves first. The verified Sui Testnet flow then asks the connected treasurer wallet to sign the transaction explicitly.",
   },
 ];
 

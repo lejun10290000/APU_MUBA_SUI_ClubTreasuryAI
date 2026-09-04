@@ -272,7 +272,8 @@ export default function DashboardPage() {
           </h2>
           <p className="mt-3 text-sm leading-6 text-white/58">
             AI recommendations stay advisory. An approved claim can only be paid
-            after the authorized treasurer signs the exact Testnet transaction.
+            after the authorized treasurer signs the exact Sui Testnet
+            transaction.
           </p>
           <div className="mt-7 space-y-3 border-t border-white/10 pt-6">
             {[

@@ -27,6 +27,7 @@ test("professional product shell navigates from landing to treasurer dashboard",
   await expect(
     page.getByRole("heading", { name: "Good morning, Treasurer." }),
   ).toBeVisible();
+  await expect(page.getByText("YX", { exact: true })).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Web3 Workshop 2026" }),
   ).toBeVisible();
