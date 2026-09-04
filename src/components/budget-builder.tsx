@@ -194,7 +194,7 @@ export function BudgetBuilder() {
             ? error.message
             : live
               ? "The budget could not be saved."
-              : "The mock budget could not be confirmed.",
+              : "The sample budget could not be confirmed.",
       });
     }
   };
@@ -333,7 +333,7 @@ export function BudgetBuilder() {
             }
             type="submit"
           >
-            {live ? "Confirm budget" : "Confirm mock budget"}
+            {live ? "Confirm budget" : "Confirm sample budget"}
             <Icon className="size-4" name="arrow" />
           </button>
         </div>

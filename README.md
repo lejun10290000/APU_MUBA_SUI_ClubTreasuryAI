@@ -296,11 +296,11 @@ repository/history secret audit: PASS
 
 Move package verification remains **31/31 Move tests**, and the deployed Move source has not changed since the verified Stage 3 deployment.
 
-### A1 workflow-continuity candidate
+### A1 workflow continuity
 
 The `stage8/a1-workflow-continuity` branch adds persisted Treasury → Budget → Claims continuity, member join codes, the unlinked approval/payment guard, and owner-only verified Sui linking. Its local application gate passed **51 files / 231 unit tests**, lint, type-check, and production build. All 9 Playwright scenarios reached completion without assertion failures, but the Windows runner hung during Next.js web-server cleanup; this is not recorded as a clean Playwright process exit. The Sui CLI was unavailable locally, so Move tests were not rerun for A1.
 
-The A1 Supabase migration and production acceptance are **not yet applied/completed**. Until the owner completes those gates and the branch is reviewed, the production URL remains the verified Stage 7 baseline. Default production AI remains deterministic mock mode: `AI_MODE=mock` and `GEMINI_LIVE_REQUESTS_ENABLED=false`.
+The owner-authorized A1 Supabase migration and controlled production acceptance completed without a payout. The existing Stage 7C Paid claim and confirmed digest remained unchanged. PR #29 remains unmerged until its integration with the professional UI refinement is reviewed and exact-head CI passes. Default production AI remains deterministic mock mode: `AI_MODE=mock` and `GEMINI_LIVE_REQUESTS_ENABLED=false`.
 
 ## Hackathon Tracks
 
@@ -335,9 +335,9 @@ Every teammate must declare any additional AI tool they personally used before f
 
 ## Demo Video
 
-**Stage 8B TODO:** add the final 3–5 minute YouTube/Loom URL here after recording.
+The final 4:21 narrated demo MP4 has been rendered and visually verified locally. **Stage 8B TODO:** upload it to YouTube or Loom and add the public URL here.
 
-The demo should use the existing verified Stage 7C payout evidence instead of performing an unnecessary second payment solely for recording.
+The demo uses the existing verified Stage 7C payout evidence instead of performing an unnecessary second payment solely for recording.
 
 ## Limitations / Future Work
 

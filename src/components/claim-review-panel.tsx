@@ -413,9 +413,8 @@ export function ClaimReviewPanel() {
             Human approval remains final
           </h3>
           <p className="mt-3 text-sm leading-6 text-white/65">
-            AI recommends and the treasurer decides. Stage 6 can only build from
-            the approved snapshot, and the connected wallet must explicitly
-            sign.
+            AI recommends and the treasurer decides. Payment can only use the
+            approved snapshot, and the connected wallet must explicitly sign.
           </p>
         </section>
         <ClaimPayoutPanel claim={claim} onClaimUpdated={setClaim} />

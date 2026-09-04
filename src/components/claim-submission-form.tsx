@@ -235,7 +235,7 @@ export function ClaimSubmissionForm() {
           </span>
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.13em] text-violet-700">
-              Stage 5 member request
+              Member reimbursement request
             </p>
             <h2 className="mt-1 text-xl font-bold tracking-[-0.025em]">
               Submit the claim and receipt
@@ -353,7 +353,7 @@ export function ClaimSubmissionForm() {
           <div className="sm:col-span-2">
             <Field
               error={errors.recipientSuiAddress?.message}
-              hint="Immutable payout destination if a treasurer approves. No payment occurs in Stage 5."
+              hint="Immutable payout destination if a treasurer approves. Submission never triggers payment."
               id="recipientSuiAddress"
               label="Recipient Sui address"
             >

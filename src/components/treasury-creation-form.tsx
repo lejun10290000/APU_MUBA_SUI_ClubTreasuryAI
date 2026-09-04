@@ -110,7 +110,7 @@ export function TreasuryCreationForm() {
             ? error.message
             : live
               ? "The treasury could not be created."
-              : "The demo preview could not be created. Please try again.",
+              : "The sample preview could not be created. Please try again.",
       });
     }
   };
@@ -214,7 +214,7 @@ export function TreasuryCreationForm() {
                 Initial status
               </p>
               <p className="mt-1 text-sm font-bold">
-                {live ? "Saved workspace" : "Demo draft"}
+                {live ? "Saved workspace" : "Sample draft"}
               </p>
             </div>
           </div>
@@ -241,7 +241,7 @@ export function TreasuryCreationForm() {
             disabled={isSubmitting}
             type="submit"
           >
-            {live ? "Create treasury" : "Create demo treasury"}
+            {live ? "Create treasury" : "Create sample treasury"}
             <Icon className="size-4" name="arrow" />
           </button>
         </div>

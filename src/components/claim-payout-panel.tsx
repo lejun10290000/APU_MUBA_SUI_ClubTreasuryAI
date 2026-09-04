@@ -71,9 +71,7 @@ export function ClaimPayoutPanel({
       const packageId = requirePackageId(suiDeploymentConfig);
       const capObjectId = suiConfig.treasurerCapObjectId;
       if (!capObjectId) {
-        throw new Error(
-          "The Stage 6 TreasurerCap object ID is not configured.",
-        );
+        throw new Error("The TreasurerCap object ID is not configured.");
       }
       setError(null);
       const result = await executeApprovedClaimPayout(claim.id, {
@@ -196,7 +194,7 @@ export function ClaimPayoutView({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-emerald-800">
-            Stage 6 · Sui Testnet payout
+            Verified Sui Testnet payout
           </p>
           <h3 className="mt-2 text-lg font-bold text-emerald-950">
             {paid ? "Paid" : phaseLabel(phase)}
@@ -283,7 +281,7 @@ export function ClaimPayoutView({
             : phase === "failed" &&
                 error?.startsWith("Payout consistency check failed:")
               ? "No transaction was signed or submitted. Refresh the authoritative Treasury data before retrying this read-only pre-sign check."
-              : "The wallet must show and approve this exact Testnet USDC payout. The claim stays unpaid until its PayoutEvent is confirmed."}
+              : "The wallet must show and approve this exact Sui Testnet USDC payout. The claim stays unpaid until its PayoutEvent is confirmed."}
         </p>
       )}
     </section>

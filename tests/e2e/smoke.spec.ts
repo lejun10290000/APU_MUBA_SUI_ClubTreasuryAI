@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 
-test("Stage 2 product shell navigates from landing to treasurer dashboard", async ({
+test("professional product shell navigates from landing to treasurer dashboard", async ({
   page,
   request,
 }) => {
@@ -10,7 +10,7 @@ test("Stage 2 product shell navigates from landing to treasurer dashboard", asyn
     page.getByRole("heading", { name: /Club funds, clearly governed/i }),
   ).toBeVisible();
   await expect(
-    page.getByText(/Stage 3 complete · verified Sui Testnet treasury flow/i),
+    page.getByText(/Verified 0.10 USDC payout on Sui Testnet/i),
   ).toBeVisible();
 
   await page.getByRole("link", { name: "Open demo workspace" }).click();
@@ -19,11 +19,15 @@ test("Stage 2 product shell navigates from landing to treasurer dashboard", asyn
     page.getByRole("heading", { name: "Choose your workspace" }),
   ).toBeVisible();
 
-  await page.getByRole("link", { name: /Continue as treasurer/i }).click();
+  await expect(
+    page.getByRole("link", { name: /Submit a reimbursement claim/i }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: /Explore as treasurer/i }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(
     page.getByRole("heading", { name: "Good morning, Treasurer." }),
   ).toBeVisible();
+  await expect(page.getByText("YX", { exact: true })).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Web3 Workshop 2026" }),
   ).toBeVisible();
@@ -33,8 +37,8 @@ test("Stage 2 product shell navigates from landing to treasurer dashboard", asyn
     page.getByText(/No compatible Sui wallet was detected/i),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Treasury transactions unavailable" }),
-  ).toBeDisabled();
+    page.getByText(/Transactions remain locked until a compatible wallet/i),
+  ).toBeVisible();
 
   const response = await request.get("/api/health");
   expect(response.ok()).toBeTruthy();
@@ -73,9 +77,11 @@ test("login enables both treasurer and member workspaces", async ({ page }) => {
   await page.goto("/login");
 
   await expect(
-    page.getByRole("link", { name: /continue as treasurer/i }),
+    page.getByRole("link", { name: /explore as treasurer/i }),
   ).toHaveAttribute("href", "/dashboard");
-  await page.getByRole("link", { name: /member claim portal/i }).click();
+  await page
+    .getByRole("link", { name: /submit a reimbursement claim/i })
+    .click();
   await expect(page).toHaveURL(/\/member$/);
   await expect(
     page.getByRole("heading", { name: "Join your club treasury" }),
@@ -87,17 +93,17 @@ test("treasurer creates a validated session-only treasury preview", async ({
   page,
 }) => {
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: "Create demo treasury" }).click();
+  await page.getByRole("link", { name: "Create treasury" }).click();
   await expect(page).toHaveURL(/\/dashboard\/treasury\/new$/);
   await expect(
-    page.getByRole("heading", { name: "Create a demo treasury" }),
+    page.getByRole("heading", { name: "Create a sample treasury" }),
   ).toBeVisible();
 
   await page
     .getByLabel("Event or treasury name")
     .fill("Orientation Night 2026");
   await page.getByLabel("Total budget").fill("12.345");
-  await page.getByRole("button", { name: "Create demo treasury" }).click();
+  await page.getByRole("button", { name: "Create sample treasury" }).click();
   await expect(
     page.getByText("Enter a valid USDC amount with up to 2 decimal places."),
   ).toBeVisible();
@@ -105,7 +111,7 @@ test("treasurer creates a validated session-only treasury preview", async ({
 
   await page.getByLabel("Total budget").fill("1250.50");
   await expect(page.getByText("1250.50 USDC")).toBeVisible();
-  await page.getByRole("button", { name: "Create demo treasury" }).click();
+  await page.getByRole("button", { name: "Create sample treasury" }).click();
 
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(
@@ -125,7 +131,7 @@ test("A1 mock continuity carries treasury and budget into claims", async ({
     .getByLabel("Event or treasury name")
     .fill("Orientation Night 2026");
   await page.getByLabel("Total budget").fill("1500.00");
-  await page.getByRole("button", { name: "Create demo treasury" }).click();
+  await page.getByRole("button", { name: "Create sample treasury" }).click();
   await page.getByRole("link", { name: "Build budget" }).click();
 
   await page.getByRole("button", { name: "Add category" }).click();
@@ -137,7 +143,7 @@ test("A1 mock continuity carries treasury and budget into claims", async ({
       page.getByText(category, { exact: true }).first(),
     ).toBeVisible();
   }
-  await page.getByRole("button", { name: "Confirm mock budget" }).click();
+  await page.getByRole("button", { name: "Confirm sample budget" }).click();
 
   await expect(page).toHaveURL(/\/dashboard\/claims\/new$/);
   await expect(page.getByText("Orientation Night 2026")).toBeVisible();
@@ -145,7 +151,7 @@ test("A1 mock continuity carries treasury and budget into claims", async ({
   await expect(page.getByLabel("Budget category")).toHaveValue("food-4");
 });
 
-test("Stage 5 mock adapter runs receipt persistence through an unpaid human decision", async ({
+test("mock adapter runs receipt persistence through an unpaid human decision", async ({
   page,
 }) => {
   await page.goto("/dashboard/treasury/new");
@@ -153,7 +159,7 @@ test("Stage 5 mock adapter runs receipt persistence through an unpaid human deci
     .getByLabel("Event or treasury name")
     .fill("Orientation Night 2026");
   await page.getByLabel("Total budget").fill("1000.00");
-  await page.getByRole("button", { name: "Create demo treasury" }).click();
+  await page.getByRole("button", { name: "Create sample treasury" }).click();
   await page.getByRole("link", { name: "Build budget" }).click();
 
   await expect(
@@ -162,11 +168,11 @@ test("Stage 5 mock adapter runs receipt persistence through an unpaid human deci
   await page.getByLabel("Allocation", { exact: true }).last().fill("150.00");
   await expect(page.getByText("Under allocated")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Confirm mock budget" }),
+    page.getByRole("button", { name: "Confirm sample budget" }),
   ).toBeDisabled();
   await page.getByLabel("Allocation", { exact: true }).last().fill("200.00");
   await expect(page.getByText("Balanced")).toBeVisible();
-  await page.getByRole("button", { name: "Confirm mock budget" }).click();
+  await page.getByRole("button", { name: "Confirm sample budget" }).click();
 
   await expect(
     page.getByRole("heading", { name: "Submit a claim" }),
@@ -201,7 +207,7 @@ test("Stage 5 mock adapter runs receipt persistence through an unpaid human deci
     page.getByText("Decision saved · approved unpaid"),
   ).toBeVisible();
   const payoutPanel = page
-    .getByText("Stage 6 · Sui Testnet payout")
+    .getByText("Verified Sui Testnet payout")
     .locator("xpath=ancestor::section");
   await expect(payoutPanel).toContainText("0.10 USDC");
   await page.getByRole("button", { name: "Pay approved claim" }).click();
@@ -249,9 +255,7 @@ function pngFixture(payload: string): Buffer {
   ]);
 }
 
-test("remaining Stage 2 pages avoid mobile horizontal overflow", async ({
-  page,
-}) => {
+test("workflow pages avoid mobile horizontal overflow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
 
   for (const path of [
@@ -275,8 +279,10 @@ test("Testnet demo exposes explicit actions behind the deployment gate", async (
 }) => {
   await page.goto("/dashboard/testnet");
   await expect(
-    page.getByRole("heading", { name: "Sui Testnet treasury demo" }),
+    page.getByRole("heading", { name: "Sui Testnet execution and proof" }),
   ).toBeVisible();
+  await expect(page.getByText("0.10 USDC payout confirmed")).toBeVisible();
+  await page.getByText("Live transaction controls").click();
   await expect(
     page.getByText(/Nothing is submitted automatically/i),
   ).toBeVisible();

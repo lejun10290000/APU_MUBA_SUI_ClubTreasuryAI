@@ -15,8 +15,8 @@ This file is the **single source of truth for current implementation status, blo
 - Production claims: **live Supabase**
 - Production rehearsal AI mode: **deterministic mock** (`AI_MODE=mock`, live Gemini disabled)
 - Sui network: **Testnet**
-- Current blocker: **A1 live Supabase migration and controlled no-payout acceptance require owner authorization/action**
-- Current priority: **obtain green PR #29 review/CI for the post-link claim-approval lifecycle fix, then finish A1 production-safe acceptance without performing an unnecessary payout**
+- Current blocker: **PR #29 must integrate the merged professional UI refinement and pass exact-head review/CI**
+- Current priority: **resolve PR #29 against current `main` while preserving the professional UI and every A1/payment-safety invariant**
 
 ## Stage Progress
 
@@ -104,7 +104,7 @@ Stage 7D also verified recovery messaging, same-digest reconciliation, private r
 
 Package the already-working product for judging. **Do not add optional features unless they are required for submission.**
 
-### A1 workflow continuity — local implementation complete, production pending
+### A1 workflow continuity — production accepted, merge pending
 
 The `stage8/a1-workflow-continuity` branch now implements:
 
@@ -128,9 +128,9 @@ Playwright process: NOT a clean exit; Windows Next.js web-server cleanup hung an
 Move tests: NOT RUN locally; Sui CLI unavailable
 ```
 
-The A1 migration is **not applied** and controlled production acceptance is **not performed**. Production remains the verified Stage 7 baseline with deterministic mock AI (`AI_MODE=mock`, `GEMINI_LIVE_REQUESTS_ENABLED=false`).
+The owner-authorized A1 migration and controlled production acceptance completed without a payout. The persisted Treasury → Budget → Claims workflow, refresh persistence, and unlinked approval guard were accepted, while the existing Stage 7C Paid claim and digest remained unchanged. Production AI remains deterministic mock (`AI_MODE=mock`, `GEMINI_LIVE_REQUESTS_ENABLED=false`).
 
-Latest development: PR #29 received an independent lifecycle review. The branch now exposes current treasury-link state in claim review, keeps pre-link approval blocked, and lets the unchanged claim reach the guarded `decide_claim` transition after linking. The SQL unlinked guard and all Stage 6/7 payment safety boundaries remain unchanged. Local focused payment-safety verification passed 86/86 tests; full lint, typecheck, 232 unit tests, and production build passed. GitHub CI for this follow-up commit is pending push.
+Latest development: PR #30 merged the professional UI refinement into `main`, so PR #29 is being updated with a manual merge resolution. The resolution retains the refined presentation together with current treasury-link state, pre-link approval blocking, guarded `decide_claim` transition after linking, and all Stage 6/7 payment boundaries. No migration, acceptance claim, wallet signature, or payout is part of this conflict-resolution task.
 
 ### Stage 8A — Submission package
 
@@ -142,12 +142,13 @@ Latest development: PR #29 received an independent lifecycle review. The branch 
 - AI-development-tool declaration
 - copy-ready Devfolio package
 - screenshots/video placeholders until final assets exist
+- submission-facing UI and workflow polish with the verified Sui evidence visible from the dashboard
 
 ### Stage 8B — Demo video
 
-- record a 3–5 minute YouTube/Loom demo
+- final 4:21 narrated MP4 rendered locally; public YouTube/Loom upload remains pending
 - prefer the no-spend path using persisted Stage 7C proof for the payout result
-- retain backup screenshots/video locally
+- refreshed desktop/mobile/product-proof screenshots retained locally
 
 ### Stage 8C — Pitch
 
@@ -162,6 +163,20 @@ Latest development: PR #29 received an independent lifecycle review. The branch 
 - verify public repository and video link
 - verify all AI tools are declared
 - submit before **5 September 2026, 11:59 PM MYT**
+
+## Stage 8 UI Refinement Verification
+
+The submission-facing workflow was polished on 4 September 2026 without changing the frozen product scope or performing a live Gemini request, wallet signature, or Sui payout.
+
+- stale stage labels, generic profile initials, and contradictory deployment messages removed from user-facing pages
+- user-facing product terminology follows sentence case while preserving proper names such as AI, USDC, Sui, Sui Testnet, Supabase, and Gemini
+- mobile navigation changed to a complete two-row grid with no hidden routes
+- dashboard reduced to a clear four-step judge flow
+- verified Stage 7C payout proof surfaced in the dashboard, history, and Sui Testnet views
+- risky live transaction controls placed behind an explicit collapsed disclosure
+- Open Graph/Twitter sharing metadata and a generated social preview added
+- `pnpm lint`, `pnpm typecheck`, production build, **201/201 unit tests**, and **7/7 Playwright smoke tests** pass
+- desktop and 390 px mobile visual QA pass with no application console errors or warnings
 
 ## Locked Product Story
 
@@ -187,7 +202,7 @@ Before further work, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 8 — Submission and pitch
 STATUS: CURRENT
 COMPLETED STAGES: 0–7
-NEXT TASK: Owner-authorized A1 Supabase migration, read-only preservation checks, and controlled no-payout production acceptance. Do not perform a live payout.
+NEXT TASK: Verify the PR #29 merge-resolution head in GitHub CI and obtain owner review. Do not merge automatically or perform a live payout.
 ```
 
 ## Handoff Rule
