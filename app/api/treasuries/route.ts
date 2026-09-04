@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createAdminSupabaseClient } from "@/src/lib/supabase/admin";
 import type {
   BudgetCategoryRow,
+  TreasurySuiActivationRow,
   TreasuryRow,
 } from "@/src/lib/supabase/database.types";
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/src/lib/supabase/server";
 import { resolveVerifiedWalletIdentity } from "@/src/lib/supabase/wallet-principal";
 import { generateJoinCode } from "@/src/lib/treasuries/join-code";
+import { mapTreasurySuiActivation } from "@/src/lib/treasuries/activation-types";
 import {
   mapPersistedTreasuryWorkspace,
   type PersistedTreasuryRole,
@@ -54,7 +56,11 @@ export async function GET() {
     }
 
     const treasuryIds = treasuries.map((treasury) => treasury.id);
-    const [{ data: memberships, error: membershipError }, { data: categories, error: categoryError }] =
+    const [
+      { data: memberships, error: membershipError },
+      { data: categories, error: categoryError },
+      { data: activations, error: activationError },
+    ] =
       await Promise.all([
         client
           .from("treasury_members")
@@ -66,9 +72,14 @@ export async function GET() {
           .select("*")
           .in("treasury_id", treasuryIds)
           .order("created_at", { ascending: true }),
+        client
+          .from("treasury_sui_activations")
+          .select("*")
+          .in("treasury_id", treasuryIds),
       ]);
     if (membershipError) throw membershipError;
     if (categoryError) throw categoryError;
+    if (activationError) throw activationError;
 
     const roles = new Map(
       (memberships ?? []).map((membership) => [
@@ -86,6 +97,12 @@ export async function GET() {
         mapPersistedTreasuryWorkspace({
           treasury,
           role,
+          activation: (() => {
+            const row = (activations as TreasurySuiActivationRow[] | null)?.find(
+              (activation) => activation.treasury_id === treasury.id,
+            );
+            return row ? mapTreasurySuiActivation(row) : null;
+          })(),
           categories: (categories as BudgetCategoryRow[]).filter(
             (category) => category.treasury_id === treasury.id,
           ),

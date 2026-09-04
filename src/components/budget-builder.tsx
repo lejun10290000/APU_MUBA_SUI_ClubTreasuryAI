@@ -31,6 +31,8 @@ import { demoTreasuryStorageKey } from "@/src/domain/treasury-setup";
 import { demoTreasury } from "@/src/data/mock-dashboard";
 import { publicConfig } from "@/src/config/public-env";
 import type { PersistedTreasuryWorkspace } from "@/src/lib/treasuries/types";
+import type { PersistedBudgetCategory } from "@/src/lib/treasuries/types";
+import { TreasuryActivationPanel } from "./treasury-activation-panel";
 
 const defaultCategories: BudgetSetupFields["categories"] = [
   { name: "Venue", allocation: "500.00" },
@@ -160,11 +162,17 @@ export function BudgetBuilder() {
             }),
           },
         );
-        const result = (await response.json()) as { error?: string };
+        const result = (await response.json()) as {
+          categories?: PersistedBudgetCategory[];
+          error?: string;
+        };
         if (!response.ok) {
           throw new Error(result.error ?? "The budget could not be saved.");
         }
-        router.push(`/dashboard/claims/new?treasury=${requestedTreasuryId}`);
+        setPersistedTreasury({
+          ...persistedTreasury,
+          categories: result.categories ?? persistedTreasury.categories,
+        });
         return;
       }
       writeDemoSessionValue(demoBudgetStorageKey, budget);
@@ -355,6 +363,9 @@ export function BudgetBuilder() {
       </form>
 
       <aside className="space-y-5">
+        {live && persistedTreasury && persistedTreasury.categories.length > 0 && (
+          <TreasuryActivationPanel workspace={persistedTreasury} />
+        )}
         <section className="rounded-3xl bg-[var(--brand)] p-6 text-white shadow-[0_18px_50px_rgba(24,72,63,0.18)] sm:p-7">
           <div className="flex items-center justify-between">
             <span className="grid size-11 place-items-center rounded-2xl bg-white/10 text-[var(--accent)]">

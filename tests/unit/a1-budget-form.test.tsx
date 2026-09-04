@@ -88,8 +88,6 @@ describe("A1 live budget form", () => {
         }),
       );
     });
-    expect(state.push).toHaveBeenCalledWith(
-      `/dashboard/claims/new?treasury=${treasuryId}`,
-    );
+    expect(state.push).not.toHaveBeenCalled();
   });
 });
