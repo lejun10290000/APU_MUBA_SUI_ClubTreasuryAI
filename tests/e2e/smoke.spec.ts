@@ -69,6 +69,20 @@ test("dashboard remains usable at a mobile viewport", async ({ page }) => {
   expect(horizontalOverflow).toBe(false);
 });
 
+test("login enables both treasurer and member workspaces", async ({ page }) => {
+  await page.goto("/login");
+
+  await expect(
+    page.getByRole("link", { name: /continue as treasurer/i }),
+  ).toHaveAttribute("href", "/dashboard");
+  await page.getByRole("link", { name: /member claim portal/i }).click();
+  await expect(page).toHaveURL(/\/member$/);
+  await expect(
+    page.getByRole("heading", { name: "Join your club treasury" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Treasury join code")).toBeVisible();
+});
+
 test("treasurer creates a validated session-only treasury preview", async ({
   page,
 }) => {

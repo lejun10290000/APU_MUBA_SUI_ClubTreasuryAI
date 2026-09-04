@@ -21,9 +21,9 @@ export default function LoginPage() {
             A calmer way to run club finances.
           </h2>
           <p className="mt-6 max-w-md text-base leading-7 text-white/58">
-            Explore the treasurer workspace with deterministic mock product data,
-            plus a separate verified Sui Testnet treasury demo for real wallet
-            signatures and public blockchain evidence.
+            Explore the treasurer workspace with deterministic mock product
+            data, plus a separate verified Sui Testnet treasury demo for real
+            wallet signatures and public blockchain evidence.
           </p>
         </div>
         <p className="relative z-10 text-xs text-white/35">
@@ -61,7 +61,8 @@ export default function LoginPage() {
               <span className="min-w-0 flex-1">
                 <span className="block font-bold">Continue as treasurer</span>
                 <span className="mt-1 block text-sm text-[var(--muted)]">
-                  Review mock workflow data and access the real Testnet treasury demo
+                  Review mock workflow data and access the real Testnet treasury
+                  demo
                 </span>
               </span>
               <Icon
@@ -69,9 +70,9 @@ export default function LoginPage() {
                 name="arrow"
               />
             </Link>
-            <div
-              aria-disabled="true"
-              className="flex items-center gap-4 rounded-2xl border border-[var(--line)] bg-white/65 p-5 text-[var(--muted)]"
+            <Link
+              className="group flex items-center gap-4 rounded-2xl border border-[var(--line)] bg-white p-5 text-[var(--muted)] transition hover:-translate-y-0.5 hover:border-[var(--brand)]"
+              href="/member"
             >
               <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-slate-100">
                 <Icon className="size-6" name="receipt" />
@@ -81,13 +82,15 @@ export default function LoginPage() {
                   Member claim portal
                 </span>
                 <span className="mt-1 block text-sm">
-                  Coming in the claim workflow task
+                  Join a club treasury and submit a receipt-backed reimbursement
+                  claim.
                 </span>
               </span>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide">
-                Next
-              </span>
-            </div>
+              <Icon
+                className="size-5 text-[var(--brand)] transition group-hover:translate-x-1"
+                name="arrow"
+              />
+            </Link>
           </div>
           <div className="mt-8 flex items-start gap-3 rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-900">
             <Icon className="mt-0.5 size-4 shrink-0" name="shield" />
