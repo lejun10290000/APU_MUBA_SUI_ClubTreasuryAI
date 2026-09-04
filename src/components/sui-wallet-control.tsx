@@ -139,13 +139,10 @@ export function SuiWalletControl() {
             ))}
           </div>
         )}
-        <button
-          className="mt-3 w-full cursor-not-allowed rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500"
-          disabled
-          type="button"
-        >
-          Treasury transactions unavailable
-        </button>
+        <p className="mt-3 border-t border-[var(--line)] pt-3 text-xs leading-5 text-[var(--muted)]">
+          Transactions remain locked until a compatible wallet is connected on
+          Sui Testnet.
+        </p>
         {error ? (
           <p role="alert" className="mt-2 text-xs text-red-700">
             {error}

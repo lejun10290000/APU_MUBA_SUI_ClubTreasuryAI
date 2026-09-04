@@ -13,6 +13,7 @@ import {
   demoClaims,
   demoTreasury,
 } from "@/src/data/mock-dashboard";
+import { verifiedDemoEvidence } from "@/src/data/verified-demo";
 
 export const metadata: Metadata = {
   title: "Treasurer dashboard · ClubTreasury AI",
@@ -47,7 +48,7 @@ export default function DashboardPage() {
     {
       label: "Available balance",
       value: formatUsdcMinor(remainingMinor).replace(" USDC", ""),
-      detail: "USDC · mock balance",
+      detail: "USDC · sample balance",
       icon: "wallet",
       tone: "bg-emerald-50 text-emerald-700",
     },
@@ -72,60 +73,55 @@ export default function DashboardPage() {
       <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-violet-700">
-            <Icon className="size-3.5" name="sparkles" /> Deterministic demo
-            workspace
+            <Icon className="size-3.5" name="sparkles" /> Guided demo workspace
           </div>
           <h1 className="text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">
             Good morning, Treasurer.
           </h1>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Here is the mock treasury snapshot for APU Blockchain Club.
+            Here is the sample treasury snapshot for APU Blockchain Club.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-xs text-[var(--muted)]">
-            <span className="font-semibold text-[var(--ink)]">
-              Stage 2 shell
-            </span>{" "}
-            · refreshed from fixtures
-          </div>
-          <Link
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-xs font-bold text-white shadow-[0_8px_20px_rgba(29,91,79,0.16)] transition hover:-translate-y-0.5 hover:bg-[var(--brand-deep)]"
-            href="/dashboard/treasury/new"
-          >
-            Create demo treasury
-            <Icon className="size-3.5" name="arrow" />
-          </Link>
+        <div className="rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-xs text-[var(--muted)]">
+          <span className="font-semibold text-[var(--ink)]">Sample data</span> ·
+          safe to explore
         </div>
       </section>
 
       <DemoTreasuryNotice />
 
       <section
-        aria-label="Stage 2 workflow"
-        className="mt-6 grid gap-3 md:grid-cols-3"
+        aria-label="Guided demo workflow"
+        className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
       >
         {[
+          {
+            href: "/dashboard/treasury/new",
+            icon: "building" as const,
+            eyebrow: "Step 1",
+            title: "Create treasury",
+            detail: "Set the event and spending limit.",
+          },
           {
             href: "/dashboard/budget",
             icon: "wallet" as const,
             eyebrow: "Step 2",
-            title: "Build category budget",
+            title: "Set category budget",
             detail: "Balance deterministic allocations.",
           },
           {
             href: "/dashboard/claims/new",
             icon: "receipt" as const,
             eyebrow: "Step 3",
-            title: "Submit demo claim",
+            title: "Submit claim",
             detail: "Add request and receipt facts.",
           },
           {
             href: "/dashboard/history",
             icon: "history" as const,
             eyebrow: "Step 4",
-            title: "View mock history",
-            detail: "See decisions without fake digests.",
+            title: "Verify evidence",
+            detail: "Compare sample activity with Sui proof.",
           },
         ].map((action) => (
           <Link
@@ -201,7 +197,7 @@ export default function DashboardPage() {
               </h2>
             </div>
             <span className="w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-emerald-700">
-              Mock · active
+              Sample · active
             </span>
           </div>
           <div className="mt-6 flex items-end justify-between gap-4">
@@ -275,14 +271,14 @@ export default function DashboardPage() {
             No automatic payouts.
           </h2>
           <p className="mt-3 text-sm leading-6 text-white/58">
-            AI recommendations stay advisory. A treasurer must review and
-            approve every claim before later-stage wallet signing.
+            AI recommendations stay advisory. An approved claim can only be paid
+            after the authorized treasurer signs the exact Testnet transaction.
           </p>
           <div className="mt-7 space-y-3 border-t border-white/10 pt-6">
             {[
-              "Mock AI only",
+              "Deterministic financial rules",
               "Human final decision",
-              "Sui execution not connected",
+              "Explicit Sui wallet signature",
             ].map((item) => (
               <div
                 className="flex items-center gap-3 text-sm text-white/72"
@@ -295,6 +291,15 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+          <a
+            className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-[var(--accent)] transition hover:text-white"
+            href={verifiedDemoEvidence.explorerUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            View verified payout
+            <Icon className="size-4" name="arrow" />
+          </a>
         </article>
       </section>
 
@@ -311,7 +316,7 @@ export default function DashboardPage() {
               </h2>
             </div>
             <span className="text-xs font-semibold text-[var(--brand)]">
-              Mock submissions
+              Sample submissions
             </span>
           </div>
           <div className="divide-y divide-[var(--line)]">

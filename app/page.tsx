@@ -1,12 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "@/src/components/icon";
 import { MarketingHeader } from "@/src/components/marketing-header";
+import { verifiedDemoEvidence } from "@/src/data/verified-demo";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const steps = [
   {
     number: "01",
     title: "Describe the budget",
-    copy: "Turn a plain-language event plan into structured categories using deterministic mock AI during development.",
+    copy: "Gemini turns a plain-language event plan into structured categories for the treasurer to review.",
   },
   {
     number: "02",
@@ -16,7 +22,7 @@ const steps = [
   {
     number: "03",
     title: "Approve with confidence",
-    copy: "A human approves first. The verified Testnet demo then asks the connected treasurer wallet to sign the Sui transaction explicitly.",
+    copy: "A human approves first. The verified Testnet flow then asks the connected treasurer wallet to sign the Sui transaction explicitly.",
   },
 ];
 
@@ -56,8 +62,15 @@ export default function Home() {
               </Link>
             </div>
             <p className="mt-5 flex items-center gap-2 text-xs text-white/42">
-              <span className="size-1.5 rounded-full bg-emerald-400" /> Stage 3
-              complete · verified Sui Testnet treasury flow
+              <span className="size-1.5 rounded-full bg-emerald-400" />
+              <a
+                className="transition hover:text-white"
+                href={verifiedDemoEvidence.explorerUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Verified {verifiedDemoEvidence.payout} payout on Sui Testnet
+              </a>
             </p>
           </div>
 
@@ -69,7 +82,7 @@ export default function Home() {
                   Treasury overview
                 </span>
                 <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-800">
-                  Mock
+                  Sample
                 </span>
               </div>
               <div className="rounded-2xl bg-[var(--brand)] p-5 text-white sm:p-6">

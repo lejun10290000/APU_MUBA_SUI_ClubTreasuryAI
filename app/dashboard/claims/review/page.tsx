@@ -19,7 +19,7 @@ export default function ClaimReviewPage() {
       <section className="mb-7 mt-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-amber-800">
-            <Icon className="size-3.5" name="shield" /> Stage 5 · human review
+            <Icon className="size-3.5" name="shield" /> Human review
           </div>
           <h1 className="text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">
             Review the claim

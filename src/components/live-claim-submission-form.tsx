@@ -12,7 +12,7 @@ import {
 import { ensureWalletIdentity } from "@/src/lib/sui/wallet-identity";
 import type { LiveClaimWorkspace } from "@/src/lib/claims/live-workspace";
 
-const DEFAULT_SUBMITTER_NAME = "Stage6 Demo Member";
+const DEFAULT_SUBMITTER_NAME = "Demo club member";
 
 export function LiveClaimSubmissionForm() {
   const router = useRouter();
@@ -21,13 +21,13 @@ export function LiveClaimSubmissionForm() {
   const [workspace, setWorkspace] = useState<LiveClaimWorkspace | null>(null);
   const [categoryReference, setCategoryReference] = useState("");
   const [submitterName, setSubmitterName] = useState(DEFAULT_SUBMITTER_NAME);
-  const [merchant, setMerchant] = useState("Stage 6 Acceptance Merchant");
+  const [merchant, setMerchant] = useState("Campus Print Shop");
   const [description, setDescription] = useState(
-    "Stage 6 live payout acceptance claim",
+    "Event banners for the Web3 workshop",
   );
   const [requestedAmount, setRequestedAmount] = useState("0.10");
   const [receiptReference, setReceiptReference] = useState(
-    () => `STAGE6-${Date.now()}`,
+    () => `DEMO-${Date.now()}`,
   );
   const [recipient, setRecipient] = useState("");
   const [receipt, setReceipt] = useState<File | null>(null);

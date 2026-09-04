@@ -146,7 +146,7 @@ PR #20 merged Stage 6 into `main` at `61fb9c86f5077f9813add6dc94aa69b311aaf4d7`.
 
 Exit criteria: **VERIFIED** — the full payment workflow works end to end, retry ambiguity cannot blindly create a replacement transaction, paid/budget state follows verified on-chain evidence, and AI cannot bypass human approval.
 
-## Stage 7 — Demo hardening and deployment — CURRENT
+## Stage 7 — Demo hardening and deployment — COMPLETE
 
 Goal: make the verified core MVP reliable under hackathon conditions and accessible as a deployed demo.
 
@@ -161,17 +161,19 @@ Required work:
 - [x] verify paid-state refresh/reconciliation remains idempotent after deployment
 - [x] prepare backup evidence/runbook and an owner screenshot/video capture checklist
 - [x] verify repository/secret safety before submission
-- [ ] pass exact-head Stage 7D PR CI and receive owner merge approval
+- [x] pass exact-head Stage 7D PR CI and receive owner merge approval
 
 Exit criteria: **a public deployment is reachable and the full demo can be repeated reliably from known state with understandable recovery paths, sufficient Testnet assets, and backup evidence.**
 
-Stage 7D repository work and local exit gates pass. Stage 7 remains CURRENT until the final Stage 7D pull request passes exact-head CI and is merged to `main` by the owner.
+Stage 7D was merged to `main` and exact-head GitHub Actions run #140 passed. The deployed workflow, recovery paths, public proof, and repository security checks are verified.
 
-## Stage 8 — Submission and pitch — NOT STARTED
+## Stage 8 — Submission and pitch — CURRENT
 
 Goal: satisfy all official requirements and optimize both Sui pitches.
 
 Required work includes final README/team/AI disclosures, screenshots/live URL, 3–5 minute video, Devfolio submission, and rehearsed Payments & Stablecoins plus AI × Sui pitches.
+
+Submission-facing UI refinement is complete. The final narrated MP4 is rendered locally; public video upload, pitch preparation, and final Devfolio submission remain.
 
 ## Stage update rule
 

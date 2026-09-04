@@ -11,6 +11,7 @@ const navigation: Array<{
   href: string;
   icon: IconName;
   label: string;
+  mobileLabel?: string;
   match: string;
 }> = [
   { href: "/dashboard", icon: "grid", label: "Overview", match: "/dashboard" },
@@ -41,7 +42,8 @@ const navigation: Array<{
   {
     href: "/dashboard/testnet",
     icon: "shield",
-    label: "Testnet demo",
+    label: "Sui Testnet",
+    mobileLabel: "Sui proof",
     match: "/dashboard/testnet",
   },
 ];
@@ -89,11 +91,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         </nav>
         <div className="mt-auto rounded-2xl border border-[var(--accent)]/20 bg-[var(--accent)]/8 p-4">
           <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
-            <Icon className="size-4" name="shield" /> Safety mode
+            <Icon className="size-4" name="shield" /> Human-controlled
           </div>
           <p className="text-xs leading-5 text-white/55">
-            Wallet connection is available on Testnet. Contract transactions
-            stay disabled until a real deployment is configured.
+            Sample pages never move funds. Every Sui Testnet transaction needs
+            an explicit wallet signature.
           </p>
         </div>
       </aside>
@@ -109,11 +111,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             </Link>
             <div className="hidden items-center gap-2 text-sm text-[var(--muted)] lg:flex">
               <span className="size-2 rounded-full bg-emerald-500" />
-              AI mode: deterministic mock
+              AI: deterministic demo mode
             </div>
             <div className="flex items-center gap-3">
               <SuiWalletControl />
-              <span className="grid size-9 place-items-center rounded-full bg-[var(--brand)] text-sm font-bold text-white">
+              <span className="hidden size-9 place-items-center rounded-full bg-[var(--brand)] text-sm font-bold text-white sm:grid">
                 YX
               </span>
               <span className="hidden text-sm font-semibold sm:inline">
@@ -123,16 +125,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           </div>
           <nav
             aria-label="Mobile treasurer navigation"
-            className="flex gap-1 overflow-x-auto border-t border-[var(--line)] px-4 py-2 lg:hidden"
+            className="grid grid-cols-3 gap-1 border-t border-[var(--line)] px-3 py-2 lg:hidden"
           >
             {navigation.map((item) => (
               <Link
-                className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${isActive(item.match) ? "bg-[var(--brand)] text-white" : "text-[var(--muted)]"}`}
+                className={`flex min-h-10 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-[11px] font-semibold ${isActive(item.match) ? "bg-[var(--brand)] text-white" : "text-[var(--muted)] hover:bg-white"}`}
                 href={item.href}
                 key={item.label}
               >
                 <Icon className="size-4" name={item.icon} />
-                {item.label}
+                {item.mobileLabel ?? item.label}
               </Link>
             ))}
           </nav>

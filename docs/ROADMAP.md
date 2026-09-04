@@ -158,14 +158,16 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 - [x] Document implemented Gemini product AI for judges
 - [x] Add live demo URL + screenshot/video placeholders
 - [x] Create copy-ready Devfolio submission package
+- [x] Professionalize the judging workflow, mobile navigation, and public Sui proof presentation
 - [ ] Verify public repo + no secrets after Stage 8A docs merge
 
-### 8B — Demo video — NOT STARTED
+### 8B — Demo video — IN PROGRESS
 
-- [ ] Finalize 3–5 minute script/storyboard
-- [ ] Capture safe production screenshots/video
-- [ ] Show existing Stage 7C payout/explorer proof without unnecessary second payout
-- [ ] Record/upload YouTube or Loom video
+- [x] Finalize 3–5 minute script/storyboard
+- [x] Capture safe production screenshots/video
+- [x] Show existing Stage 7C payout/explorer proof without unnecessary second payout
+- [x] Render final 4:21 narrated MP4 locally
+- [ ] Upload the final video to YouTube or Loom
 - [ ] Add final video URL to README and submission package
 
 ### 8C — Pitch — NOT STARTED
@@ -198,11 +200,11 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 
 ## Official Team
 
-| Name | Role | University | GitHub |
-| --- | --- | --- | --- |
-| CHUA LE JUN | Developer | UTM Kuala Lumpur | `lejun10290000` |
-| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le` |
-| LAI YAN QI | Presenter | UTM Kuala Lumpur | `YANKEY-CODE` |
+| Name          | Role      | University       | GitHub          |
+| ------------- | --------- | ---------------- | --------------- |
+| CHUA LE JUN   | Developer | UTM Kuala Lumpur | `lejun10290000` |
+| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le`         |
+| LAI YAN QI    | Presenter | UTM Kuala Lumpur | `YANKEY-CODE`   |
 
 ## Optional — Only If Core Demo Is Stable
 

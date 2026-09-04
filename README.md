@@ -318,17 +318,17 @@ Every teammate must declare any additional AI tool they personally used before f
 
 ## Team Members
 
-| Name | Role | University | GitHub |
-| --- | --- | --- | --- |
-| **CHUA LE JUN** | Developer | UTM Kuala Lumpur | [`lejun10290000`](https://github.com/lejun10290000) |
-| **LE YONG XIANG** | Developer | UTM Kuala Lumpur | [`yx-le`](https://github.com/yx-le) |
-| **LAI YAN QI** | Presenter | UTM Kuala Lumpur | [`YANKEY-CODE`](https://github.com/YANKEY-CODE) |
+| Name              | Role      | University       | GitHub                                              |
+| ----------------- | --------- | ---------------- | --------------------------------------------------- |
+| **CHUA LE JUN**   | Developer | UTM Kuala Lumpur | [`lejun10290000`](https://github.com/lejun10290000) |
+| **LE YONG XIANG** | Developer | UTM Kuala Lumpur | [`yx-le`](https://github.com/yx-le)                 |
+| **LAI YAN QI**    | Presenter | UTM Kuala Lumpur | [`YANKEY-CODE`](https://github.com/YANKEY-CODE)     |
 
 ## Demo Video
 
-**Stage 8B TODO:** add the final 3–5 minute YouTube/Loom URL here after recording.
+The final 4:21 narrated demo MP4 has been rendered and visually verified locally. **Stage 8B TODO:** upload it to YouTube or Loom and add the public URL here.
 
-The demo should use the existing verified Stage 7C payout evidence instead of performing an unnecessary second payment solely for recording.
+The demo uses the existing verified Stage 7C payout evidence instead of performing an unnecessary second payment solely for recording.
 
 ## Limitations / Future Work
 

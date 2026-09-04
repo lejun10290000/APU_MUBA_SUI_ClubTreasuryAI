@@ -70,7 +70,7 @@ export function TreasuryCreationForm() {
 
       setError("root", {
         type: "validation",
-        message: "The demo preview could not be created. Please try again.",
+        message: "The sample preview could not be created. Please try again.",
       });
     }
   };
@@ -172,7 +172,7 @@ export function TreasuryCreationForm() {
               <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
                 Initial status
               </p>
-              <p className="mt-1 text-sm font-bold">Demo draft</p>
+              <p className="mt-1 text-sm font-bold">Sample draft</p>
             </div>
           </div>
         </div>
@@ -198,7 +198,7 @@ export function TreasuryCreationForm() {
             disabled={isSubmitting}
             type="submit"
           >
-            Create demo treasury
+            Create sample treasury
             <Icon className="size-4" name="arrow" />
           </button>
         </div>
