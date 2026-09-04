@@ -94,7 +94,7 @@ describe("live claim submission authentication ordering", () => {
       expect(state.ensureWalletIdentity).toHaveBeenCalledWith({
         signer: state.signer,
         walletAddress: state.account.address,
-        displayName: "Stage6 Demo Member",
+        displayName: "Demo club member",
       });
     });
 

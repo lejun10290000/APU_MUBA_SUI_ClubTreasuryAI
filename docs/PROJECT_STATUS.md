@@ -94,11 +94,11 @@ Stage 7D also verified recovery messaging, same-digest reconciliation, private r
 
 ## Official Team
 
-| Name | Role | University | GitHub |
-| --- | --- | --- | --- |
-| CHUA LE JUN | Developer | UTM Kuala Lumpur | `lejun10290000` |
-| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le` |
-| LAI YAN QI | Presenter | UTM Kuala Lumpur | `YANKEY-CODE` |
+| Name          | Role      | University       | GitHub          |
+| ------------- | --------- | ---------------- | --------------- |
+| CHUA LE JUN   | Developer | UTM Kuala Lumpur | `lejun10290000` |
+| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le`         |
+| LAI YAN QI    | Presenter | UTM Kuala Lumpur | `YANKEY-CODE`   |
 
 ## Stage 8 Current Goal
 
@@ -114,12 +114,13 @@ Package the already-working product for judging. **Do not add optional features 
 - AI-development-tool declaration
 - copy-ready Devfolio package
 - screenshots/video placeholders until final assets exist
+- submission-facing UI and workflow polish with the verified Sui evidence visible from the dashboard
 
 ### Stage 8B — Demo video
 
-- record a 3–5 minute YouTube/Loom demo
+- final 4:21 narrated MP4 rendered locally; public YouTube/Loom upload remains pending
 - prefer the no-spend path using persisted Stage 7C proof for the payout result
-- retain backup screenshots/video locally
+- refreshed desktop/mobile/product-proof screenshots retained locally
 
 ### Stage 8C — Pitch
 
@@ -134,6 +135,20 @@ Package the already-working product for judging. **Do not add optional features 
 - verify public repository and video link
 - verify all AI tools are declared
 - submit before **5 September 2026, 11:59 PM MYT**
+
+## Stage 8 UI Refinement Verification
+
+The submission-facing workflow was polished on 4 September 2026 without changing the frozen product scope or performing a live Gemini request, wallet signature, or Sui payout.
+
+- stale stage labels, generic profile initials, and contradictory deployment messages removed from user-facing pages
+- user-facing product terminology follows sentence case while preserving proper names such as AI, USDC, Sui, Sui Testnet, Supabase, and Gemini
+- mobile navigation changed to a complete two-row grid with no hidden routes
+- dashboard reduced to a clear four-step judge flow
+- verified Stage 7C payout proof surfaced in the dashboard, history, and Sui Testnet views
+- risky live transaction controls placed behind an explicit collapsed disclosure
+- Open Graph/Twitter sharing metadata and a generated social preview added
+- `pnpm lint`, `pnpm typecheck`, production build, **201/201 unit tests**, and **7/7 Playwright smoke tests** pass
+- desktop and 390 px mobile visual QA pass with no application console errors or warnings
 
 ## Locked Product Story
 

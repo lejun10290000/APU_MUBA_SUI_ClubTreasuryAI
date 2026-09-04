@@ -111,7 +111,7 @@ export async function executeAndConfirmTestnetTransaction({
     if (cause instanceof SuiIntegrationError) throw cause;
     throw new SuiIntegrationError(
       "TRANSACTION_CONFIRMATION_FAILED",
-      "The transaction was submitted but Testnet confirmation could not be verified.",
+      "The transaction was submitted but Sui Testnet confirmation could not be verified.",
       "on-chain",
       { cause },
     );

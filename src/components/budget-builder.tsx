@@ -103,7 +103,7 @@ export function BudgetBuilder() {
         message:
           error instanceof Error
             ? error.message
-            : "The mock budget could not be confirmed.",
+            : "The sample budget could not be confirmed.",
       });
     }
   };
@@ -237,7 +237,7 @@ export function BudgetBuilder() {
             disabled={!preview.canConfirm || isSubmitting}
             type="submit"
           >
-            Confirm mock budget
+            Confirm sample budget
             <Icon className="size-4" name="arrow" />
           </button>
         </div>

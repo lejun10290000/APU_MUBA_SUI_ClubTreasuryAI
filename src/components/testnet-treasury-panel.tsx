@@ -31,6 +31,12 @@ import { isTestnetAccount } from "@/src/lib/sui/wallet-status";
 
 const STORAGE_KEY = "clubtreasury.testnet-demo.v1";
 const CATEGORY = "events";
+const stepLabels: Record<TestnetDemoStep, string> = {
+  create: "Treasury creation",
+  fund: "Deposit",
+  allocate: "Allocation",
+  payout: "Payout",
+};
 
 type CoinMetadata = { decimals: number; symbol: string; name: string };
 type CoinRow = { objectId: string; balance: string };
@@ -38,7 +44,7 @@ type CoinRow = { objectId: string; balance: string };
 function errorMessage(error: unknown) {
   if (error instanceof SuiIntegrationError) return error.message;
   if (error instanceof Error && error.message.trim()) return error.message;
-  return "The Testnet request did not complete.";
+  return "The Sui Testnet request did not complete.";
 }
 
 function short(value: string) {
@@ -125,7 +131,7 @@ export function TestnetTreasuryPanel() {
       setSourceCoinId(
         (current) => current || coinResult.objects[0]?.objectId || "",
       );
-      setNotice("Testnet metadata and wallet-owned USDC coins refreshed.");
+      setNotice("Sui Testnet metadata and wallet-owned USDC coins refreshed.");
     } catch (caught) {
       setError(errorMessage(caught));
     } finally {
@@ -187,7 +193,7 @@ export function TestnetTreasuryPanel() {
         digests: { ...current.digests, [step]: confirmed.digest },
       }));
       setLastTransaction(confirmed);
-      setNotice(`${step} confirmed on Sui Testnet.`);
+      setNotice(`${stepLabels[step]} confirmed on Sui Testnet.`);
     } catch (caught) {
       setError(errorMessage(caught));
       setNotice(null);
@@ -200,7 +206,7 @@ export function TestnetTreasuryPanel() {
     if (!metadata) {
       throw new SuiIntegrationError(
         "COIN_METADATA_UNAVAILABLE",
-        "Load Testnet coin metadata before entering transaction amounts.",
+        "Load Sui Testnet coin metadata before entering transaction amounts.",
         "on-chain",
       );
     }
@@ -272,10 +278,10 @@ export function TestnetTreasuryPanel() {
           <h2 className="text-lg font-bold">Safety and deployment status</h2>
           <div className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
             <p className={connected ? "text-emerald-700" : "text-amber-800"}>
-              Wallet: {connected ? short(account.address) : "not connected"}
+              Wallet: {connected ? short(account.address) : "Not connected"}
             </p>
             <p className={onTestnet ? "text-emerald-700" : "text-amber-800"}>
-              Network: {onTestnet ? "Sui Testnet" : "switch to Testnet"}
+              Network: {onTestnet ? "Sui Testnet" : "Switch to Sui Testnet"}
             </p>
             <p
               className={
@@ -285,7 +291,7 @@ export function TestnetTreasuryPanel() {
               Package:{" "}
               {deploymentReady
                 ? short(suiDeploymentConfig.packageId!)
-                : "not configured"}
+                : "Not configured"}
             </p>
           </div>
           <p className="mt-4 rounded-xl bg-amber-50 p-3 text-xs leading-5 text-amber-900">
@@ -298,7 +304,7 @@ export function TestnetTreasuryPanel() {
               className="mt-3 text-sm font-semibold text-amber-900"
             >
               Deployment gate active: transaction buttons remain disabled until
-              a verified Testnet package ID is configured.
+              a verified Sui Testnet package ID is configured.
             </p>
           ) : null}
         </article>
@@ -307,7 +313,7 @@ export function TestnetTreasuryPanel() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold">
-                1. Load real Testnet USDC data
+                1. Load Sui Testnet USDC data
               </h2>
               <p className="mt-1 text-xs text-[var(--muted)]">
                 Read-only RPC request; no signature.
@@ -319,7 +325,7 @@ export function TestnetTreasuryPanel() {
               onClick={loadTestnetData}
               type="button"
             >
-              {busy === "data" ? "Loading…" : "Load Testnet data"}
+              {busy === "data" ? "Loading…" : "Load Sui Testnet data"}
             </button>
           </div>
           <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
@@ -525,7 +531,7 @@ export function TestnetTreasuryPanel() {
                   className="flex items-center justify-between gap-3"
                   key={step}
                 >
-                  <span className="capitalize">{step}</span>
+                  <span>{stepLabels[step]}</span>
                   {href ? (
                     <a
                       className="font-semibold text-[var(--brand)] underline"
@@ -533,7 +539,7 @@ export function TestnetTreasuryPanel() {
                       rel="noreferrer"
                       target="_blank"
                     >
-                      View confirmed tx
+                      View confirmed transaction
                     </a>
                   ) : (
                     <span className="text-[var(--muted)]">Not submitted</span>

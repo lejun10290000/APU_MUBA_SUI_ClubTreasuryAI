@@ -5,7 +5,7 @@ export function parseCoinAmount(value: string, decimals: number) {
   if (!Number.isSafeInteger(decimals) || decimals < 0 || decimals > 18) {
     throw new SuiIntegrationError(
       "COIN_METADATA_UNAVAILABLE",
-      "The coin decimals returned by Testnet are not supported.",
+      "The coin decimals returned by Sui Testnet are not supported.",
       "on-chain",
     );
   }
