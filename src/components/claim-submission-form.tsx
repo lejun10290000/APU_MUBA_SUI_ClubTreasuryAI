@@ -41,6 +41,8 @@ interface Stage5ClaimFields {
   receipt: FileList;
 }
 
+const MOCK_PERSISTED_TREASURY_ID = "00000000-0000-4000-8000-000000000002";
+
 export function ClaimSubmissionForm() {
   const router = useRouter();
   const dAppKit = useDAppKit();
@@ -144,6 +146,7 @@ export function ClaimSubmissionForm() {
       const payload = {
         externalReference: requestReference,
         workspace: {
+          treasuryId: MOCK_PERSISTED_TREASURY_ID,
           externalReference: treasury.id,
           name: treasury.name,
           totalBudgetMinor: treasury.totalBudgetMinor,
@@ -222,6 +225,10 @@ export function ClaimSubmissionForm() {
         noValidate
         onSubmit={handleSubmit(submitClaim)}
       >
+        <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950">
+          <p className="font-bold">Selected treasury</p>
+          <p className="mt-1">{treasury.name}</p>
+        </div>
         <div className="flex items-start gap-4 border-b border-[var(--line)] pb-6">
           <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-violet-50 text-violet-700">
             <Icon className="size-5" name="receipt" />

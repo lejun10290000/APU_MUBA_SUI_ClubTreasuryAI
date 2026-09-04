@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TreasuryCreationForm } from "@/src/components/treasury-creation-form";
 import { Icon } from "@/src/components/icon";
+import { publicConfig } from "@/src/config/public-env";
 
 export const metadata: Metadata = {
-  title: "Create demo treasury · ClubTreasury AI",
+  title: "Create treasury · ClubTreasury AI",
 };
 
 export default function NewTreasuryPage() {
+  const live = publicConfig.claimDataMode === "live";
   return (
     <main className="mx-auto max-w-[1280px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10">
       <Link
@@ -19,18 +21,21 @@ export default function NewTreasuryPage() {
       <section className="mb-7 mt-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-700">
-            <Icon className="size-3.5" name="building" /> Stage 2 · mock setup
+            <Icon className="size-3.5" name="building" />{" "}
+            {live ? "Stage 8 · persisted setup" : "Stage 2 · mock setup"}
           </div>
           <h1 className="text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">
-            Create a demo treasury
+            {live ? "Create a treasury" : "Create a demo treasury"}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
             Define the event and total spending limit before adding budget
-            categories in the next Stage 2 flow.
+            categories in the next step.
           </p>
         </div>
         <span className="w-fit rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-xs font-semibold text-[var(--muted)]">
-          Step 1 of 1 · local preview
+          {live
+            ? "Step 1 of 2 · saved workspace"
+            : "Step 1 of 1 · local preview"}
         </span>
       </section>
       <TreasuryCreationForm />

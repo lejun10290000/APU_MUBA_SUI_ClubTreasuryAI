@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { ZodError } from "zod";
 import { Icon } from "./icon";
@@ -29,6 +29,8 @@ import {
 import { treasurySchema } from "@/src/domain/schemas";
 import { demoTreasuryStorageKey } from "@/src/domain/treasury-setup";
 import { demoTreasury } from "@/src/data/mock-dashboard";
+import { publicConfig } from "@/src/config/public-env";
+import type { PersistedTreasuryWorkspace } from "@/src/lib/treasuries/types";
 
 const defaultCategories: BudgetSetupFields["categories"] = [
   { name: "Venue", allocation: "500.00" },
@@ -38,11 +40,17 @@ const defaultCategories: BudgetSetupFields["categories"] = [
 
 export function BudgetBuilder() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedTreasuryId = searchParams.get("treasury");
+  const live = publicConfig.claimDataMode === "live";
   const sessionTreasury = useDemoSessionValue(
     demoTreasuryStorageKey,
     treasurySchema,
   );
-  const treasury = sessionTreasury ?? demoTreasury;
+  const mockTreasury = sessionTreasury ?? demoTreasury;
+  const [persistedTreasury, setPersistedTreasury] =
+    useState<PersistedTreasuryWorkspace | null>(null);
+  const [loadingTreasury, setLoadingTreasury] = useState(live);
   const {
     register,
     control,
@@ -57,6 +65,63 @@ export function BudgetBuilder() {
     control,
     name: "categories",
   });
+  useEffect(() => {
+    if (!live) return;
+    let cancelled = false;
+    async function loadTreasury() {
+      setLoadingTreasury(true);
+      clearErrors("root");
+      try {
+        if (!requestedTreasuryId) {
+          throw new Error(
+            "Choose a persisted treasury before building its budget.",
+          );
+        }
+        const response = await fetch("/api/treasuries", { cache: "no-store" });
+        const result = (await response.json()) as {
+          treasuries?: PersistedTreasuryWorkspace[];
+          error?: string;
+        };
+        const selected = result.treasuries?.find(
+          (treasury) => treasury.id === requestedTreasuryId,
+        );
+        if (!response.ok || !selected) {
+          throw new Error(
+            result.error ?? "The selected treasury is not accessible.",
+          );
+        }
+        if (!cancelled) setPersistedTreasury(selected);
+      } catch (error) {
+        if (!cancelled) {
+          setPersistedTreasury(null);
+          setError("root", {
+            type: "load",
+            message:
+              error instanceof Error
+                ? error.message
+                : "The selected treasury could not be loaded.",
+          });
+        }
+      } finally {
+        if (!cancelled) setLoadingTreasury(false);
+      }
+    }
+    void loadTreasury();
+    return () => {
+      cancelled = true;
+    };
+  }, [clearErrors, live, requestedTreasuryId, setError]);
+  const treasury = live
+    ? {
+        id: persistedTreasury?.id ?? "unavailable",
+        name: persistedTreasury?.name ?? "Treasury unavailable",
+        currency: "USDC" as const,
+        totalBudgetMinor: asMinorAmount(
+          persistedTreasury?.totalBudgetMinor ?? 0,
+        ),
+        status: "draft" as const,
+      }
+    : mockTreasury;
   const watchedCategories = useWatch({ control, name: "categories" });
   const categories = useMemo(
     () => watchedCategories ?? [],
@@ -67,10 +132,34 @@ export function BudgetBuilder() {
     [categories, treasury.totalBudgetMinor],
   );
 
-  const confirmBudget = (values: BudgetSetupFields) => {
+  const confirmBudget = async (values: BudgetSetupFields) => {
     clearErrors("root");
     try {
       const budget = buildDemoBudget(treasury, values);
+      if (live) {
+        if (!persistedTreasury || !requestedTreasuryId) {
+          throw new Error("Choose an accessible persisted treasury first.");
+        }
+        const response = await fetch(
+          `/api/treasuries/${requestedTreasuryId}/budget`,
+          {
+            method: "PUT",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              categories: values.categories.map((category) => ({
+                name: category.name.trim(),
+                allocationMinor: parseUsdcDisplay(category.allocation),
+              })),
+            }),
+          },
+        );
+        const result = (await response.json()) as { error?: string };
+        if (!response.ok) {
+          throw new Error(result.error ?? "The budget could not be saved.");
+        }
+        router.push(`/dashboard/claims/new?treasury=${requestedTreasuryId}`);
+        return;
+      }
       writeDemoSessionValue(demoBudgetStorageKey, budget);
       removeDemoSessionValue(demoClaimStorageKey);
       removeDemoSessionValue(demoDecisionStorageKey);
@@ -103,7 +192,9 @@ export function BudgetBuilder() {
         message:
           error instanceof Error
             ? error.message
-            : "The mock budget could not be confirmed.",
+            : live
+              ? "The budget could not be saved."
+              : "The mock budget could not be confirmed.",
       });
     }
   };
@@ -234,10 +325,15 @@ export function BudgetBuilder() {
           </Link>
           <button
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 py-3 text-sm font-bold text-white shadow-[0_10px_24px_rgba(29,91,79,0.18)] transition hover:-translate-y-0.5 hover:bg-[var(--brand-deep)] disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={!preview.canConfirm || isSubmitting}
+            disabled={
+              !preview.canConfirm ||
+              isSubmitting ||
+              loadingTreasury ||
+              (live && !persistedTreasury)
+            }
             type="submit"
           >
-            Confirm mock budget
+            {live ? "Confirm budget" : "Confirm mock budget"}
             <Icon className="size-4" name="arrow" />
           </button>
         </div>
