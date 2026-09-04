@@ -10,6 +10,10 @@ import {
   requireSupabaseUserId,
 } from "@/src/lib/supabase/server";
 import { resolveVerifiedWalletIdentity } from "@/src/lib/supabase/wallet-principal";
+import {
+  assertUniqueCategoryReferences,
+  toSuiCategoryReference,
+} from "@/src/lib/treasuries/category-reference";
 import { mapPersistedBudgetCategory } from "@/src/lib/treasuries/types";
 
 const paramsSchema = z.object({ treasuryId: z.string().uuid() });
@@ -60,7 +64,9 @@ export async function PUT(
 
     const { data: treasury, error: treasuryError } = await client
       .from("treasuries")
-      .select("id,total_budget_minor,status")
+      .select(
+        "id,total_budget_minor,status,budget_locked_at,sui_activation_status",
+      )
       .eq("id", treasuryId)
       .eq("status", "active")
       .maybeSingle();
@@ -71,6 +77,18 @@ export async function PUT(
         { status: 404 },
       );
     }
+
+    if (
+      treasury.budget_locked_at !== null ||
+      treasury.sui_activation_status !== "not_started"
+    ) {
+      return NextResponse.json(
+        { error: "Budget is locked because Sui activation has started." },
+        { status: 409 },
+      );
+    }
+
+    assertUniqueCategoryReferences(categories.map((category) => category.name));
 
     const budgetCheck = checkBudgetTotal(
       asMinorAmount(treasury.total_budget_minor),
@@ -99,6 +117,7 @@ export async function PUT(
       p_treasury_id: treasuryId,
       p_categories: categories.map((category) => ({
         name: category.name.trim(),
+        external_reference: toSuiCategoryReference(category.name),
         allocated_minor: category.allocationMinor,
       })),
     });

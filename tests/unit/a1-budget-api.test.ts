@@ -23,6 +23,8 @@ const treasury = {
   id: treasuryId,
   total_budget_minor: 150_000,
   status: "active",
+  budget_locked_at: null,
+  sui_activation_status: "not_started",
 };
 
 function treasuryQuery() {
@@ -154,8 +156,8 @@ describe("A1 live budget API", () => {
     expect(rpc).toHaveBeenCalledWith("replace_treasury_budget", {
       p_treasury_id: treasuryId,
       p_categories: [
-        { name: "Food", allocated_minor: 60_000 },
-        { name: "Venue", allocated_minor: 90_000 },
+        { name: "Food", external_reference: "food", allocated_minor: 60_000 },
+        { name: "Venue", external_reference: "venue", allocated_minor: 90_000 },
       ],
     });
     await expect(response.json()).resolves.toEqual({

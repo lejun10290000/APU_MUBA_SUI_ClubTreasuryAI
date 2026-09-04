@@ -122,6 +122,13 @@ export function BudgetBuilder() {
         status: "draft" as const,
       }
     : mockTreasury;
+  const budgetLocked = Boolean(
+    live &&
+      persistedTreasury &&
+      (persistedTreasury.budgetLockedAt != null ||
+        (persistedTreasury.suiActivationStatus !== undefined &&
+          persistedTreasury.suiActivationStatus !== "not_started")),
+  );
   const watchedCategories = useWatch({ control, name: "categories" });
   const categories = useMemo(
     () => watchedCategories ?? [],
@@ -206,6 +213,11 @@ export function BudgetBuilder() {
         noValidate
         onSubmit={handleSubmit(confirmBudget)}
       >
+        {budgetLocked && (
+          <p className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+            Budget locked · Sui activation in progress or active
+          </p>
+        )}
         <div className="flex flex-col justify-between gap-4 border-b border-[var(--line)] pb-6 sm:flex-row sm:items-start">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.13em] text-[var(--brand)]">
@@ -243,6 +255,7 @@ export function BudgetBuilder() {
                     className="mt-2 w-full rounded-xl border border-[var(--line)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-emerald-100"
                     id={`category-${index}-name`}
                     placeholder="e.g. Catering"
+                    disabled={budgetLocked}
                     {...register(`categories.${index}.name`)}
                   />
                   {errors.categories?.[index]?.name && (
@@ -269,6 +282,7 @@ export function BudgetBuilder() {
                       className="w-full rounded-xl border border-[var(--line)] bg-white py-3 pl-4 pr-16 text-sm outline-none focus:border-[var(--brand)] focus:ring-4 focus:ring-emerald-100"
                       id={`category-${index}-allocation`}
                       inputMode="decimal"
+                      disabled={budgetLocked}
                       {...register(`categories.${index}.allocation`)}
                     />
                     <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[10px] font-bold text-[var(--muted)]">
@@ -287,7 +301,7 @@ export function BudgetBuilder() {
                 <button
                   aria-label={`Remove category ${index + 1}`}
                   className="mt-6 rounded-lg px-3 py-3 text-xs font-bold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={fields.length === 1}
+                  disabled={budgetLocked || fields.length === 1}
                   onClick={() => remove(index)}
                   type="button"
                 >
@@ -300,7 +314,7 @@ export function BudgetBuilder() {
 
         <button
           className="mt-4 inline-flex items-center gap-2 rounded-xl border border-dashed border-[var(--brand)]/40 px-4 py-3 text-sm font-bold text-[var(--brand)] transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={fields.length >= 8}
+          disabled={budgetLocked || fields.length >= 8}
           onClick={() => append({ name: "", allocation: "" })}
           type="button"
         >
@@ -329,6 +343,7 @@ export function BudgetBuilder() {
               !preview.canConfirm ||
               isSubmitting ||
               loadingTreasury ||
+              budgetLocked ||
               (live && !persistedTreasury)
             }
             type="submit"
