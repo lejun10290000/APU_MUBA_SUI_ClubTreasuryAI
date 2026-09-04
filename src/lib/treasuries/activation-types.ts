@@ -23,6 +23,8 @@ export type TreasurySuiActivation = {
   createStatus: ActivationStepStatus;
   createDigest: string | null;
   createConfirmedAt: string | null;
+  treasuryObjectId: string | null;
+  treasurerCapObjectId: string | null;
   fundStatus: ActivationStepStatus;
   fundDigest: string | null;
   fundConfirmedAt: string | null;
@@ -42,6 +44,8 @@ export function mapTreasurySuiActivation(
     createStatus: row.create_status,
     createDigest: row.create_digest,
     createConfirmedAt: row.create_confirmed_at,
+    treasuryObjectId: row.treasury_object_id,
+    treasurerCapObjectId: row.treasurer_cap_object_id,
     fundStatus: row.fund_status,
     fundDigest: row.fund_digest,
     fundConfirmedAt: row.fund_confirmed_at,

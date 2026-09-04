@@ -51,6 +51,8 @@ export type TreasurySuiActivationRow = {
   create_status: "not_started" | "signed" | "submitted" | "confirmed" | "reconciliation_required" | "failed_before_signing";
   create_digest: string | null;
   create_confirmed_at: string | null;
+  treasury_object_id: string | null;
+  treasurer_cap_object_id: string | null;
   fund_status: "not_started" | "signed" | "submitted" | "confirmed" | "reconciliation_required" | "failed_before_signing";
   fund_digest: string | null;
   fund_confirmed_at: string | null;
@@ -268,6 +270,38 @@ export interface Database {
       replace_treasury_budget: {
         Args: { p_treasury_id: string; p_categories: Json };
         Returns: BudgetCategoryRow[];
+      };
+      start_treasury_sui_activation: {
+        Args: {
+          p_treasury_id: string;
+          p_owner_user_id: string;
+          p_owner_wallet_address: string;
+        };
+        Returns: TreasurySuiActivationRow;
+      };
+      record_treasury_activation_signed: {
+        Args: {
+          p_treasury_id: string;
+          p_owner_user_id: string;
+          p_step: "create" | "fund" | "allocation";
+          p_digest: string;
+        };
+        Returns: TreasurySuiActivationRow;
+      };
+      reconcile_treasury_activation_step: {
+        Args: {
+          p_treasury_id: string;
+          p_owner_user_id: string;
+          p_step: "create" | "fund" | "allocation";
+          p_digest: string;
+          p_outcome:
+            | "confirmed"
+            | "reconciliation_required"
+            | "failed_before_signing";
+          p_treasury_object_id: string | null;
+          p_treasurer_cap_object_id: string | null;
+        };
+        Returns: TreasurySuiActivationRow;
       };
       transition_claim_payment_attempt: {
         Args: {
