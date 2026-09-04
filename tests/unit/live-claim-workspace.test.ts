@@ -6,6 +6,7 @@ describe("live claim workspace", () => {
     expect(
       mapLiveClaimWorkspace(
         {
+          id: "11111111-1111-4111-8111-111111111111",
           external_reference: "stage6-live-acceptance-20260902",
           name: "Stage 6 Live Acceptance",
           total_budget_minor: 100,
@@ -22,6 +23,7 @@ describe("live claim workspace", () => {
         ],
       ),
     ).toEqual({
+      treasuryId: "11111111-1111-4111-8111-111111111111",
       externalReference: "stage6-live-acceptance-20260902",
       name: "Stage 6 Live Acceptance",
       totalBudgetMinor: 100,

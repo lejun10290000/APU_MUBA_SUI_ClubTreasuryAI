@@ -32,7 +32,7 @@ export interface PersistedWorkspace {
   categoryExternalReference: string;
   categoryAllocatedMinor: MinorAmount;
   categorySpentMinor: MinorAmount;
-  treasuryObjectId: string;
+  treasuryObjectId: string | null;
 }
 
 export interface SubmittedClaimInsert {

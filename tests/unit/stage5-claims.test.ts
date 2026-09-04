@@ -31,12 +31,29 @@ describe("Stage 5 claim validation", () => {
       }),
     ).toThrow(/valid Sui treasury object ID/);
   });
+
+  it("accepts claims for a persisted treasury before it is linked to Sui", () => {
+    const result = persistedClaimSubmissionSchema.parse({
+      ...makeSubmission(),
+      workspace: {
+        ...makeSubmission().workspace,
+        treasuryId: "11111111-1111-4111-8111-111111111111",
+        treasuryObjectId: null,
+      },
+    });
+
+    expect(result.workspace).toMatchObject({
+      treasuryId: "11111111-1111-4111-8111-111111111111",
+      treasuryObjectId: null,
+    });
+  });
 });
 
 function makeSubmission(overrides: Record<string, unknown> = {}) {
   return {
     externalReference: "00000000-0000-4000-8000-000000000010",
     workspace: {
+      treasuryId: "11111111-1111-4111-8111-111111111111",
       externalReference: "demo-treasury",
       name: "Demo Treasury",
       totalBudgetMinor: 10_000,

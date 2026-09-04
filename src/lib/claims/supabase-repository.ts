@@ -63,55 +63,25 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
       throw new Error("Choose a category from the active treasury budget.");
     }
 
-    const { data: existingTreasury, error: lookupError } = await this.userClient
+    const { data: treasury, error: lookupError } = await this.userClient
       .from("treasuries")
       .select("*")
-      .eq("sui_treasury_object_id", submission.workspace.treasuryObjectId)
+      .eq("id", submission.workspace.treasuryId)
+      .eq("status", "active")
       .maybeSingle();
     if (lookupError) throw lookupError;
+    if (!treasury) {
+      throw new Error("The selected treasury is not accessible.");
+    }
     if (
-      existingTreasury &&
-      existingTreasury.external_reference !==
-        submission.workspace.externalReference
+      treasury.external_reference !== submission.workspace.externalReference ||
+      treasury.name !== submission.workspace.name ||
+      treasury.total_budget_minor !== submission.workspace.totalBudgetMinor ||
+      treasury.sui_treasury_object_id !== submission.workspace.treasuryObjectId
     ) {
       throw new Error(
-        "The selected Sui treasury does not match this workspace reference.",
+        "The selected treasury changed. Reload it and try again.",
       );
-    }
-
-    let treasury = existingTreasury;
-    if (!treasury) {
-      // Keep INSERT and SELECT as separate statements. PostgreSQL applies the
-      // SELECT policy to INSERT ... RETURNING before can_access_treasury() can
-      // observe the new row, which rejects a valid first-time owner insert.
-      const { error: insertError } = await this.userClient
-        .from("treasuries")
-        .insert({
-          owner_user_id: this.identity.userId,
-          external_reference: submission.workspace.externalReference,
-          name: submission.workspace.name,
-          total_budget_minor: submission.workspace.totalBudgetMinor,
-          sui_treasury_object_id: submission.workspace.treasuryObjectId,
-          currency: "USDC",
-          status: "active",
-        });
-      if (insertError && insertError.code !== "23505") throw insertError;
-
-      const { data, error: createdLookupError } = await this.userClient
-        .from("treasuries")
-        .select("*")
-        .eq("sui_treasury_object_id", submission.workspace.treasuryObjectId)
-        .single();
-      if (createdLookupError) throw createdLookupError;
-      treasury = data;
-
-      if (
-        treasury.external_reference !== submission.workspace.externalReference
-      ) {
-        throw new Error(
-          "The selected Sui treasury does not match this workspace reference.",
-        );
-      }
     }
 
     const { data: membership, error: membershipError } = await this.userClient
@@ -124,61 +94,28 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
     if (!membership && treasury.owner_user_id !== this.identity.userId) {
       throw new Error("Treasury membership is required to submit this claim.");
     }
-    if (!membership) {
-      const { error } = await this.userClient.from("treasury_members").insert({
-        treasury_id: treasury.id,
-        user_id: this.identity.userId,
-        role: "owner",
-      });
-      if (error) throw error;
-    }
-
-    const canManage =
-      treasury.owner_user_id === this.identity.userId ||
-      membership?.role === "owner" ||
-      membership?.role === "treasurer";
-
-    if (canManage) {
-      for (const category of submission.workspace.categories) {
-        const { data: existing, error: existingError } = await this.userClient
-          .from("budget_categories")
-          .select("id")
-          .eq("treasury_id", treasury.id)
-          .eq("external_reference", category.externalReference)
-          .maybeSingle();
-        if (existingError) throw existingError;
-        if (existing) {
-          const { error } = await this.userClient
-            .from("budget_categories")
-            .update({
-              name: category.name,
-              allocated_minor: category.allocatedMinor,
-              spent_minor: category.spentMinor,
-            })
-            .eq("id", existing.id);
-          if (error) throw error;
-        } else {
-          const { error } = await this.userClient
-            .from("budget_categories")
-            .insert({
-              treasury_id: treasury.id,
-              external_reference: category.externalReference,
-              name: category.name,
-              allocated_minor: category.allocatedMinor,
-              spent_minor: category.spentMinor,
-            });
-          if (error) throw error;
-        }
-      }
-    }
-
-    const { data: category, error: categoryError } = await this.userClient
+    const { data: categories, error: categoryError } = await this.userClient
       .from("budget_categories")
       .select("*")
       .eq("treasury_id", treasury.id)
-      .eq("external_reference", selected.externalReference)
-      .single();
+      .order("created_at", { ascending: true });
     if (categoryError) throw categoryError;
+    const category = categories.find(
+      (candidate) =>
+        candidate.external_reference === selected.externalReference,
+    );
+    if (!category) {
+      throw new Error("Choose a category from the active treasury budget.");
+    }
+    if (
+      category.name !== selected.name ||
+      category.allocated_minor !== selected.allocatedMinor ||
+      category.spent_minor !== selected.spentMinor
+    ) {
+      throw new Error(
+        "The selected budget category changed. Reload it and try again.",
+      );
+    }
 
     return {
       treasuryId: treasury.id,
@@ -379,6 +316,9 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
     const treasury = treasuryResult.data;
     const category = categoryResult.data;
     if (!claim || !treasury || !category) return null;
+    if (!treasury.sui_treasury_object_id) {
+      throw new Error("Payment treasury is not linked to Sui.");
+    }
 
     const approvedSnapshot =
       claim.approved_treasury_object_id &&
