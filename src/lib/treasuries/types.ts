@@ -3,6 +3,10 @@ import type {
   BudgetCategoryRow,
   TreasuryRow,
 } from "@/src/lib/supabase/database.types";
+import type {
+  TreasuryActivationStatus,
+  TreasurySuiActivation,
+} from "@/src/lib/treasuries/activation-types";
 
 export type PersistedTreasuryRole = "owner" | "treasurer" | "member";
 
@@ -20,6 +24,11 @@ export type PersistedTreasuryWorkspace = {
   name: string;
   totalBudgetMinor: number;
   suiTreasuryObjectId: string | null;
+  suiTreasurerCapObjectId: string | null;
+  suiActivationStatus: TreasuryActivationStatus;
+  budgetLockedAt: string | null;
+  activatedAt: string | null;
+  activation: TreasurySuiActivation | null;
   linkedToSui: boolean;
   joinCode?: string;
   role: PersistedTreasuryRole;
@@ -47,10 +56,12 @@ export function mapPersistedTreasuryWorkspace({
   treasury,
   categories,
   role,
+  activation = null,
 }: {
   treasury: TreasuryRow;
   categories: BudgetCategoryRow[];
   role: PersistedTreasuryRole;
+  activation?: TreasurySuiActivation | null;
 }): PersistedTreasuryWorkspace {
   const workspace: PersistedTreasuryWorkspace = {
     id: treasury.id,
@@ -58,12 +69,20 @@ export function mapPersistedTreasuryWorkspace({
     name: treasury.name,
     totalBudgetMinor: asMinorAmount(treasury.total_budget_minor),
     suiTreasuryObjectId: treasury.sui_treasury_object_id,
+    suiTreasurerCapObjectId: treasury.sui_treasurer_cap_object_id,
+    suiActivationStatus: treasury.sui_activation_status,
+    budgetLockedAt: treasury.budget_locked_at,
+    activatedAt: treasury.activated_at,
+    activation,
     linkedToSui: treasury.sui_treasury_object_id !== null,
     role,
     categories: categories.map(mapPersistedBudgetCategory),
   };
 
-  if (role === "owner" || role === "treasurer") {
+  if (
+    (role === "owner" || role === "treasurer") &&
+    treasury.sui_activation_status === "active"
+  ) {
     workspace.joinCode = treasury.join_code;
   }
 

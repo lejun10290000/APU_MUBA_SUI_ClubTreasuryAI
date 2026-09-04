@@ -30,8 +30,34 @@ export type TreasuryRow = {
   currency: "USDC";
   total_budget_minor: number;
   sui_treasury_object_id: string | null;
+  sui_treasurer_cap_object_id: string | null;
+  sui_activation_status:
+    | "not_started"
+    | "in_progress"
+    | "reconciliation_required"
+    | "active";
+  budget_locked_at: string | null;
+  activated_at: string | null;
   join_code: string;
   status: "active" | "closed";
+  created_at: string;
+  updated_at: string;
+};
+
+export type TreasurySuiActivationRow = {
+  treasury_id: string;
+  owner_wallet_address: string;
+  status: "not_started" | "in_progress" | "reconciliation_required" | "active";
+  create_status: "not_started" | "signed" | "submitted" | "confirmed" | "reconciliation_required" | "failed_before_signing";
+  create_digest: string | null;
+  create_confirmed_at: string | null;
+  fund_status: "not_started" | "signed" | "submitted" | "confirmed" | "reconciliation_required" | "failed_before_signing";
+  fund_digest: string | null;
+  fund_confirmed_at: string | null;
+  allocation_status: "not_started" | "signed" | "submitted" | "confirmed" | "reconciliation_required" | "failed_before_signing";
+  allocation_digest: string | null;
+  allocation_confirmed_at: string | null;
+  activated_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -160,6 +186,11 @@ export interface Database {
           | "join_code"
         > &
           Partial<Pick<TreasuryRow, "currency" | "status">>
+      >;
+      treasury_sui_activations: TableDefinition<
+        TreasurySuiActivationRow,
+        Pick<TreasurySuiActivationRow, "treasury_id" | "owner_wallet_address"> &
+          Partial<Omit<TreasurySuiActivationRow, "treasury_id" | "owner_wallet_address" | "created_at" | "updated_at">>
       >;
       treasury_members: TableDefinition<
         {
