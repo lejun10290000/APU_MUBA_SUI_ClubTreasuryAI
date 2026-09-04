@@ -26,6 +26,18 @@ export type PersistedTreasuryWorkspace = {
   categories: PersistedBudgetCategory[];
 };
 
+export function mapPersistedBudgetCategory(
+  category: BudgetCategoryRow,
+): PersistedBudgetCategory {
+  return {
+    id: category.id,
+    externalReference: category.external_reference,
+    name: category.name,
+    allocatedMinor: asMinorAmount(category.allocated_minor),
+    spentMinor: asMinorAmount(category.spent_minor),
+  };
+}
+
 export function mapPersistedTreasuryWorkspace({
   treasury,
   categories,
@@ -43,13 +55,7 @@ export function mapPersistedTreasuryWorkspace({
     suiTreasuryObjectId: treasury.sui_treasury_object_id,
     linkedToSui: treasury.sui_treasury_object_id !== null,
     role,
-    categories: categories.map((category) => ({
-      id: category.id,
-      externalReference: category.external_reference,
-      name: category.name,
-      allocatedMinor: asMinorAmount(category.allocated_minor),
-      spentMinor: asMinorAmount(category.spent_minor),
-    })),
+    categories: categories.map(mapPersistedBudgetCategory),
   };
 
   if (role === "owner" || role === "treasurer") {
