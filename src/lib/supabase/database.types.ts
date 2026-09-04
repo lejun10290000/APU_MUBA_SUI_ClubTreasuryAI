@@ -29,7 +29,8 @@ export type TreasuryRow = {
   name: string;
   currency: "USDC";
   total_budget_minor: number;
-  sui_treasury_object_id: string;
+  sui_treasury_object_id: string | null;
+  join_code: string;
   status: "active" | "closed";
   created_at: string;
   updated_at: string;
@@ -51,7 +52,7 @@ export type ClaimRow = {
   external_reference: string;
   treasury_id: string;
   category_id: string;
-  treasury_object_id: string;
+  treasury_object_id: string | null;
   member_user_id: string;
   member_wallet_address: string;
   recipient_sui_address: string;
@@ -156,6 +157,7 @@ export interface Database {
           | "name"
           | "total_budget_minor"
           | "sui_treasury_object_id"
+          | "join_code"
         > &
           Partial<Pick<TreasuryRow, "currency" | "status">>
       >;
@@ -231,6 +233,10 @@ export interface Database {
       prepare_claim_payment: {
         Args: { p_claim_id: string };
         Returns: ClaimPaymentAttemptRow;
+      };
+      replace_treasury_budget: {
+        Args: { p_treasury_id: string; p_categories: Json };
+        Returns: BudgetCategoryRow[];
       };
       transition_claim_payment_attempt: {
         Args: {
