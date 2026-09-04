@@ -163,7 +163,7 @@ test("mock adapter runs receipt persistence through an unpaid human decision", a
     page.getByText("Decision saved · approved unpaid"),
   ).toBeVisible();
   const payoutPanel = page
-    .getByText("Verified Sui Testnet payout")
+    .getByText("Sui Testnet payout", { exact: true })
     .locator("xpath=ancestor::section");
   await expect(payoutPanel).toContainText("0.10 USDC");
   await page.getByRole("button", { name: "Pay approved claim" }).click();
@@ -211,16 +211,24 @@ function pngFixture(payload: string): Buffer {
   ]);
 }
 
-test("workflow pages avoid mobile horizontal overflow", async ({ page }) => {
+test("product pages hide internal stage labels and avoid mobile horizontal overflow", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
 
   for (const path of [
+    "/",
+    "/login",
+    "/dashboard",
+    "/dashboard/treasury/new",
     "/dashboard/budget",
     "/dashboard/claims/new",
     "/dashboard/claims/review",
     "/dashboard/history",
+    "/dashboard/testnet",
   ]) {
     await page.goto(path);
+    await expect(page.locator("body")).not.toContainText(/\bStage\s*\d+\b/i);
     const horizontalOverflow = await page.evaluate(
       () =>
         document.documentElement.scrollWidth >

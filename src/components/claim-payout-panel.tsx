@@ -174,7 +174,7 @@ export function ClaimPayoutView({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-emerald-800">
-            Verified Sui Testnet payout
+            Sui Testnet payout
           </p>
           <h3 className="mt-2 text-lg font-bold text-emerald-950">
             {paid ? "Paid" : phaseLabel(phase)}

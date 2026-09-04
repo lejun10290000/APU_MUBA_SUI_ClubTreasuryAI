@@ -118,7 +118,7 @@ Package the already-working product for judging. **Do not add optional features 
 
 ### Stage 8B — Demo video
 
-- final 4:21 narrated MP4 rendered locally; public YouTube/Loom upload remains pending
+- final 3:33 product-focused MP4 rendered locally with natural narration and embedded English captions; public YouTube/Loom upload remains pending
 - prefer the no-spend path using persisted Stage 7C proof for the payout result
 - refreshed desktop/mobile/product-proof screenshots retained locally
 

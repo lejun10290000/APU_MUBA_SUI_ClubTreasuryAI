@@ -166,7 +166,7 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 - [x] Finalize 3–5 minute script/storyboard
 - [x] Capture safe production screenshots/video
 - [x] Show existing Stage 7C payout/explorer proof without unnecessary second payout
-- [x] Render final 4:21 narrated MP4 locally
+- [x] Render final 3:33 product-focused MP4 locally with natural narration and embedded English captions
 - [ ] Upload the final video to YouTube or Loom
 - [ ] Add final video URL to README and submission package
 
