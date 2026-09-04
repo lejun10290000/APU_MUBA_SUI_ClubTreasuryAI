@@ -52,6 +52,10 @@ export function ClaimPayoutPanel({
 
   async function act() {
     if (actionInFlight.current) return;
+    if (!claim.treasuryObjectId) {
+      setError("Link this treasury to Sui before payout.");
+      return;
+    }
     if (!account) {
       setError("Connect the authorized treasurer wallet before paying.");
       return;
@@ -159,6 +163,22 @@ export function ClaimPayoutView({
     claim.status === "approved_unpaid" && claim.paymentStatus === "unpaid";
   const paid = claim.status === "paid" && claim.paymentStatus === "paid";
   if (!eligible && !paid) return null;
+  if (eligible && !claim.treasuryObjectId) {
+    return (
+      <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+        <p className="text-xs font-bold uppercase tracking-[0.12em]">
+          Payout locked
+        </p>
+        <h3 className="mt-2 text-lg font-bold">
+          Link this treasury to Sui before payout
+        </h3>
+        <p className="mt-3 text-xs leading-5">
+          No payment preparation, preflight, transaction build, or wallet
+          signature can start while this treasury is unlinked.
+        </p>
+      </section>
+    );
+  }
 
   const snapshot = claim.approvedSnapshot;
   const busy = [

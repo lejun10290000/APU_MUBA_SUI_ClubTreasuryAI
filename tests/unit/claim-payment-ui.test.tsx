@@ -13,6 +13,23 @@ const digest = toBase58(new Uint8Array(32).fill(7));
 afterEach(cleanup);
 
 describe("approved claim payout UI", () => {
+  it("renders no payout action for an unlinked malformed approved claim", () => {
+    const onAction = vi.fn();
+    render(
+      <ClaimPayoutView
+        claim={approvedClaim({ treasuryObjectId: null })}
+        onAction={onAction}
+        phase="ready"
+      />,
+    );
+
+    expect(
+      screen.getByText(/link this treasury to Sui before payout/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(onAction).not.toHaveBeenCalled();
+  });
+
   it("shows the immutable payout snapshot and an explicit payment control only when approved and unpaid", () => {
     const claim = approvedClaim();
     const { rerender } = render(
