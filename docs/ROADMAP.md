@@ -162,7 +162,8 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 - [x] Enable authenticated Member join-code claim path
 - [x] Block approval/payment/signing until verified Sui link
 - [x] Add owner-only verified Treasury/TreasurerCap link step
-- [x] Pass A1 local lint, typecheck, 231 unit tests, and production build
+- [x] Make an existing pre-link claim approvable after verified treasury linking and reload without resubmission
+- [x] Pass A1 local lint, typecheck, 232 unit tests, and production build
 - [x] Run all 9 Playwright scenarios without assertion failure; Windows cleanup hang remains accurately recorded
 - [ ] Apply A1 Supabase migration with owner authorization
 - [ ] Perform controlled production A1 acceptance without payout

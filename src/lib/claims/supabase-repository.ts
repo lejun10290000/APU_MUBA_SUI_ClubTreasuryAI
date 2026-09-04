@@ -31,6 +31,7 @@ import type {
   PersistedWorkspace,
   Stage6ClaimRepository,
   SubmittedClaimInsert,
+  TreasuryLinkState,
 } from "./types";
 
 type TypedClient = SupabaseClient<Database>;
@@ -248,6 +249,24 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
       .maybeSingle();
     if (error) throw error;
     return data ? this.hydrate(data) : null;
+  }
+
+  async getTreasuryLinkState(
+    treasuryId: string,
+  ): Promise<TreasuryLinkState> {
+    const { data, error } = await this.userClient
+      .from("treasuries")
+      .select("sui_treasury_object_id")
+      .eq("id", treasuryId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) {
+      throw new Error("The claim treasury is not accessible.");
+    }
+    return {
+      linked: data.sui_treasury_object_id !== null,
+      treasuryObjectId: data.sui_treasury_object_id,
+    };
   }
 
   async decideClaim(

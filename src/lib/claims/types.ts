@@ -35,6 +35,11 @@ export interface PersistedWorkspace {
   treasuryObjectId: string | null;
 }
 
+export interface TreasuryLinkState {
+  linked: boolean;
+  treasuryObjectId: string | null;
+}
+
 export interface SubmittedClaimInsert {
   submission: PersistedClaimSubmission;
   workspace: PersistedWorkspace;
@@ -74,6 +79,7 @@ export interface ClaimRepository {
   ): Promise<PersistedClaim>;
   markManualReview(claimId: string, reason: string): Promise<PersistedClaim>;
   getClaim(claimId: string): Promise<PersistedClaim | null>;
+  getTreasuryLinkState(treasuryId: string): Promise<TreasuryLinkState>;
   decideClaim(
     claimId: string,
     decision: ClaimDecisionInput["decision"],

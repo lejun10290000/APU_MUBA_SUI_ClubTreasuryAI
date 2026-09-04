@@ -27,10 +27,15 @@ afterEach(() => {
 
 describe("claim review recovery", () => {
   it("shows the persisted claim and a non-blocking warning when its private preview is unavailable", async () => {
+    const claim = reviewClaim();
     state.fetch.mockResolvedValue({
       ok: true,
       json: async () => ({
-        claim: reviewClaim(),
+        claim,
+        treasuryLink: {
+          linked: true,
+          treasuryObjectId: claim.treasuryObjectId,
+        },
         receiptPreviewUrl: null,
         receiptPreviewError:
           "Private receipt preview is temporarily unavailable. The persisted claim can still be reviewed.",

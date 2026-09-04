@@ -16,7 +16,7 @@ This file is the **single source of truth for current implementation status, blo
 - Production rehearsal AI mode: **deterministic mock** (`AI_MODE=mock`, live Gemini disabled)
 - Sui network: **Testnet**
 - Current blocker: **A1 live Supabase migration and controlled no-payout acceptance require owner authorization/action**
-- Current priority: **finish A1 production-safe acceptance, then return to submission/video/pitch work without performing an unnecessary payout**
+- Current priority: **obtain green PR #29 review/CI for the post-link claim-approval lifecycle fix, then finish A1 production-safe acceptance without performing an unnecessary payout**
 
 ## Stage Progress
 
@@ -113,6 +113,7 @@ The `stage8/a1-workflow-continuity` branch now implements:
 - Member wallet verification, join-code membership, and claim entry;
 - explicit unlinked status with approval, payout preparation, preflight, signing, submission, and reconciliation blocked;
 - owner-only verification of an existing shared Sui `Treasury<USDC>` plus the exact wallet-owned `TreasurerCap` before linking;
+- claim review reads the current treasury link separately from the claim's historical pre-approval link, so an existing unlinked claim becomes approvable after a verified link and reload without resubmission;
 - preservation of the existing Stage 7C treasury, claim, payment attempt, digest, and no-blind-retry safety pipeline.
 
 Local verification on 4 September 2026:
@@ -120,7 +121,7 @@ Local verification on 4 September 2026:
 ```text
 lint: PASS
 typecheck: PASS
-unit tests: PASS (51 files / 231 tests)
+unit tests: PASS (51 files / 232 tests)
 build: PASS
 Playwright assertions: 9/9 scenarios completed without assertion failure
 Playwright process: NOT a clean exit; Windows Next.js web-server cleanup hung and was terminated
@@ -128,6 +129,8 @@ Move tests: NOT RUN locally; Sui CLI unavailable
 ```
 
 The A1 migration is **not applied** and controlled production acceptance is **not performed**. Production remains the verified Stage 7 baseline with deterministic mock AI (`AI_MODE=mock`, `GEMINI_LIVE_REQUESTS_ENABLED=false`).
+
+Latest development: PR #29 received an independent lifecycle review. The branch now exposes current treasury-link state in claim review, keeps pre-link approval blocked, and lets the unchanged claim reach the guarded `decide_claim` transition after linking. The SQL unlinked guard and all Stage 6/7 payment safety boundaries remain unchanged. Local focused payment-safety verification passed 86/86 tests; full lint, typecheck, 232 unit tests, and production build passed. GitHub CI for this follow-up commit is pending push.
 
 ### Stage 8A — Submission package
 

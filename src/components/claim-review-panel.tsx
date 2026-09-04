@@ -7,6 +7,7 @@ import { compareReceiptAmount } from "@/src/domain/claim-rules";
 import { formatUsdcMinor } from "@/src/domain/money";
 import type { PersistedClaim } from "@/src/domain/stage5-claims";
 import { receiptAnalysisSchema } from "@/src/lib/ai/types";
+import type { TreasuryLinkState } from "@/src/lib/claims/types";
 import { ClaimPayoutPanel } from "./claim-payout-panel";
 import { Icon } from "./icon";
 
@@ -20,6 +21,8 @@ export function ClaimReviewPanel() {
   const searchParams = useSearchParams();
   const claimId = searchParams.get("claim");
   const [claim, setClaim] = useState<PersistedClaim | null>(null);
+  const [treasuryLink, setTreasuryLink] =
+    useState<TreasuryLinkState | null>(null);
   const [receiptPreviewUrl, setReceiptPreviewUrl] = useState<string | null>(
     null,
   );
@@ -39,15 +42,17 @@ export function ClaimReviewPanel() {
       .then(async (response) => {
         const result = (await response.json()) as {
           claim?: PersistedClaim;
+          treasuryLink?: TreasuryLinkState;
           receiptPreviewUrl?: string | null;
           receiptPreviewError?: string | null;
           error?: string;
         };
-        if (!response.ok || !result.claim) {
+        if (!response.ok || !result.claim || !result.treasuryLink) {
           throw new Error(result.error ?? "The claim could not be loaded.");
         }
         if (active) {
           setClaim(result.claim);
+          setTreasuryLink(result.treasuryLink);
           setReceiptPreviewUrl(result.receiptPreviewUrl ?? null);
           setReceiptPreviewError(result.receiptPreviewError ?? null);
         }
@@ -79,8 +84,8 @@ export function ClaimReviewPanel() {
 
   async function decide(decision: "approve" | "reject") {
     if (!claim) return;
-    if (decision === "approve" && !claim.treasuryObjectId) {
-      setError("Link this treasury to its own Sui Treasury before approval.");
+    if (decision === "approve" && !treasuryLink?.treasuryObjectId) {
+      setError("Link this treasury to Sui before approval.");
       return;
     }
     if (!decisionReason.trim()) {
@@ -136,7 +141,8 @@ export function ClaimReviewPanel() {
     claim.status === "paid";
   const parsedAnalysis = receiptAnalysisSchema.safeParse(claim.receiptAnalysis);
   const aiAnalysis = parsedAnalysis.success ? parsedAnalysis.data : null;
-  const approvalBlocked = claim.treasuryObjectId === null;
+  const approvalBlocked =
+    !treasuryLink?.linked || treasuryLink.treasuryObjectId === null;
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,.85fr)]">
       <section className="rounded-3xl border border-[var(--line)] bg-white p-5 shadow-[0_12px_40px_rgba(24,49,43,0.05)] sm:p-8">
@@ -328,7 +334,7 @@ export function ClaimReviewPanel() {
           <div className="mt-6">
             {approvalBlocked && (
               <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
-                Link this treasury to its own Sui Treasury before approval.
+                Link this treasury to Sui before approval.
                 Claim review is safe to continue, but no payout snapshot can be
                 created yet.
               </p>
