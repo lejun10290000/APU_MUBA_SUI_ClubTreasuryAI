@@ -70,7 +70,7 @@ export default function LoginPage() {
             </Link>
             <Link
               className="group flex items-center gap-4 rounded-2xl border border-[var(--line)] bg-white p-5 transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-[0_16px_48px_rgba(16,49,43,0.08)]"
-              href="/dashboard/claims/new"
+              href="/member"
             >
               <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-violet-50 text-violet-700">
                 <Icon className="size-6" name="receipt" />
@@ -80,8 +80,8 @@ export default function LoginPage() {
                   Submit a reimbursement claim
                 </span>
                 <span className="mt-1 block text-sm text-[var(--muted)]">
-                  Connect a wallet to access the persisted treasury and upload a
-                  receipt
+                  Join a club treasury and submit a receipt-backed reimbursement
+                  claim.
                 </span>
               </span>
               <Icon

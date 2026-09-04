@@ -73,6 +73,22 @@ test("dashboard remains usable at a mobile viewport", async ({ page }) => {
   expect(horizontalOverflow).toBe(false);
 });
 
+test("login enables both treasurer and member workspaces", async ({ page }) => {
+  await page.goto("/login");
+
+  await expect(
+    page.getByRole("link", { name: /explore as treasurer/i }),
+  ).toHaveAttribute("href", "/dashboard");
+  await page
+    .getByRole("link", { name: /submit a reimbursement claim/i })
+    .click();
+  await expect(page).toHaveURL(/\/member$/);
+  await expect(
+    page.getByRole("heading", { name: "Join your club treasury" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Treasury join code")).toBeVisible();
+});
+
 test("treasurer creates a validated session-only treasury preview", async ({
   page,
 }) => {
@@ -105,6 +121,34 @@ test("treasurer creates a validated session-only treasury preview", async ({
     page.getByText("Orientation Night 2026 · 1250.50 USDC"),
   ).toBeVisible();
   await expect(page.getByText(/Session-only preview/i)).toBeVisible();
+});
+
+test("A1 mock continuity carries treasury and budget into claims", async ({
+  page,
+}) => {
+  await page.goto("/dashboard/treasury/new");
+  await page
+    .getByLabel("Event or treasury name")
+    .fill("Orientation Night 2026");
+  await page.getByLabel("Total budget").fill("1500.00");
+  await page.getByRole("button", { name: "Create sample treasury" }).click();
+  await page.getByRole("link", { name: "Build budget" }).click();
+
+  await page.getByRole("button", { name: "Add category" }).click();
+  await page.getByLabel("Category name").last().fill("Food");
+  await page.getByLabel("Allocation", { exact: true }).last().fill("500.00");
+  await expect(page.getByText("Balanced")).toBeVisible();
+  for (const category of ["Food", "Marketing", "Venue", "Catering"]) {
+    await expect(
+      page.getByText(category, { exact: true }).first(),
+    ).toBeVisible();
+  }
+  await page.getByRole("button", { name: "Confirm sample budget" }).click();
+
+  await expect(page).toHaveURL(/\/dashboard\/claims\/new$/);
+  await expect(page.getByText("Orientation Night 2026")).toBeVisible();
+  await page.getByLabel("Budget category").selectOption("food-4");
+  await expect(page.getByLabel("Budget category")).toHaveValue("food-4");
 });
 
 test("mock adapter runs receipt persistence through an unpaid human decision", async ({

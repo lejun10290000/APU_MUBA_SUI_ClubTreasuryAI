@@ -279,6 +279,7 @@ function submissionFixture(): PersistedClaimSubmission {
   return {
     externalReference: randomUUID(),
     workspace: {
+      treasuryId: "11111111-1111-4111-8111-111111111111",
       externalReference: "stage6-api-workspace",
       name: "Stage 6 API Treasury",
       totalBudgetMinor: asMinorAmount(10_000),

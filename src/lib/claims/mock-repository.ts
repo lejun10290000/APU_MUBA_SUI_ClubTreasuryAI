@@ -18,6 +18,7 @@ import type {
   PersistedWorkspace,
   Stage6ClaimRepository,
   SubmittedClaimInsert,
+  TreasuryLinkState,
 } from "./types";
 
 interface MockWorkspace extends PersistedWorkspace {
@@ -74,15 +75,14 @@ export class MockClaimRepository implements Stage6ClaimRepository {
     let workspace = this.store.workspaces.find(
       (candidate) =>
         candidate.ownerUserId === this.identity.userId &&
-        candidate.externalReference ===
-          submission.workspace.externalReference &&
+        candidate.treasuryId === submission.workspace.treasuryId &&
         candidate.categoryExternalReference ===
           selectedCategory.externalReference,
     );
     workspace ??= {
       ownerUserId: this.identity.userId,
       externalReference: submission.workspace.externalReference,
-      treasuryId: randomUUID(),
+      treasuryId: submission.workspace.treasuryId,
       categoryId: randomUUID(),
       categoryName: selectedCategory.name,
       categoryExternalReference: selectedCategory.externalReference,
@@ -205,6 +205,21 @@ export class MockClaimRepository implements Stage6ClaimRepository {
     return claim ? structuredClone(claim) : null;
   }
 
+  async getTreasuryLinkState(
+    treasuryId: string,
+  ): Promise<TreasuryLinkState> {
+    const workspace = this.store.workspaces.find(
+      (candidate) => candidate.treasuryId === treasuryId,
+    );
+    if (!workspace) {
+      throw new Error("The claim treasury is not accessible.");
+    }
+    return {
+      linked: workspace.treasuryObjectId !== null,
+      treasuryObjectId: workspace.treasuryObjectId,
+    };
+  }
+
   async decideClaim(
     claimId: string,
     decision: "approve" | "reject",
@@ -214,6 +229,37 @@ export class MockClaimRepository implements Stage6ClaimRepository {
     if (claim.status !== "under_review") {
       throw new Error("Only an under-review claim can be decided.");
     }
+    const workspace = this.store.workspaces.find(
+      (candidate) =>
+        candidate.treasuryId === claim.treasuryId &&
+        candidate.categoryId === claim.categoryId,
+    );
+    if (!workspace) {
+      throw new Error("The claim treasury is not accessible.");
+    }
+    const treasuryObjectId = workspace.treasuryObjectId;
+    if (decision === "approve" && !treasuryObjectId) {
+      throw new Error("Link this treasury to Sui before approving the claim.");
+    }
+    if (
+      decision === "approve" &&
+      claim.treasuryObjectId &&
+      claim.treasuryObjectId !== treasuryObjectId
+    ) {
+      throw new Error(
+        "Claim treasury does not match the linked Sui Treasury.",
+      );
+    }
+    const approvedSnapshot =
+      decision === "approve" && treasuryObjectId
+        ? {
+            treasuryObjectId,
+            categoryReference: claim.categoryExternalReference,
+            recipientSuiAddress: claim.recipientSuiAddress,
+            amountMinor: claim.requestedAmountMinor,
+            currency: "USDC" as const,
+          }
+        : null;
     const decidedAt = new Date().toISOString();
     const updated: PersistedClaim = {
       ...claim,
@@ -221,16 +267,9 @@ export class MockClaimRepository implements Stage6ClaimRepository {
       decisionReason: reason,
       decidedAt,
       status: decision === "approve" ? "approved_unpaid" : "rejected",
-      approvedSnapshot:
-        decision === "approve"
-          ? {
-              treasuryObjectId: claim.treasuryObjectId,
-              categoryReference: claim.categoryExternalReference,
-              recipientSuiAddress: claim.recipientSuiAddress,
-              amountMinor: claim.requestedAmountMinor,
-              currency: "USDC",
-            }
-          : null,
+      treasuryObjectId:
+        decision === "approve" ? treasuryObjectId : claim.treasuryObjectId,
+      approvedSnapshot,
     };
     this.store.claims.set(claimId, updated);
     return structuredClone(updated);
@@ -283,6 +322,9 @@ export class MockClaimRepository implements Stage6ClaimRepository {
         )
       : null;
     if (!claim || !workspace) return null;
+    if (!workspace.treasuryObjectId) {
+      throw new Error("Payment treasury is not linked to Sui.");
+    }
     return {
       attempt: structuredClone(attempt),
       claim: {

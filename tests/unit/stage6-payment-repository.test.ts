@@ -249,6 +249,7 @@ function makeSubmission(): PersistedClaimSubmission {
   return {
     externalReference: randomUUID(),
     workspace: {
+      treasuryId: "11111111-1111-4111-8111-111111111111",
       externalReference: "stage6-test-workspace",
       name: "Stage 6 Test Treasury",
       totalBudgetMinor: asMinorAmount(10_000),

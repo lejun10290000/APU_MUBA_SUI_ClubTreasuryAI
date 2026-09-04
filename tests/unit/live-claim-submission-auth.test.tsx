@@ -17,6 +17,7 @@ const state = vi.hoisted(() => ({
       "0x7f696478ae487ae2fce37c0ea8584f9af38154f0b14a459675bc3822af4564ea",
   },
   signer: { signPersonalMessage: vi.fn() },
+  search: "treasury=11111111-1111-4111-8111-111111111111",
 }));
 
 vi.mock("@mysten/dapp-kit-react", () => ({
@@ -26,6 +27,7 @@ vi.mock("@mysten/dapp-kit-react", () => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: state.push }),
+  useSearchParams: () => new URLSearchParams(state.search),
 }));
 
 vi.mock("@/src/config/public-env", () => ({
@@ -40,6 +42,7 @@ vi.mock("@/src/lib/sui/wallet-identity", () => ({
 }));
 
 const workspace = {
+  treasuryId: "11111111-1111-4111-8111-111111111111",
   externalReference: "stage7-live",
   name: "Stage 6 Live Acceptance",
   totalBudgetMinor: 100,
@@ -62,7 +65,7 @@ beforeEach(() => {
   state.fetch.mockReset();
   state.fetch.mockImplementation(async (input: RequestInfo | URL) => {
     const url = String(input);
-    if (url.startsWith("/api/claims/workspace")) {
+    if (url === "/api/treasuries") {
       if (state.ensureWalletIdentity.mock.calls.length === 0) {
         return {
           ok: false,
@@ -73,8 +76,30 @@ beforeEach(() => {
       }
       return {
         ok: true,
-        json: async () => ({ workspace }),
+        json: async () => ({
+          treasuries: [
+            {
+              id: workspace.treasuryId,
+              externalReference: workspace.externalReference,
+              name: workspace.name,
+              totalBudgetMinor: workspace.totalBudgetMinor,
+              suiTreasuryObjectId: workspace.treasuryObjectId,
+              linkedToSui: true,
+              role: "owner",
+              categories: workspace.categories.map((category) => ({
+                id: "22222222-2222-4222-8222-222222222222",
+                ...category,
+              })),
+            },
+          ],
+        }),
       } as Response;
+    }
+    if (
+      url ===
+      `/api/claims/workspace?treasuryId=${encodeURIComponent(workspace.treasuryId)}`
+    ) {
+      return { ok: true, json: async () => ({ workspace }) } as Response;
     }
     throw new Error(`Unexpected fetch: ${url}`);
   });

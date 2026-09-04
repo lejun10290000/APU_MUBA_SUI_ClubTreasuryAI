@@ -28,10 +28,11 @@ const walletSuiAddressSchema = createSuiAddressSchema(
 const externalReferenceSchema = z.string().trim().min(1).max(160);
 
 export const claimWorkspaceSchema = z.object({
+  treasuryId: z.string().uuid(),
   externalReference: externalReferenceSchema,
   name: z.string().trim().min(1).max(120),
   totalBudgetMinor: positiveMinorAmountSchema,
-  treasuryObjectId: treasurySuiObjectIdSchema,
+  treasuryObjectId: treasurySuiObjectIdSchema.nullable(),
   categories: z
     .array(
       z.object({
@@ -76,7 +77,7 @@ export const persistedClaimSchema = z.object({
   categoryId: z.string().uuid(),
   categoryName: z.string(),
   categoryExternalReference: z.string(),
-  treasuryObjectId: treasurySuiObjectIdSchema,
+  treasuryObjectId: treasurySuiObjectIdSchema.nullable(),
   memberWalletAddress: walletSuiAddressSchema,
   recipientSuiAddress: recipientSuiAddressSchema,
   submitterName: z.string(),

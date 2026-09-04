@@ -31,25 +31,28 @@ AI is **advisory only**. It does not own authoritative balances, authorize payou
 ### Treasurer workflow
 
 1. Connect a Sui Testnet wallet.
-2. Create/fund a club Treasury.
+2. Create a persisted app treasury workspace.
 3. Enter natural-language budget instructions.
 4. Gemini converts them into structured budget categories.
-5. Treasurer reviews and confirms the allocation.
-6. Review member claims and private receipt evidence.
-7. Inspect AI recommendation plus deterministic checks.
-8. Approve or reject manually.
-9. For an approved claim, review the immutable payout snapshot.
-10. Explicitly sign one Sui Testnet USDC payout.
-11. Wait for verified finality and `PayoutEvent` evidence.
-12. View the paid state, updated category balance, digest, and explorer proof.
+5. Treasurer reviews and persists the balanced category budget.
+6. Collect and review claims against that exact treasury and its categories.
+7. Link the workspace to its own verified Sui `Treasury<USDC>` and wallet-owned `TreasurerCap` before approval.
+8. Inspect AI recommendation plus deterministic checks.
+9. Approve or reject manually; approval stays blocked while the workspace is unlinked.
+10. For an approved claim, review the immutable payout snapshot.
+11. Explicitly sign one Sui Testnet USDC payout.
+12. Wait for verified finality and `PayoutEvent` evidence.
+13. View the paid state, updated category balance, digest, and explorer proof.
 
 ### Club member workflow
 
-1. Select the real persisted treasury/category.
-2. Enter reimbursement details.
-3. Upload receipt evidence privately.
+1. Connect a wallet and join a persisted treasury using its short join code.
+2. Select that treasury and one of its persisted categories.
+3. Enter reimbursement details and upload receipt evidence privately.
 4. Submit the claim.
 5. Wait for human review and payment result.
+
+Treasury and category budgets persist immediately for operational workflow. Claims and AI-assisted review can happen before chain setup. A payout cannot be approved until the workspace is linked to its own verified Sui Treasury; after linking, the existing human-controlled preflight/finality pipeline applies.
 
 ## Why Sui Is Integral
 
@@ -292,6 +295,12 @@ repository/history secret audit: PASS
 ```
 
 Move package verification remains **31/31 Move tests**, and the deployed Move source has not changed since the verified Stage 3 deployment.
+
+### A1 workflow continuity
+
+The `stage8/a1-workflow-continuity` branch adds persisted Treasury → Budget → Claims continuity, member join codes, the unlinked approval/payment guard, and owner-only verified Sui linking. Its local application gate passed **51 files / 231 unit tests**, lint, type-check, and production build. All 9 Playwright scenarios reached completion without assertion failures, but the Windows runner hung during Next.js web-server cleanup; this is not recorded as a clean Playwright process exit. The Sui CLI was unavailable locally, so Move tests were not rerun for A1.
+
+The owner-authorized A1 Supabase migration and controlled production acceptance completed without a payout. The existing Stage 7C Paid claim and confirmed digest remained unchanged. PR #29 remains unmerged until its integration with the professional UI refinement is reviewed and exact-head CI passes. Default production AI remains deterministic mock mode: `AI_MODE=mock` and `GEMINI_LIVE_REQUESTS_ENABLED=false`.
 
 ## Hackathon Tracks
 

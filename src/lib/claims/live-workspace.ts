@@ -1,10 +1,11 @@
 import { asMinorAmount } from "@/src/domain/money";
 
 export type LiveClaimWorkspace = {
+  treasuryId: string;
   externalReference: string;
   name: string;
   totalBudgetMinor: number;
-  treasuryObjectId: string;
+  treasuryObjectId: string | null;
   categories: Array<{
     externalReference: string;
     name: string;
@@ -14,10 +15,11 @@ export type LiveClaimWorkspace = {
 };
 
 type TreasuryRecord = {
+  id: string;
   external_reference: string;
   name: string;
   total_budget_minor: number;
-  sui_treasury_object_id: string;
+  sui_treasury_object_id: string | null;
 };
 
 type CategoryRecord = {
@@ -32,6 +34,7 @@ export function mapLiveClaimWorkspace(
   categories: CategoryRecord[],
 ): LiveClaimWorkspace {
   return {
+    treasuryId: treasury.id,
     externalReference: treasury.external_reference,
     name: treasury.name,
     totalBudgetMinor: asMinorAmount(treasury.total_budget_minor),

@@ -158,6 +158,16 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 - [x] Document implemented Gemini product AI for judges
 - [x] Add live demo URL + screenshot/video placeholders
 - [x] Create copy-ready Devfolio submission package
+- [x] Implement local persisted Treasury → Budget → Claims continuity
+- [x] Enable authenticated Member join-code claim path
+- [x] Block approval/payment/signing until verified Sui link
+- [x] Add owner-only verified Treasury/TreasurerCap link step
+- [x] Make an existing pre-link claim approvable after verified treasury linking and reload without resubmission
+- [x] Pass A1 local lint, typecheck, 232 unit tests, and production build
+- [x] Run all 9 Playwright scenarios without assertion failure; Windows cleanup hang remains accurately recorded
+- [x] Apply A1 Supabase migration with owner authorization
+- [x] Perform controlled production A1 acceptance without payout
+- [x] Verify Stage 7C paid evidence remains unchanged after migration
 - [x] Professionalize the judging workflow, mobile navigation, and public Sui proof presentation
 - [ ] Verify public repo + no secrets after Stage 8A docs merge
 

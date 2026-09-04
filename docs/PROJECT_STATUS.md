@@ -15,8 +15,8 @@ This file is the **single source of truth for current implementation status, blo
 - Production claims: **live Supabase**
 - Production rehearsal AI mode: **deterministic mock** (`AI_MODE=mock`, live Gemini disabled)
 - Sui network: **Testnet**
-- Current blocker: **none**
-- Current priority: **finish submission package, demo video, pitch, Q&A, and Devfolio submission without expanding product scope**
+- Current blocker: **PR #29 must integrate the merged professional UI refinement and pass exact-head review/CI**
+- Current priority: **resolve PR #29 against current `main` while preserving the professional UI and every A1/payment-safety invariant**
 
 ## Stage Progress
 
@@ -104,6 +104,34 @@ Stage 7D also verified recovery messaging, same-digest reconciliation, private r
 
 Package the already-working product for judging. **Do not add optional features unless they are required for submission.**
 
+### A1 workflow continuity — production accepted, merge pending
+
+The `stage8/a1-workflow-continuity` branch now implements:
+
+- persisted app treasury creation and exact-sum category budgets in live mode;
+- Claims using the same persisted treasury UUID and categories without mutating them;
+- Member wallet verification, join-code membership, and claim entry;
+- explicit unlinked status with approval, payout preparation, preflight, signing, submission, and reconciliation blocked;
+- owner-only verification of an existing shared Sui `Treasury<USDC>` plus the exact wallet-owned `TreasurerCap` before linking;
+- claim review reads the current treasury link separately from the claim's historical pre-approval link, so an existing unlinked claim becomes approvable after a verified link and reload without resubmission;
+- preservation of the existing Stage 7C treasury, claim, payment attempt, digest, and no-blind-retry safety pipeline.
+
+Local verification on 4 September 2026:
+
+```text
+lint: PASS
+typecheck: PASS
+unit tests: PASS (51 files / 232 tests)
+build: PASS
+Playwright assertions: 9/9 scenarios completed without assertion failure
+Playwright process: NOT a clean exit; Windows Next.js web-server cleanup hung and was terminated
+Move tests: NOT RUN locally; Sui CLI unavailable
+```
+
+The owner-authorized A1 migration and controlled production acceptance completed without a payout. The persisted Treasury → Budget → Claims workflow, refresh persistence, and unlinked approval guard were accepted, while the existing Stage 7C Paid claim and digest remained unchanged. Production AI remains deterministic mock (`AI_MODE=mock`, `GEMINI_LIVE_REQUESTS_ENABLED=false`).
+
+Latest development: PR #30 merged the professional UI refinement into `main`, so PR #29 is being updated with a manual merge resolution. The resolution retains the refined presentation together with current treasury-link state, pre-link approval blocking, guarded `decide_claim` transition after linking, and all Stage 6/7 payment boundaries. No migration, acceptance claim, wallet signature, or payout is part of this conflict-resolution task.
+
 ### Stage 8A — Submission package
 
 - final README
@@ -174,7 +202,7 @@ Before further work, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 8 — Submission and pitch
 STATUS: CURRENT
 COMPLETED STAGES: 0–7
-NEXT TASK: Finish submission/pitch materials. Do not expand product scope or perform unnecessary live payouts.
+NEXT TASK: Verify the PR #29 merge-resolution head in GitHub CI and obtain owner review. Do not merge automatically or perform a live payout.
 ```
 
 ## Handoff Rule

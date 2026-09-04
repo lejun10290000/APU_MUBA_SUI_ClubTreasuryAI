@@ -9,14 +9,14 @@ import {
 import { resolveVerifiedWalletIdentity } from "@/src/lib/supabase/wallet-principal";
 
 const querySchema = z.object({
-  treasuryObjectId: z.string().trim().min(1),
+  treasuryId: z.string().uuid(),
 });
 
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    const { treasuryObjectId } = querySchema.parse({
-      treasuryObjectId: url.searchParams.get("treasuryObjectId"),
+    const { treasuryId } = querySchema.parse({
+      treasuryId: url.searchParams.get("treasuryId"),
     });
     const client = await createServerSupabaseClient();
     const sessionUserId = await requireSupabaseUserId(client);
@@ -30,11 +30,11 @@ export async function GET(request: Request) {
       .select(
         "id,owner_user_id,external_reference,name,total_budget_minor,sui_treasury_object_id,status",
       )
-      .eq("sui_treasury_object_id", treasuryObjectId)
+      .eq("id", treasuryId)
       .eq("status", "active")
       .maybeSingle();
     if (treasuryError) throw treasuryError;
-    if (!treasury) throw new Error("Configured live treasury was not found.");
+    if (!treasury) throw new Error("The selected treasury was not found.");
 
     const { data: membership, error: membershipError } = await client
       .from("treasury_members")

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
 import { useForm, useWatch } from "react-hook-form";
 import { ZodError } from "zod";
 import { Icon } from "./icon";
@@ -16,6 +17,8 @@ import {
   demoDecisionStorageKey,
 } from "@/src/domain/demo-workflow";
 import { formatUsdcMinor, parseUsdcDisplay } from "@/src/domain/money";
+import { publicConfig } from "@/src/config/public-env";
+import { ensureWalletIdentity } from "@/src/lib/sui/wallet-identity";
 import {
   buildDemoTreasury,
   demoTreasuryStorageKey,
@@ -24,6 +27,9 @@ import {
 
 export function TreasuryCreationForm() {
   const router = useRouter();
+  const account = useCurrentAccount();
+  const dAppKit = useDAppKit();
+  const live = publicConfig.claimDataMode === "live";
   const {
     register,
     handleSubmit,
@@ -49,9 +55,38 @@ export function TreasuryCreationForm() {
     }
   }, [totalBudget]);
 
-  const submitTreasury = (values: TreasurySetupFields) => {
+  const submitTreasury = async (values: TreasurySetupFields) => {
     try {
       const treasury = buildDemoTreasury(values);
+      if (live) {
+        if (!account) {
+          throw new Error(
+            "Connect the treasurer wallet before creating a treasury.",
+          );
+        }
+        await ensureWalletIdentity({
+          signer: dAppKit,
+          walletAddress: account.address,
+          displayName: "Club treasurer",
+        });
+        const response = await fetch("/api/treasuries", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            name: treasury.name,
+            totalBudgetMinor: treasury.totalBudgetMinor,
+          }),
+        });
+        const result = (await response.json()) as {
+          treasury?: { id: string };
+          error?: string;
+        };
+        if (!response.ok || !result.treasury) {
+          throw new Error(result.error ?? "The treasury could not be created.");
+        }
+        router.push(`/dashboard/budget?treasury=${result.treasury.id}`);
+        return;
+      }
       writeDemoSessionValue(demoTreasuryStorageKey, treasury);
       removeDemoSessionValue(demoBudgetStorageKey);
       removeDemoSessionValue(demoClaimStorageKey);
@@ -70,7 +105,12 @@ export function TreasuryCreationForm() {
 
       setError("root", {
         type: "validation",
-        message: "The sample preview could not be created. Please try again.",
+        message:
+          error instanceof Error
+            ? error.message
+            : live
+              ? "The treasury could not be created."
+              : "The sample preview could not be created. Please try again.",
       });
     }
   };
@@ -94,8 +134,9 @@ export function TreasuryCreationForm() {
               Set the event and spending limit
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              This creates a temporary preview in this browser tab. It does not
-              save a record, connect a wallet, or move funds.
+              {live
+                ? "This saves an off-chain treasury workspace. Sui linking remains a separate owner-controlled step."
+                : "This creates a temporary preview in this browser tab. It does not save a record, connect a wallet, or move funds."}
             </p>
           </div>
         </div>
@@ -172,7 +213,9 @@ export function TreasuryCreationForm() {
               <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
                 Initial status
               </p>
-              <p className="mt-1 text-sm font-bold">Sample draft</p>
+              <p className="mt-1 text-sm font-bold">
+                {live ? "Saved workspace" : "Sample draft"}
+              </p>
             </div>
           </div>
         </div>
@@ -198,7 +241,7 @@ export function TreasuryCreationForm() {
             disabled={isSubmitting}
             type="submit"
           >
-            Create sample treasury
+            {live ? "Create treasury" : "Create sample treasury"}
             <Icon className="size-4" name="arrow" />
           </button>
         </div>
@@ -214,7 +257,7 @@ export function TreasuryCreationForm() {
               <Icon className="size-5" name="wallet" />
             </span>
             <span className="rounded-full border border-white/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">
-              Live preview
+              {live ? "Saved workspace" : "Live preview"}
             </span>
           </div>
           <p className="mt-8 text-xs font-semibold text-white/55">
@@ -237,12 +280,23 @@ export function TreasuryCreationForm() {
 
         <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-800">
-            <Icon className="size-4" name="shield" /> Demo boundary
+            <Icon className="size-4" name="shield" />{" "}
+            {live ? "Safety boundary" : "Demo boundary"}
           </div>
           <ul className="mt-4 space-y-3 text-sm leading-5 text-amber-950/70">
-            <li>• Stored only for this browser session</li>
-            <li>• No Supabase persistence</li>
-            <li>• No wallet, deposit, or on-chain treasury</li>
+            {live ? (
+              <>
+                <li>• Stored in the authenticated workspace</li>
+                <li>• Starts unlinked to every Sui treasury</li>
+                <li>• No deposit or on-chain transaction</li>
+              </>
+            ) : (
+              <>
+                <li>• Stored only for this browser session</li>
+                <li>• No Supabase persistence</li>
+                <li>• No wallet, deposit, or on-chain treasury</li>
+              </>
+            )}
           </ul>
         </section>
       </aside>

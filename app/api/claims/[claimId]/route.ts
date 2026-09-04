@@ -11,16 +11,21 @@ export async function GET(
 ) {
   try {
     const { claimId } = paramsSchema.parse(await context.params);
-    const claim = await (await getClaimRepository()).getClaim(claimId);
+    const repository = await getClaimRepository();
+    const claim = await repository.getClaim(claimId);
     if (!claim) {
       return NextResponse.json({ error: "Claim not found." }, { status: 404 });
     }
+    const treasuryLink = await repository.getTreasuryLinkState(
+      claim.treasuryId,
+    );
     try {
       const receiptPreviewUrl = await createAuthorizedReceiptUrl(claimId);
-      return NextResponse.json({ claim, receiptPreviewUrl });
+      return NextResponse.json({ claim, treasuryLink, receiptPreviewUrl });
     } catch {
       return NextResponse.json({
         claim,
+        treasuryLink,
         receiptPreviewUrl: null,
         receiptPreviewError:
           "Private receipt preview is temporarily unavailable. The persisted claim can still be reviewed.",

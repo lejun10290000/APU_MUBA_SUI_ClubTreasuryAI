@@ -1,9 +1,8 @@
 "use client";
 
 import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { publicConfig } from "@/src/config/public-env";
 import {
   asMinorAmount,
   formatUsdcMinor,
@@ -11,14 +10,21 @@ import {
 } from "@/src/domain/money";
 import { ensureWalletIdentity } from "@/src/lib/sui/wallet-identity";
 import type { LiveClaimWorkspace } from "@/src/lib/claims/live-workspace";
+import type { PersistedTreasuryWorkspace } from "@/src/lib/treasuries/types";
 
 const DEFAULT_SUBMITTER_NAME = "Demo club member";
 
 export function LiveClaimSubmissionForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedTreasuryId = searchParams.get("treasury");
   const account = useCurrentAccount();
   const dAppKit = useDAppKit();
   const [workspace, setWorkspace] = useState<LiveClaimWorkspace | null>(null);
+  const [treasuries, setTreasuries] = useState<PersistedTreasuryWorkspace[]>(
+    [],
+  );
+  const [selectedTreasuryId, setSelectedTreasuryId] = useState("");
   const [categoryReference, setCategoryReference] = useState("");
   const [submitterName, setSubmitterName] = useState(DEFAULT_SUBMITTER_NAME);
   const [merchant, setMerchant] = useState("Campus Print Shop");
@@ -54,9 +60,30 @@ export function LiveClaimSubmissionForm() {
           walletAddress: account.address,
           displayName: DEFAULT_SUBMITTER_NAME,
         });
-        const objectId = publicConfig.demoTreasuryObjectId;
+        const treasuriesResponse = await fetch("/api/treasuries", {
+          cache: "no-store",
+        });
+        const treasuriesResult = (await treasuriesResponse.json()) as {
+          treasuries?: PersistedTreasuryWorkspace[];
+          error?: string;
+        };
+        if (!treasuriesResponse.ok || !treasuriesResult.treasuries) {
+          throw new Error(
+            treasuriesResult.error ??
+              "Persisted treasuries could not be loaded.",
+          );
+        }
+        const selectedTreasury =
+          treasuriesResult.treasuries.find(
+            (treasury) => treasury.id === requestedTreasuryId,
+          ) ?? treasuriesResult.treasuries[0];
+        if (!selectedTreasury) {
+          throw new Error(
+            "Create or join a treasury before submitting a claim.",
+          );
+        }
         const response = await fetch(
-          `/api/claims/workspace?treasuryObjectId=${encodeURIComponent(objectId)}`,
+          `/api/claims/workspace?treasuryId=${encodeURIComponent(selectedTreasury.id)}`,
           { cache: "no-store" },
         );
         const result = (await response.json()) as {
@@ -69,6 +96,8 @@ export function LiveClaimSubmissionForm() {
           );
         }
         if (cancelled) return;
+        setTreasuries(treasuriesResult.treasuries);
+        setSelectedTreasuryId(selectedTreasury.id);
         setWorkspace(result.workspace);
         setCategoryReference(
           result.workspace.categories[0]?.externalReference ?? "",
@@ -89,7 +118,42 @@ export function LiveClaimSubmissionForm() {
     return () => {
       cancelled = true;
     };
-  }, [account, dAppKit, loadAttempt]);
+  }, [account, dAppKit, loadAttempt, requestedTreasuryId]);
+
+  async function selectTreasury(treasuryId: string) {
+    setSelectedTreasuryId(treasuryId);
+    setWorkspace(null);
+    setCategoryReference("");
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `/api/claims/workspace?treasuryId=${encodeURIComponent(treasuryId)}`,
+        { cache: "no-store" },
+      );
+      const result = (await response.json()) as {
+        workspace?: LiveClaimWorkspace;
+        error?: string;
+      };
+      if (!response.ok || !result.workspace) {
+        throw new Error(
+          result.error ?? "Live treasury workspace could not be loaded.",
+        );
+      }
+      setWorkspace(result.workspace);
+      setCategoryReference(
+        result.workspace.categories[0]?.externalReference ?? "",
+      );
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Live workspace could not be loaded.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const selectedCategory = useMemo(
     () =>
@@ -186,10 +250,33 @@ export function LiveClaimSubmissionForm() {
     >
       <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950">
         <p className="font-bold">Persisted live treasury</p>
+        {treasuries.length > 1 && (
+          <label className="mt-3 block font-bold">
+            Treasury
+            <select
+              className={inputClass}
+              value={selectedTreasuryId}
+              onChange={(event) => void selectTreasury(event.target.value)}
+            >
+              {treasuries.map((treasury) => (
+                <option key={treasury.id} value={treasury.id}>
+                  {treasury.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <p className="mt-1">{workspace?.name ?? "Unavailable"}</p>
-        <p className="mt-1 break-all font-mono text-xs">
-          {workspace?.treasuryObjectId}
+        <p className="mt-1 text-xs font-bold">
+          {workspace?.treasuryObjectId
+            ? "Linked to Sui Testnet"
+            : "Not linked to Sui yet · claims and review are available, payout is locked"}
         </p>
+        {workspace?.treasuryObjectId && (
+          <p className="mt-1 break-all font-mono text-xs">
+            {workspace.treasuryObjectId}
+          </p>
+        )}
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">

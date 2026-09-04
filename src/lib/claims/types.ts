@@ -32,7 +32,12 @@ export interface PersistedWorkspace {
   categoryExternalReference: string;
   categoryAllocatedMinor: MinorAmount;
   categorySpentMinor: MinorAmount;
-  treasuryObjectId: string;
+  treasuryObjectId: string | null;
+}
+
+export interface TreasuryLinkState {
+  linked: boolean;
+  treasuryObjectId: string | null;
 }
 
 export interface SubmittedClaimInsert {
@@ -74,6 +79,7 @@ export interface ClaimRepository {
   ): Promise<PersistedClaim>;
   markManualReview(claimId: string, reason: string): Promise<PersistedClaim>;
   getClaim(claimId: string): Promise<PersistedClaim | null>;
+  getTreasuryLinkState(treasuryId: string): Promise<TreasuryLinkState>;
   decideClaim(
     claimId: string,
     decision: ClaimDecisionInput["decision"],

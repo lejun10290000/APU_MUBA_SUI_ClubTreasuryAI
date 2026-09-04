@@ -30,16 +30,18 @@ University clubs commonly face:
 ClubTreasury AI creates a single workflow for club treasury management:
 
 1. Treasurer connects a Sui Testnet wallet.
-2. Gemini turns natural-language budget instructions into structured categories.
-3. Treasurer reviews and confirms allocations.
-4. Members submit reimbursement claims and private receipt evidence.
+2. Treasurer creates a persisted app treasury and balanced category budget.
+3. Gemini turns natural-language budget instructions into structured categories for human confirmation.
+4. Members join with a short code and submit reimbursement claims plus private receipt evidence against that same treasury.
 5. Gemini extracts receipt information and suggests a category/review rationale.
 6. Deterministic checks validate amount, duplicates, category budget, and evidence.
-7. Human treasurer approves or rejects.
-8. Approved payout data becomes an immutable snapshot.
+7. Claims can be reviewed while the workspace is off-chain, but approval/payment is blocked until the owner links its own verified Sui Treasury and TreasurerCap.
+8. Human treasurer approves or rejects; approved payout data becomes an immutable snapshot.
 9. Server verifies Supabase ↔ Sui Treasury consistency before wallet signing.
 10. Treasurer explicitly signs one Sui Testnet USDC payout.
 11. Claim/budget state updates only after verified chain finality and exact `PayoutEvent` evidence.
+
+Treasury and category budgets persist immediately for operational workflow. Claims and AI-assisted review can happen before chain setup. A payout cannot be approved until the workspace is linked to its own verified Sui Treasury; after linking, the existing human-controlled preflight/finality pipeline applies.
 
 ## Why AI
 
@@ -159,13 +161,29 @@ repository/history secret audit: PASS
 Move tests: retained verified 31/31
 ```
 
+A1 workflow-continuity branch verification:
+
+```text
+lint: PASS
+typecheck: PASS
+unit tests: 51 files / 231 tests PASS
+build: PASS
+Playwright: all 9 scenarios completed without assertion failure; Windows web-server cleanup hung, so no clean process exit is claimed
+Move tests: not rerun locally because Sui CLI was unavailable
+Supabase migration: NOT APPLIED
+production acceptance: NOT PERFORMED
+live A1 payout: NOT PERFORMED
+```
+
+These A1 results describe the review branch. The public production deployment remains the verified Stage 7 baseline until the owner applies the migration and completes controlled no-payout acceptance. AI remains deterministic mock in production (`AI_MODE=mock`, `GEMINI_LIVE_REQUESTS_ENABLED=false`).
+
 ## Team
 
-| Name | Role | University | GitHub |
-| --- | --- | --- | --- |
-| CHUA LE JUN | Developer | UTM Kuala Lumpur | `lejun10290000` |
-| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le` |
-| LAI YAN QI | Presenter | UTM Kuala Lumpur | `YANKEY-CODE` |
+| Name          | Role      | University       | GitHub          |
+| ------------- | --------- | ---------------- | --------------- |
+| CHUA LE JUN   | Developer | UTM Kuala Lumpur | `lejun10290000` |
+| LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le`         |
+| LAI YAN QI    | Presenter | UTM Kuala Lumpur | `YANKEY-CODE`   |
 
 ## AI Development Tools Declaration
 

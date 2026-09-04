@@ -190,6 +190,7 @@ function makeSubmission(
   return persistedClaimSubmissionSchema.parse({
     externalReference: randomUUID(),
     workspace: {
+      treasuryId: "11111111-1111-4111-8111-111111111111",
       externalReference: "demo-treasury",
       name: "Demo Treasury",
       totalBudgetMinor: 10_000,
