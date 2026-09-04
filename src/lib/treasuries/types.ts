@@ -26,6 +26,11 @@ export type PersistedTreasuryWorkspace = {
   categories: PersistedBudgetCategory[];
 };
 
+export type SuiTreasuryLinkInput = {
+  treasuryObjectId: string;
+  treasurerCapObjectId: string;
+};
+
 export function mapPersistedBudgetCategory(
   category: BudgetCategoryRow,
 ): PersistedBudgetCategory {

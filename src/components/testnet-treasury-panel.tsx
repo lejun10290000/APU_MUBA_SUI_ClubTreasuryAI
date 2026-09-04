@@ -7,6 +7,7 @@ import {
   useDAppKit,
 } from "@mysten/dapp-kit-react";
 import type { Transaction } from "@mysten/sui/transactions";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatCoinAmount, parseCoinAmount } from "@/src/lib/sui/amounts";
 import {
@@ -28,6 +29,11 @@ import {
 } from "@/src/lib/sui/testnet-state";
 import { treasuryTransactionService } from "@/src/lib/sui/transaction-service";
 import { isTestnetAccount } from "@/src/lib/sui/wallet-status";
+import { ensureWalletIdentity } from "@/src/lib/sui/wallet-identity";
+import type {
+  PersistedTreasuryWorkspace,
+  SuiTreasuryLinkInput,
+} from "@/src/lib/treasuries/types";
 
 const STORAGE_KEY = "clubtreasury.testnet-demo.v1";
 const CATEGORY = "events";
@@ -46,6 +52,7 @@ function short(value: string) {
 }
 
 export function TestnetTreasuryPanel() {
+  const searchParams = useSearchParams();
   const dAppKit = useDAppKit();
   const client = useCurrentClient();
   const account = useCurrentAccount();
@@ -66,6 +73,12 @@ export function TestnetTreasuryPanel() {
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [workspaces, setWorkspaces] = useState<PersistedTreasuryWorkspace[]>(
+    [],
+  );
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState("");
+  const [linkTreasuryObjectId, setLinkTreasuryObjectId] = useState("");
+  const [linkTreasurerCapObjectId, setLinkTreasurerCapObjectId] = useState("");
   const storageReady = useRef(false);
 
   const connected = account !== null;
@@ -75,6 +88,10 @@ export function TestnetTreasuryPanel() {
   const deploymentReady = isDeploymentReady(suiDeploymentConfig);
   const actions = useMemo(() => availableTestnetActions(demo), [demo]);
   const executionReady = connected && onTestnet && deploymentReady;
+  const effectiveLinkTreasuryObjectId =
+    linkTreasuryObjectId.trim() || demo.treasuryId;
+  const effectiveLinkTreasurerCapObjectId =
+    linkTreasurerCapObjectId.trim() || demo.treasurerCapId;
 
   useEffect(() => {
     const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -99,6 +116,95 @@ export function TestnetTreasuryPanel() {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(demo));
     }
   }, [demo]);
+
+  async function loadPersistedWorkspaces() {
+    if (!account) return;
+    setBusy("workspaces");
+    setError(null);
+    try {
+      await ensureWalletIdentity({
+        signer: dAppKit,
+        walletAddress: account.address,
+        displayName: "Club treasurer",
+      });
+      const response = await fetch("/api/treasuries");
+      const result = (await response.json()) as {
+        treasuries?: PersistedTreasuryWorkspace[];
+        error?: string;
+      };
+      if (!response.ok || !result.treasuries) {
+        throw new Error(
+          result.error ?? "Treasury workspaces could not be loaded.",
+        );
+      }
+      const manageable = result.treasuries.filter(
+        (workspace) => workspace.role === "owner",
+      );
+      setWorkspaces(manageable);
+      const requested = searchParams.get("treasury");
+      const selected =
+        manageable.find((workspace) => workspace.id === requested) ??
+        manageable.find((workspace) => !workspace.linkedToSui) ??
+        manageable[0];
+      setSelectedWorkspaceId(selected?.id ?? "");
+      setNotice(
+        manageable.length
+          ? "Persisted treasury workspaces loaded."
+          : "No owner-managed treasury workspace is available to link.",
+      );
+    } catch (caught) {
+      setError(errorMessage(caught));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function linkPersistedWorkspace() {
+    if (!account || !selectedWorkspaceId) return;
+    setBusy("link");
+    setError(null);
+    try {
+      await ensureWalletIdentity({
+        signer: dAppKit,
+        walletAddress: account.address,
+        displayName: "Club treasurer",
+      });
+      const body: SuiTreasuryLinkInput = {
+        treasuryObjectId: effectiveLinkTreasuryObjectId,
+        treasurerCapObjectId: effectiveLinkTreasurerCapObjectId,
+      };
+      const response = await fetch(
+        `/api/treasuries/${selectedWorkspaceId}/link-sui`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+        },
+      );
+      const result = (await response.json()) as {
+        treasury?: PersistedTreasuryWorkspace;
+        error?: string;
+      };
+      if (!response.ok || !result.treasury) {
+        throw new Error(
+          result.error ?? "The Sui treasury could not be linked.",
+        );
+      }
+      setWorkspaces((current) =>
+        current.map((workspace) =>
+          workspace.id === result.treasury!.id ? result.treasury! : workspace,
+        ),
+      );
+      setNotice(
+        "Sui Treasury and TreasurerCap verified. This workspace is now linked.",
+      );
+    } catch (caught) {
+      setError(errorMessage(caught));
+      setNotice(null);
+    } finally {
+      setBusy(null);
+    }
+  }
 
   async function loadTestnetData() {
     if (!account) return;
@@ -484,6 +590,79 @@ export function TestnetTreasuryPanel() {
       </section>
 
       <aside className="space-y-4">
+        <article className="rounded-2xl border border-[var(--line)] bg-white p-5">
+          <h2 className="text-lg font-bold">Link a persisted workspace</h2>
+          <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+            Owner-only verification stores an existing Testnet Treasury link. It
+            does not create, fund, allocate, or pay anything.
+          </p>
+          <button
+            className={`${transactionButton} mt-4`}
+            disabled={!connected || !onTestnet || busy !== null}
+            onClick={loadPersistedWorkspaces}
+            type="button"
+          >
+            {busy === "workspaces" ? "Loading…" : "Load my workspaces"}
+          </button>
+          <div className="mt-4 space-y-3">
+            <label className="block text-xs font-semibold">
+              Persisted treasury
+              <select
+                aria-label="Persisted treasury workspace"
+                className="mt-1 w-full rounded-xl border border-[var(--line)] p-2.5 text-sm"
+                onChange={(event) => setSelectedWorkspaceId(event.target.value)}
+                value={selectedWorkspaceId}
+              >
+                <option value="">Select an owner-managed workspace</option>
+                {workspaces.map((workspace) => (
+                  <option key={workspace.id} value={workspace.id}>
+                    {workspace.name} ·{" "}
+                    {workspace.linkedToSui ? "linked" : "not linked"}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-xs font-semibold">
+              Treasury object ID
+              <input
+                aria-label="Treasury object ID to link"
+                className="mt-1 w-full rounded-xl border border-[var(--line)] p-2.5 font-mono text-xs"
+                onChange={(event) =>
+                  setLinkTreasuryObjectId(event.target.value)
+                }
+                value={linkTreasuryObjectId || demo.treasuryId}
+              />
+            </label>
+            <label className="block text-xs font-semibold">
+              TreasurerCap object ID
+              <input
+                aria-label="TreasurerCap object ID to verify"
+                className="mt-1 w-full rounded-xl border border-[var(--line)] p-2.5 font-mono text-xs"
+                onChange={(event) =>
+                  setLinkTreasurerCapObjectId(event.target.value)
+                }
+                value={linkTreasurerCapObjectId || demo.treasurerCapId}
+              />
+            </label>
+          </div>
+          <button
+            className={`${transactionButton} mt-4 w-full`}
+            disabled={
+              !executionReady ||
+              !selectedWorkspaceId ||
+              !effectiveLinkTreasuryObjectId ||
+              !effectiveLinkTreasurerCapObjectId ||
+              busy !== null
+            }
+            onClick={linkPersistedWorkspace}
+            type="button"
+          >
+            {busy === "link"
+              ? "Verifying…"
+              : "Verify and link to this workspace"}
+          </button>
+        </article>
+
         <article className="rounded-2xl border border-[var(--line)] bg-white p-5">
           <h2 className="text-lg font-bold">Verified public identifiers</h2>
           <dl className="mt-4 space-y-3 text-xs">
