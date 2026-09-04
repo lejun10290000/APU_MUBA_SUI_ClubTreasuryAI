@@ -326,7 +326,7 @@ Every teammate must declare any additional AI tool they personally used before f
 
 ## Demo Video
 
-The final 3:33 product-focused demo MP4 has been rendered with natural conversational narration, embedded English captions, and visual verification. **Stage 8B TODO:** upload it to YouTube or Loom and add the public URL here.
+The final 3:18 product-focused demo MP4 has been rendered with smooth conversational narration, embedded English captions, and visual verification. A separate 1:57 silent website walkthrough is also ready for editing or presenter narration. **Stage 8B TODO:** upload the selected video to YouTube or Loom and add the public URL here.
 
 The demo uses the existing verified Stage 7C payout evidence instead of performing an unnecessary second payment solely for recording.
 
