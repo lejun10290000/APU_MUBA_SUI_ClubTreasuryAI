@@ -13,10 +13,10 @@ This file is the **single source of truth for current implementation status, blo
 - Stage 7 post-merge CI: **run #140 — SUCCESS**
 - Production app: `https://apumubasuiclubtreasuryai000.vercel.app`
 - Production claims: **live Supabase**
-- Production rehearsal AI mode: **deterministic mock** (`AI_MODE=mock`, live Gemini disabled)
+- Production rehearsal AI mode: **live Gemini receipt analysis observed during A2 smoke acceptance**
 - Sui network: **Testnet**
-- Current blocker: **A2 migration, deployment, live Gemini configuration, and acceptance transactions require separate owner authorization**
-- Current priority: **review the exact `stage8/a2-live-treasury-activation` head; do not migrate, enable Gemini, transact, or merge automatically**
+- Current blocker: **A2 smoke acceptance reaches treasurer review, but human approval is blocked by an ambiguous `treasury_object_id` reference in `public.decide_claim`**
+- Current priority: **merge and apply the forward-only `decide_claim` ambiguity hotfix, then resume the same under-review smoke-test claim; do not create a replacement claim or payout before approval is verified**
 
 ## Stage Progress
 
@@ -128,13 +128,13 @@ Playwright process: NOT a clean exit; Windows Next.js web-server cleanup hung an
 Move tests: NOT RUN locally; Sui CLI unavailable
 ```
 
-The owner-authorized A1 migration and controlled production acceptance completed without a payout. The persisted Treasury → Budget → Claims workflow, refresh persistence, and unlinked approval guard were accepted, while the existing Stage 7C Paid claim and digest remained unchanged. Production AI remains deterministic mock (`AI_MODE=mock`, `GEMINI_LIVE_REQUESTS_ENABLED=false`).
+The owner-authorized A1 migration and controlled production acceptance completed without a payout. The persisted Treasury → Budget → Claims workflow, refresh persistence, and unlinked approval guard were accepted, while the existing Stage 7C Paid claim and digest remained unchanged.
 
 The final A1 implementation and professional UI integration are merged in `30ae958a1ab221e651a5304cd8c6450184f8e398`. The resolution retained current treasury-link state, pre-link approval blocking, guarded `decide_claim` transition after linking, and all Stage 6/7 payment boundaries.
 
-### A2-Lite live treasury activation — implementation complete, owner gates pending
+### A2-Lite live treasury activation — deployed, smoke acceptance in progress
 
-The `stage8/a2-live-treasury-activation` branch now implements:
+The merged A2 implementation provides:
 
 - one persisted activation state machine per workspace with stable category references and a locked budget snapshot;
 - human-wallet-signed Create → exact multi-coin USDC Fund → dynamic Allocate transactions;
@@ -144,7 +144,7 @@ The `stage8/a2-live-treasury-activation` branch now implements:
 - production Gemini live-or-manual-review behavior with no hidden mock fallback;
 - authorized, paid-only, newest-first persisted History with real Testnet digest links.
 
-Local verification on 5 September 2026:
+Local verification before deployment on 5 September 2026:
 
 ```text
 lint: PASS
@@ -155,7 +155,19 @@ Playwright assertions: 9/9 PASS across the full run plus focused rerun
 Playwright process: NOT a clean exit; Windows Next.js web-server cleanup hung and was terminated
 ```
 
-The forward-only migration `20260905030000_stage8_a2_live_treasury_activation.sql` exists but is **NOT applied**. No real Sui transaction and no live Gemini request was executed during implementation.
+The owner-authorized A2 migration and deployment are now live enough to complete workspace activation, member claim submission, persisted private receipt evidence, Gemini receipt extraction, deterministic amount/duplicate/budget checks, and treasurer review.
+
+Production smoke acceptance on 5 September 2026 reached the human approval boundary with a fresh `A2 Smoke Test 2` claim. The claim showed a `0.10 USDC` requested/receipt exact match, no duplicate signal, sufficient Food budget, stored private receipt evidence, and Gemini extraction of `Campus Cafe` / `0.10 USDC` / `2026-09-05`. Gemini suggested `Cafe` while the selected budget category was `Food`, so the deterministic policy correctly produced `REVIEW`.
+
+The subsequent treasurer Approve action failed before persistence with:
+
+```text
+column reference "treasury_object_id" is ambiguous
+```
+
+Root cause: the A1 `public.decide_claim` function uses a PL/pgSQL local variable named `treasury_object_id` and later assigns `treasury_object_id = treasury_object_id`, which is ambiguous once executed. No approval or payout was committed. The existing claim should remain `under_review`.
+
+Hotfix PR #33 adds a regression test and forward-only migration `20260905114500_stage8_a2_decide_claim_ambiguity_hotfix.sql`, renaming the local value to `linked_treasury_object_id` while preserving role checks, Sui-link guards, immutable approved snapshot fields, and authenticated execute permissions. Resume the **same** smoke-test claim only after this hotfix is merged and applied to the production Supabase project.
 
 ### Stage 8A — Submission package
 
@@ -227,7 +239,7 @@ Before further work, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 8 — Submission and pitch
 STATUS: CURRENT
 COMPLETED STAGES: 0–7
-NEXT TASK: Review the exact A2 branch head and migration. Do not apply the migration, enable live Gemini, perform a Sui transaction, or merge without separate owner authorization.
+NEXT TASK: Merge and apply the forward-only decide_claim ambiguity hotfix, then resume the same under-review A2 smoke-test claim. Do not create a replacement claim or payout before approval is verified.
 ```
 
 ## Handoff Rule

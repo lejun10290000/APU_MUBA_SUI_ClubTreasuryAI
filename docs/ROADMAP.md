@@ -176,10 +176,15 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 - [x] Replace sample History with authorized persisted paid claims
 - [x] Make production Gemini explicit live-or-manual-review with no mock fallback
 - [x] Pass A2 lint, typecheck, 263 tests, build, and 9/9 browser assertions
-- [ ] Obtain independent A2 code/migration review
-- [ ] Apply A2 migration only with owner authorization
-- [ ] Run owner-authorized smoke acceptance only after reviewed deployment
-- [ ] Verify public repo + no secrets after Stage 8A docs merge
+- [x] Apply A2 migration and deploy the merged A2 flow with owner authorization
+- [x] Begin owner-authorized A2 smoke acceptance: activation, member claim, receipt analysis, deterministic checks, and treasurer review reached successfully
+- [x] Reproduce the human-approval failure as `column reference "treasury_object_id" is ambiguous` without creating a payout
+- [x] Add regression coverage and a forward-only `decide_claim` ambiguity hotfix in PR #33
+- [ ] Merge PR #33 after exact-head CI is green
+- [ ] Apply `20260905114500_stage8_a2_decide_claim_ambiguity_hotfix.sql` to the production Supabase project
+- [ ] Resume the same under-review smoke claim and verify Approve → `approved_unpaid`
+- [ ] Verify the separate wallet-signed payout path only after approval is confirmed
+- [ ] Verify public repo + no secrets after Stage 8A hotfix merge
 
 ### 8B — Demo video — IN PROGRESS
 
