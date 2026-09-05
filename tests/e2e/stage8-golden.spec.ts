@@ -64,6 +64,7 @@ test("judge golden path keeps AI advisory, human approval separate, and Sui proo
 
   await page.goto("/dashboard/testnet");
   await expect(page.getByText("0.10 USDC payout confirmed")).toBeVisible();
+  await page.getByText("Live transaction controls").click();
   await expect(page.getByText(/Nothing is submitted automatically/i)).toBeVisible();
 });
 
