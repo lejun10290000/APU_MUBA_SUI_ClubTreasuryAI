@@ -82,7 +82,7 @@ const claims: ManagedDashboardClaim[] = [
 ];
 
 describe("live Overview dashboard model", () => {
-  it("shows only owner/treasurer workspaces and keeps newest API order", () => {
+  it("shows only owner/treasurer workspaces with the newest API item first", () => {
     const workspaces = [
       treasury("owner", "owner", 25),
       treasury("member", "member", 0),
@@ -90,15 +90,15 @@ describe("live Overview dashboard model", () => {
     ];
 
     expect(getManagedTreasuries(workspaces).map((item) => item.id)).toEqual([
-      "owner",
       "treasurer",
+      "owner",
     ]);
   });
 
   it("honors a valid URL treasury and otherwise selects the newest managed treasury", () => {
     const managed = getManagedTreasuries([
-      treasury("newest", "owner", 0),
       treasury("older", "treasurer", 0),
+      treasury("newest", "owner", 0),
     ]);
 
     expect(resolveSelectedTreasury(managed, "older")?.id).toBe("older");
