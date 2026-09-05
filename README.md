@@ -298,9 +298,15 @@ Move package verification remains **31/31 Move tests**, and the deployed Move so
 
 ### A1 workflow continuity
 
-The `stage8/a1-workflow-continuity` branch adds persisted Treasury → Budget → Claims continuity, member join codes, the unlinked approval/payment guard, and owner-only verified Sui linking. Its local application gate passed **51 files / 231 unit tests**, lint, type-check, and production build. All 9 Playwright scenarios reached completion without assertion failures, but the Windows runner hung during Next.js web-server cleanup; this is not recorded as a clean Playwright process exit. The Sui CLI was unavailable locally, so Move tests were not rerun for A1.
+The merged A1 workflow adds persisted Treasury → Budget → Claims continuity, member join codes, the unlinked approval/payment guard, and owner-only verified Sui linking.
 
-The owner-authorized A1 Supabase migration and controlled production acceptance completed without a payout. The existing Stage 7C Paid claim and confirmed digest remained unchanged. PR #29 remains unmerged until its integration with the professional UI refinement is reviewed and exact-head CI passes. Default production AI remains deterministic mock mode: `AI_MODE=mock` and `GEMINI_LIVE_REQUESTS_ENABLED=false`.
+The owner-authorized A1 Supabase migration and controlled production acceptance completed without a payout. The existing Stage 7C Paid claim and confirmed digest remained unchanged.
+
+### A2-Lite live treasury activation
+
+The A2 branch completes the judge path: a persisted workspace locks its dynamic budget, then the human wallet signs separate Create, exact USDC Fund, and Allocate transactions. Each digest is saved before broadcast and ambiguous outcomes can only reconcile that same digest. Full activation reveals the join code, locks member claims to the verified wallet recipient, and assigns the workspace's own immutable `Treasury<USDC>` + `TreasurerCap<USDC>` pair.
+
+Human approval remains separate from Pay. Payout preparation resolves the Cap from the exact claim workspace, preflight compares Supabase with Sui, and Paid History appears only after confirmed finality. Production Gemini is explicit live-or-manual-review; mock AI is never a hidden live fallback. The A2 migration is not applied and production AI remains `AI_MODE=mock` with `GEMINI_LIVE_REQUESTS_ENABLED=false` until owner-controlled deployment.
 
 ## Hackathon Tracks
 

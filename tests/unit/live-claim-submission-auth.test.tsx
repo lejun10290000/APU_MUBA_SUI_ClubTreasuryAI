@@ -149,4 +149,14 @@ describe("live claim submission authentication ordering", () => {
     ).toBeInTheDocument();
     expect(state.ensureWalletIdentity).toHaveBeenCalledTimes(2);
   });
+
+  it("shows the verified wallet as a read-only payout recipient", async () => {
+    render(<LiveClaimSubmissionForm />);
+
+    expect(await screen.findByText(state.account.address)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", { name: /recipient sui address/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/verified wallet payout recipient/i)).toBeInTheDocument();
+  });
 });

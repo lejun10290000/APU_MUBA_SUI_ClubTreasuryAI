@@ -21,6 +21,12 @@ export function getAIService(
   if (config.AI_MODE === "mock") {
     return new MockAIService();
   }
+  if (!config.GEMINI_LIVE_REQUESTS_ENABLED) {
+    throw new Error("Live Gemini requests are disabled.");
+  }
+  if (!config.GEMINI_API_KEY?.trim()) {
+    throw new Error("Gemini API key is not configured.");
+  }
 
   return new GeminiAIService({
     apiKey: config.GEMINI_API_KEY,
@@ -28,4 +34,24 @@ export function getAIService(
     liveRequestsEnabled: config.GEMINI_LIVE_REQUESTS_ENABLED,
     createClient: dependencies.createGeminiClient,
   });
+}
+
+export function getClaimAIService(
+  config: AIServiceConfig = serverConfig,
+  dependencies: AIServiceDependencies = {},
+): AIService {
+  try {
+    return getAIService(config, dependencies);
+  } catch (error) {
+    const reason =
+      error instanceof Error ? error.message : "Live Gemini is not configured.";
+    return {
+      async analyzeReceipt() {
+        throw new Error(`Gemini analysis was unavailable. ${reason}`);
+      },
+      async parseBudget() {
+        throw new Error(`Gemini analysis was unavailable. ${reason}`);
+      },
+    };
+  }
 }

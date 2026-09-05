@@ -69,10 +69,6 @@ export function ClaimPayoutPanel({
         );
       }
       const packageId = requirePackageId(suiDeploymentConfig);
-      const capObjectId = suiConfig.treasurerCapObjectId;
-      if (!capObjectId) {
-        throw new Error("The TreasurerCap object ID is not configured.");
-      }
       setError(null);
       const result = await executeApprovedClaimPayout(claim.id, {
         prepare: (claimId) =>
@@ -83,7 +79,7 @@ export function ClaimPayoutPanel({
           requestJson<{ ok: true }>(
             `/api/payments/${attemptId}/preflight`,
           ).then(() => undefined),
-        authorize: async (snapshot) => {
+        authorize: async (snapshot, capObjectId) => {
           await verifyTreasurerCap(client, {
             capObjectId,
             connectedWalletAddress: account.address,
@@ -91,9 +87,8 @@ export function ClaimPayoutPanel({
             packageId,
             coinType: suiConfig.usdcCoinType,
           });
-          return { treasurerCapObjectId: capObjectId };
         },
-        build: (snapshot) =>
+        build: (snapshot, capObjectId) =>
           treasuryTransactionService.buildPayout({
             treasuryId: snapshot.treasuryObjectId,
             treasurerCapId: capObjectId,

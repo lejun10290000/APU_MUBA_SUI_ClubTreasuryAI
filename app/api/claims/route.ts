@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { persistedClaimSubmissionSchema } from "@/src/domain/stage5-claims";
-import { getAIService } from "@/src/lib/ai";
+import { getClaimAIService } from "@/src/lib/ai";
 import { getClaimRepository } from "@/src/lib/claims";
 import { submitClaimWorkflow } from "@/src/lib/claims/service";
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     );
     const result = await submitClaimWorkflow({
       repository: await getClaimRepository(),
-      aiService: getAIService(),
+      aiService: getClaimAIService(),
       submission,
       receipt,
     });

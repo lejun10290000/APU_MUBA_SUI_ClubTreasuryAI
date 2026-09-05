@@ -44,7 +44,7 @@ test("professional product shell navigates from landing to treasurer dashboard",
   expect(response.ok()).toBeTruthy();
   await expect(response.json()).resolves.toMatchObject({
     ok: true,
-    stage: 7,
+    stage: 8,
     readiness: {
       ai: { mode: "mock", liveRequestsEnabled: false },
       claims: { mode: "mock", supabaseConfigured: false },

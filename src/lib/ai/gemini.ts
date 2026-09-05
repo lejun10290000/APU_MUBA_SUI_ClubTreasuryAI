@@ -242,7 +242,7 @@ export class GeminiAIService implements AIService {
       }
       throw new AIServiceError(
         "PROVIDER_REQUEST_FAILED",
-        "Gemini analysis failed. Continue with manual review.",
+        "Gemini analysis was unavailable. Continue with manual review.",
       );
     }
   }

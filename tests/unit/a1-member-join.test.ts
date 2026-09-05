@@ -43,7 +43,14 @@ const treasury = {
   name: "Orientation Night 2026",
   currency: "USDC" as const,
   total_budget_minor: 150_000,
-  sui_treasury_object_id: null,
+  sui_treasury_object_id:
+    "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  sui_treasurer_cap_object_id:
+    "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  sui_activation_status: "active" as const,
+  activation_started_at: "2026-09-05T00:00:00.000Z",
+  activated_at: "2026-09-05T00:03:00.000Z",
+  budget_locked_at: "2026-09-05T00:00:00.000Z",
   join_code: "ORI1-AB12CD",
   status: "active" as const,
   created_at: "2026-09-04T00:00:00.000Z",
@@ -101,6 +108,42 @@ describe("A1 member join API", () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({
       error: expect.stringMatching(/not found|active/i),
+    });
+  });
+
+  it.each([
+    {
+      label: "not started",
+      treasury: {
+        ...treasury,
+        sui_treasury_object_id: null,
+        sui_treasurer_cap_object_id: null,
+        sui_activation_status: "not_started" as const,
+        activated_at: null,
+      },
+    },
+    {
+      label: "partially activated",
+      treasury: {
+        ...treasury,
+        sui_treasurer_cap_object_id: null,
+        sui_activation_status: "allocating" as const,
+        activated_at: null,
+      },
+    },
+  ])("rejects a discovered join code for a $label treasury", async ({ treasury: inactiveTreasury }) => {
+    const adminClient = {
+      from: vi.fn(() => query({ data: inactiveTreasury, error: null })),
+    };
+    mocks.createAdminClient.mockReturnValue(adminClient);
+    mocks.createServerClient.mockResolvedValue({});
+    const { POST } = await import("@/app/api/treasuries/join/route");
+
+    const response = await POST(joinRequest("ORI1-AB12CD"));
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      error: expect.stringMatching(/not yet active on Sui/i),
     });
   });
 

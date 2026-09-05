@@ -33,6 +33,7 @@ import type {
   SubmittedClaimInsert,
   TreasuryLinkState,
 } from "./types";
+import { resolveWorkspaceTreasurerCap } from "@/src/lib/payments/workspace-authorization";
 
 type TypedClient = SupabaseClient<Database>;
 
@@ -157,7 +158,7 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
         treasury_object_id: input.workspace.treasuryObjectId,
         member_user_id: input.identity.userId,
         member_wallet_address: input.identity.walletAddress,
-        recipient_sui_address: input.submission.recipientSuiAddress,
+        recipient_sui_address: input.identity.walletAddress,
         submitter_name: input.submission.submitterName,
         merchant: input.submission.merchant,
         description: input.submission.description,
@@ -284,12 +285,54 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
   }
 
   async preparePaymentAttempt(claimId: string) {
+    const { data: claimAuthorization, error: claimAuthorizationError } =
+      await this.userClient
+        .from("claims")
+        .select("treasury_id,approved_treasury_object_id")
+        .eq("id", claimId)
+        .maybeSingle();
+    if (claimAuthorizationError) throw claimAuthorizationError;
+    if (
+      !claimAuthorization ||
+      !claimAuthorization.approved_treasury_object_id
+    ) {
+      throw new Error("Approved payout snapshot is missing.");
+    }
+    const { data: treasuryAuthorization, error: treasuryAuthorizationError } =
+      await this.userClient
+        .from("treasuries")
+        .select(
+          "id,status,sui_activation_status,sui_treasury_object_id,sui_treasurer_cap_object_id",
+        )
+        .eq("id", claimAuthorization.treasury_id)
+        .maybeSingle();
+    if (treasuryAuthorizationError) throw treasuryAuthorizationError;
+    const treasurerCapObjectId = resolveWorkspaceTreasurerCap({
+      claimTreasuryId: claimAuthorization.treasury_id,
+      approvedTreasuryObjectId:
+        claimAuthorization.approved_treasury_object_id,
+      treasury: treasuryAuthorization
+        ? {
+            id: treasuryAuthorization.id,
+            status: treasuryAuthorization.status,
+            suiActivationStatus: treasuryAuthorization.sui_activation_status,
+            suiTreasuryObjectId:
+              treasuryAuthorization.sui_treasury_object_id,
+            suiTreasurerCapObjectId:
+              treasuryAuthorization.sui_treasurer_cap_object_id,
+          }
+        : null,
+    });
     const { data, error } = await this.userClient.rpc("prepare_claim_payment", {
       p_claim_id: claimId,
     });
     if (error) throw error;
     const attempt = mapPaymentAttemptRow(data);
-    return { attempt, snapshot: attempt.snapshot };
+    return {
+      attempt,
+      snapshot: attempt.snapshot,
+      treasurerCapObjectId,
+    };
   }
 
   async getPaymentAttempt(attemptId: string) {
@@ -338,6 +381,14 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
     if (!treasury.sui_treasury_object_id) {
       throw new Error("Payment treasury is not linked to Sui.");
     }
+    if (
+      treasury.sui_activation_status !== "active" ||
+      !treasury.sui_treasurer_cap_object_id
+    ) {
+      throw new Error(
+        "Payment workspace activation and TreasurerCap are not confirmed.",
+      );
+    }
 
     const approvedSnapshot =
       claim.approved_treasury_object_id &&
@@ -368,6 +419,8 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
       treasury: {
         id: treasury.id,
         suiTreasuryObjectId: treasury.sui_treasury_object_id,
+        suiTreasurerCapObjectId: treasury.sui_treasurer_cap_object_id,
+        suiActivationStatus: treasury.sui_activation_status,
         currency: treasury.currency,
         status: treasury.status,
       },

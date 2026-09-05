@@ -153,7 +153,8 @@ describe("A1 unlinked approval and payment guards", () => {
       requestedAmountMinor: asMinorAmount(100),
       receiptAmountMinor: asMinorAmount(100),
       receiptReference: "A1-UNLINKED",
-      recipientSuiAddress: demoSuiAddress,
+      recipientSuiAddress:
+        "0x9999999999999999999999999999999999999999999999999999999999999999",
       currency: "USDC",
     };
     const workspace = await repository.ensureWorkspace(submission);
@@ -166,6 +167,7 @@ describe("A1 unlinked approval and payment guards", () => {
       receiptMimeType: "image/png",
       receiptSizeBytes: 128,
     });
+    expect(created.recipientSuiAddress).toBe(repository.identity.walletAddress);
     await repository.markManualReview(created.id, "Review required.");
 
     await expect(

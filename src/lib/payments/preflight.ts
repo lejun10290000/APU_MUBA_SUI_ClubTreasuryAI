@@ -33,6 +33,8 @@ export interface PaymentPreflightPersistedState {
   treasury: {
     id: string;
     suiTreasuryObjectId: string;
+    suiTreasurerCapObjectId: string;
+    suiActivationStatus: string;
     currency: string;
     status: string;
   };
@@ -185,6 +187,11 @@ export async function preflightPaymentAttempt(
   if (
     treasury.currency !== "USDC" ||
     treasury.status !== "active" ||
+    treasury.suiActivationStatus !== "active" ||
+    !normalizeForPreflight(
+      treasury.suiTreasurerCapObjectId,
+      "workspace TreasurerCap ID",
+    ) ||
     normalizeForPreflight(
       treasury.suiTreasuryObjectId,
       "persisted Treasury ID",

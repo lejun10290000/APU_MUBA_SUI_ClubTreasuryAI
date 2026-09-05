@@ -22,10 +22,14 @@ export type PaymentReconciliationResult =
 export interface ApprovedClaimPayoutDependencies<TTransaction = unknown> {
   prepare(claimId: string): Promise<PreparePaymentResult>;
   preflight(attemptId: string): Promise<void>;
-  authorize(snapshot: ApprovedPayoutSnapshot): Promise<{
-    treasurerCapObjectId: string;
-  }>;
-  build(snapshot: ApprovedPayoutSnapshot): TTransaction;
+  authorize(
+    snapshot: ApprovedPayoutSnapshot,
+    treasurerCapObjectId: string,
+  ): Promise<void>;
+  build(
+    snapshot: ApprovedPayoutSnapshot,
+    treasurerCapObjectId: string,
+  ): TTransaction;
   sign(
     transaction: TTransaction,
   ): Promise<{ bytes: string; signature: string }>;
@@ -48,7 +52,8 @@ export async function executeApprovedClaimPayout<TTransaction>(
   dependencies: ApprovedClaimPayoutDependencies<TTransaction>,
 ): Promise<PaymentReconciliationResult> {
   dependencies.onPhase?.("preparing");
-  const { attempt, snapshot } = await dependencies.prepare(claimId);
+  const { attempt, snapshot, treasurerCapObjectId } =
+    await dependencies.prepare(claimId);
 
   if (attempt.transactionDigest) {
     dependencies.onPhase?.("confirming");
@@ -60,8 +65,8 @@ export async function executeApprovedClaimPayout<TTransaction>(
   }
 
   await dependencies.preflight(attempt.id);
-  const { treasurerCapObjectId } = await dependencies.authorize(snapshot);
-  const transaction = dependencies.build(snapshot);
+  await dependencies.authorize(snapshot, treasurerCapObjectId);
+  const transaction = dependencies.build(snapshot, treasurerCapObjectId);
 
   dependencies.onPhase?.("awaiting_signature");
   const signed = await dependencies.sign(transaction);

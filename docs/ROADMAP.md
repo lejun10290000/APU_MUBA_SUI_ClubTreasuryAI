@@ -169,6 +169,16 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 - [x] Perform controlled production A1 acceptance without payout
 - [x] Verify Stage 7C paid evidence remains unchanged after migration
 - [x] Professionalize the judging workflow, mobile navigation, and public Sui proof presentation
+- [x] Implement A2 per-workspace Create/Fund/Allocate activation with digest-first reconciliation
+- [x] Add automatic multi-coin Circle Testnet USDC selection and exact funding
+- [x] Restrict join codes to Sui-active workspaces and lock claim recipients to verified wallets
+- [x] Resolve payouts from each workspace's immutable TreasurerCap relationship
+- [x] Replace sample History with authorized persisted paid claims
+- [x] Make production Gemini explicit live-or-manual-review with no mock fallback
+- [x] Pass A2 lint, typecheck, 263 tests, build, and 9/9 browser assertions
+- [ ] Obtain independent A2 code/migration review
+- [ ] Apply A2 migration only with owner authorization
+- [ ] Run owner-authorized smoke acceptance only after reviewed deployment
 - [ ] Verify public repo + no secrets after Stage 8A docs merge
 
 ### 8B — Demo video — IN PROGRESS

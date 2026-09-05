@@ -48,6 +48,10 @@ const treasuryRow = {
   currency: "USDC",
   total_budget_minor: 150_000,
   sui_treasury_object_id: null,
+  sui_treasurer_cap_object_id: null,
+  sui_activation_status: "not_started",
+  budget_locked_at: null,
+  activated_at: null,
   join_code: "ORI1-AB12CD",
   status: "active",
   created_at: "2026-09-04T00:00:00.000Z",
@@ -143,7 +147,6 @@ describe("A1 treasury API", () => {
       treasury: {
         id: treasuryRow.id,
         linkedToSui: false,
-        joinCode: "ORI1-AB12CD",
         role: "owner",
         categories: [],
       },
@@ -198,6 +201,14 @@ describe("A1 treasury API", () => {
   });
 
   it("lists only RLS-visible treasuries and hides join codes from members", async () => {
+    const ownerTreasury = {
+      ...treasuryRow,
+      sui_treasury_object_id: `0x${"7".repeat(64)}`,
+      sui_treasurer_cap_object_id: `0x${"8".repeat(64)}`,
+      sui_activation_status: "active",
+      budget_locked_at: "2026-09-05T00:00:00.000Z",
+      activated_at: "2026-09-05T00:02:00.000Z",
+    };
     const memberTreasury = {
       ...treasuryRow,
       id: "44444444-4444-4444-8444-444444444444",
@@ -205,7 +216,7 @@ describe("A1 treasury API", () => {
       join_code: "MEM1-ABCDEF",
     };
     const results: Record<string, QueryResult> = {
-      treasuries: { data: [treasuryRow, memberTreasury], error: null },
+      treasuries: { data: [ownerTreasury, memberTreasury], error: null },
       treasury_members: {
         data: [{ treasury_id: memberTreasury.id, role: "member" }],
         error: null,
@@ -225,6 +236,7 @@ describe("A1 treasury API", () => {
         ],
         error: null,
       },
+      treasury_sui_activations: { data: [], error: null },
     };
     const client = {
       from: vi.fn((table: string) => query(results[table]!)),
@@ -238,7 +250,7 @@ describe("A1 treasury API", () => {
     expect(response.status).toBe(200);
     expect(body.treasuries).toHaveLength(2);
     expect(body.treasuries[0]).toMatchObject({
-      id: treasuryRow.id,
+      id: ownerTreasury.id,
       role: "owner",
       joinCode: "ORI1-AB12CD",
     });

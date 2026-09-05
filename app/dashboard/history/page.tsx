@@ -25,12 +25,12 @@ export default function HistoryPage() {
             Activity and transaction history
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Separate sample workflow activity from independently verifiable Sui
-            Testnet payment evidence.
+            Persisted paid claims with independently verifiable Sui Testnet
+            transaction evidence.
           </p>
         </div>
         <span className="w-fit rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-xs font-semibold text-[var(--muted)]">
-          Sample activity + live proof
+          Paid only · newest first
         </span>
       </section>
       <HistoryPanel />

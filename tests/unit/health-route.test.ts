@@ -6,7 +6,7 @@ describe("GET /api/health", () => {
     vi.resetModules();
   });
 
-  it("returns a non-secret Stage 7 readiness contract without caching", async () => {
+  it("returns a non-secret Stage 8 readiness contract without caching", async () => {
     const { GET } = await import("@/app/api/health/route");
     const response = GET();
     const body = await response.json();
@@ -16,7 +16,7 @@ describe("GET /api/health", () => {
       ok: true,
       ready: expect.any(Boolean),
       service: "clubtreasury-ai",
-      stage: 7,
+      stage: 8,
       readiness: {
         ai: {
           mode: expect.any(String),

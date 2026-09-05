@@ -42,6 +42,7 @@ export interface PaymentAttempt {
 export interface PreparePaymentResult {
   attempt: PaymentAttempt;
   snapshot: ApprovedPayoutSnapshot;
+  treasurerCapObjectId: string;
 }
 
 export interface ConfirmedPaymentInput {

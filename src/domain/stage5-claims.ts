@@ -61,7 +61,9 @@ export const persistedClaimSubmissionSchema = z.object({
   requestedAmountMinor: positiveMinorAmountSchema,
   receiptAmountMinor: positiveMinorAmountSchema.nullable(),
   receiptReference: z.string().trim().max(100).nullable(),
-  recipientSuiAddress: recipientSuiAddressSchema,
+  // Legacy clients may send this value, but the server always derives the
+  // authoritative payout recipient from the verified wallet principal.
+  recipientSuiAddress: recipientSuiAddressSchema.optional(),
   currency: currencySchema.default("USDC"),
 });
 

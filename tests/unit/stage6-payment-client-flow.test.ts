@@ -30,14 +30,18 @@ const preparedAttempt: PaymentAttempt = {
   confirmedAt: null,
 };
 
+const workspaceCapObjectId =
+  "0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7";
+
 function dependencies(overrides: Record<string, unknown> = {}) {
   return {
-    prepare: vi.fn().mockResolvedValue({ attempt: preparedAttempt, snapshot }),
-    preflight: vi.fn().mockResolvedValue(undefined),
-    authorize: vi.fn().mockResolvedValue({
-      treasurerCapObjectId:
-        "0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7",
+    prepare: vi.fn().mockResolvedValue({
+      attempt: preparedAttempt,
+      snapshot,
+      treasurerCapObjectId: workspaceCapObjectId,
     }),
+    preflight: vi.fn().mockResolvedValue(undefined),
+    authorize: vi.fn().mockResolvedValue(undefined),
     build: vi.fn().mockReturnValue({ kind: "unsigned-payout" }),
     sign: vi
       .fn()
@@ -88,15 +92,14 @@ describe("approved claim payout client flow", () => {
 
     await executeApprovedClaimPayout(preparedAttempt.claimId, deps);
 
-    expect(deps.authorize).toHaveBeenCalledWith(snapshot);
-    expect(deps.build).toHaveBeenCalledWith(snapshot);
+    expect(deps.authorize).toHaveBeenCalledWith(snapshot, workspaceCapObjectId);
+    expect(deps.build).toHaveBeenCalledWith(snapshot, workspaceCapObjectId);
     expect(deps.persistSignedSubmission).toHaveBeenCalledWith(
       preparedAttempt.id,
       {
         transactionDigest: "digest-signed-transaction-12345",
         signedTransactionBase64: "c2lnbmVkLXR4",
-        treasurerCapObjectId:
-          "0x86343cc7af70e9524df589193332c35ed3f9e83f877c7e8ac2a8ee230612b6c7",
+        treasurerCapObjectId: workspaceCapObjectId,
       },
     );
     expect(
@@ -129,7 +132,11 @@ describe("approved claim payout client flow", () => {
       transactionDigest: "digest-existing-transaction-12345",
     };
     const deps = dependencies({
-      prepare: vi.fn().mockResolvedValue({ attempt: submitted, snapshot }),
+      prepare: vi.fn().mockResolvedValue({
+        attempt: submitted,
+        snapshot,
+        treasurerCapObjectId: workspaceCapObjectId,
+      }),
       reconcile: vi
         .fn()
         .mockResolvedValue({ state: "reconciliation_required" }),
