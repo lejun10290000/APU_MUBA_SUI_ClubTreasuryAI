@@ -22,17 +22,23 @@ describe("A2 claim role flow regression", () => {
     expect(shell).not.toContain('href: "/dashboard/claims/new"');
   });
 
-  it("re-verifies the currently connected wallet before a human decision", () => {
-    const review = source("src/components/claim-review-panel.tsx");
-    expect(review).toContain("ensureWalletIdentity");
-    expect(review).toContain("useCurrentAccount");
-    expect(review).toContain("useDAppKit");
-    expect(review).toMatch(/await ensureWalletIdentity[\s\S]*?\/decision/);
+  it("synchronizes the connected dashboard wallet before treasurer actions are exposed", () => {
+    const shell = source("src/components/dashboard-shell.tsx");
+    expect(shell).toContain("ensureWalletIdentity");
+    expect(shell).toContain("useCurrentAccount");
+    expect(shell).toContain("useDAppKit");
+    expect(shell).toContain("Verifying connected treasurer wallet");
   });
 
-  it("rejects owner and treasurer identities from member claim submission", () => {
-    const repository = source("src/lib/claims/supabase-repository.ts");
-    expect(repository).toContain('membership.role !== "member"');
-    expect(repository).toContain("Only treasury members can submit reimbursement claims.");
+  it("enforces member-only claim submission on the server", () => {
+    const route = source("app/api/claims/route.ts");
+    const authorization = source(
+      "src/lib/claims/submission-authorization.ts",
+    );
+    expect(route).toContain("requireMemberClaimSubmission");
+    expect(authorization).toContain('membership.role !== "member"');
+    expect(authorization).toContain(
+      "Only treasury members can submit reimbursement claims.",
+    );
   });
 });
