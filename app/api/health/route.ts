@@ -25,7 +25,7 @@ export function GET() {
       ok: true,
       ready: aiReady && claimsReady && packageConfigured,
       service: "clubtreasury-ai",
-      stage: 7,
+      stage: 8,
       readiness: {
         ai: {
           mode: serverConfig.AI_MODE,

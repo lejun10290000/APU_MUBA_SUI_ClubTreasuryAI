@@ -27,24 +27,31 @@ describe("AI service selection and mock safety", () => {
     expect(createGeminiClient).not.toHaveBeenCalled();
   });
 
-  it("selects Gemini in live mode without constructing a client eagerly", async () => {
+  it("rejects live mode while billable requests are disabled", () => {
     const createGeminiClient = vi.fn(() => {
       throw new Error("Construction should be lazy.");
     });
-    const service = getAIService(
-      {
-        ...baseConfig,
-        AI_MODE: "live",
-        GEMINI_API_KEY: "test-only-key",
-      },
-      { createGeminiClient },
-    );
+    expect(() =>
+      getAIService(
+        {
+          ...baseConfig,
+          AI_MODE: "live",
+          GEMINI_API_KEY: "test-only-key",
+        },
+        { createGeminiClient },
+      ),
+    ).toThrow("Live Gemini requests are disabled.");
+    expect(createGeminiClient).not.toHaveBeenCalled();
+  });
+
+  it("selects Gemini only when live requests and a key are both configured", () => {
+    const service = getAIService({
+      ...baseConfig,
+      AI_MODE: "live",
+      GEMINI_API_KEY: "test-only-key",
+      GEMINI_LIVE_REQUESTS_ENABLED: true,
+    });
 
     expect(service).toBeInstanceOf(GeminiAIService);
-    expect(createGeminiClient).not.toHaveBeenCalled();
-    await expect(
-      service.parseBudget("Allocate 10 USDC to food."),
-    ).rejects.toMatchObject({ code: "LIVE_REQUESTS_DISABLED" });
-    expect(createGeminiClient).not.toHaveBeenCalled();
   });
 });

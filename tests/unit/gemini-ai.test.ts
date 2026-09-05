@@ -229,7 +229,7 @@ describe("GeminiAIService", () => {
 
     await expect(service.parseBudget("Valid input")).rejects.toMatchObject({
       code: "PROVIDER_REQUEST_FAILED",
-      message: "Gemini analysis failed. Continue with manual review.",
+      message: "Gemini analysis was unavailable. Continue with manual review.",
     });
   });
 });
