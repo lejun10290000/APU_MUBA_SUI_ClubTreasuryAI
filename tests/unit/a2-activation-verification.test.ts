@@ -85,6 +85,53 @@ describe("A2 activation chain verification", () => {
     ).not.toThrow();
   });
 
+  it("accepts the same frozen allocations when chain category order differs", () => {
+    const transaction = {
+      digest: "digest",
+      success: true,
+      checkpointed: true,
+      sender: owner,
+      moveCalls: [
+        {
+          packageId,
+          module: "treasury",
+          function: "confirm_allocations",
+          typeArguments: [coinType],
+          objectIds: [treasuryId, capId],
+        },
+      ],
+      createdObjects: [],
+    };
+
+    expect(() =>
+      verifyAllocationActivation(transaction, {
+        digest: "digest",
+        ownerWalletAddress: owner,
+        packageId,
+        coinType,
+        treasuryObjectId: treasuryId,
+        treasurerCapObjectId: capId,
+        treasury: {
+          objectId: treasuryId,
+          treasurerAddress: owner,
+          externalReference: "workspace",
+          custodyAtomic: 10_000_000n,
+          allocationsConfirmed: true,
+          categories: [
+            { reference: "marketing", allocatedAtomic: 5_000_000n, remainingAtomic: 5_000_000n },
+            { reference: "venue", allocatedAtomic: 3_000_000n, remainingAtomic: 3_000_000n },
+            { reference: "food", allocatedAtomic: 2_000_000n, remainingAtomic: 2_000_000n },
+          ],
+        },
+        expectedCategories: [
+          { reference: "marketing", allocatedAtomic: 5_000_000n },
+          { reference: "food", allocatedAtomic: 2_000_000n },
+          { reference: "venue", allocatedAtomic: 3_000_000n },
+        ],
+      }),
+    ).not.toThrow();
+  });
+
   it("requires reconciliation for success-shaped mismatched evidence", () => {
     expect(() =>
       verifyFundActivation(

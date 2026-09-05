@@ -252,14 +252,21 @@ export function verifyAllocationActivation(
     }
   }
   const actual = expected.treasury.categories;
+  const actualByReference = new Map(
+    actual.map((category) => [category.reference, category] as const),
+  );
+  const expectedReferences = new Set(
+    expected.expectedCategories.map((category) => category.reference),
+  );
   const categoriesMatch =
     expected.treasury.allocationsConfirmed &&
     actual.length === expected.expectedCategories.length &&
-    actual.every((category, index) => {
-      const wanted = expected.expectedCategories[index];
+    actualByReference.size === actual.length &&
+    expectedReferences.size === expected.expectedCategories.length &&
+    expected.expectedCategories.every((wanted) => {
+      const category = actualByReference.get(wanted.reference);
       return (
-        wanted?.reference === category.reference &&
-        wanted.allocatedAtomic === category.allocatedAtomic &&
+        category?.allocatedAtomic === wanted.allocatedAtomic &&
         category.remainingAtomic === category.allocatedAtomic
       );
     });
