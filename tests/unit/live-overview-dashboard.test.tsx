@@ -32,11 +32,6 @@ function workspace(id: string, name: string, spentMinor: number) {
   };
 }
 
-function elementIncludes(text: string) {
-  return (_content: string, element: Element | null) =>
-    element?.textContent?.includes(text) ?? false;
-}
-
 beforeEach(() => {
   const older = workspace("older", "Older Event", 10);
   const newest = workspace("newest", "A2 Smoke Test 2", 25);
@@ -101,12 +96,12 @@ describe("live Overview dashboard", () => {
     const selector = await screen.findByLabelText("Viewing treasury");
     expect(selector).toHaveValue("newest");
     expect(screen.getByText("Campus Cafe")).toBeInTheDocument();
-    expect(screen.getByText(elementIncludes("0.75 USDC remaining"))).toBeInTheDocument();
+    expect(screen.getByText("0.75 USDC left")).toBeInTheDocument();
 
     fireEvent.change(selector, { target: { value: "older" } });
 
     await waitFor(() => expect(selector).toHaveValue("older"));
-    expect(screen.getByText(elementIncludes("0.90 USDC remaining"))).toBeInTheDocument();
+    expect(screen.getByText("0.90 USDC left")).toBeInTheDocument();
     expect(screen.queryByText("Campus Cafe")).not.toBeInTheDocument();
     expect(window.location.search).toContain("treasury=older");
   });
