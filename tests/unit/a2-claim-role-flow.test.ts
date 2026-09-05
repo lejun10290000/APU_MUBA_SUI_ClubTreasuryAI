@@ -16,10 +16,17 @@ describe("A2 claim role flow regression", () => {
     expect(submissionForm).not.toContain("/dashboard/claims/review?claim=");
   });
 
-  it("routes the treasurer Claims navigation to the review inbox", () => {
+  it("routes live treasurers to the review inbox while preserving the mock claim fixture", () => {
     const shell = source("src/components/dashboard-shell.tsx");
-    expect(shell).toContain('href: "/dashboard/claims"');
-    expect(shell).not.toContain('href: "/dashboard/claims/new"');
+    const newClaimPage = source("app/dashboard/claims/new/page.tsx");
+
+    expect(shell).toContain("publicConfig.claimDataMode");
+    expect(shell).toContain('"/dashboard/claims"');
+    expect(shell).toContain('"/dashboard/claims/new"');
+    expect(newClaimPage).toContain('publicConfig.claimDataMode === "live"');
+    expect(newClaimPage).toContain('redirect("/dashboard/claims")');
+    expect(newClaimPage).toContain("<ClaimSubmissionForm />");
+    expect(newClaimPage).not.toContain("LiveClaimSubmissionForm");
   });
 
   it("synchronizes the connected dashboard wallet before treasurer actions are exposed", () => {
