@@ -50,37 +50,41 @@ const navigation: Array<{
   },
 ];
 
+type IdentityResult = {
+  address: string;
+  error: string | null;
+};
+
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const account = useCurrentAccount();
   const dAppKit = useDAppKit();
-  const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
-  const [identityError, setIdentityError] = useState<string | null>(null);
+  const [identityResult, setIdentityResult] = useState<IdentityResult | null>(
+    null,
+  );
   const [identityAttempt, setIdentityAttempt] = useState(0);
 
   useEffect(() => {
-    if (!account) {
-      setVerifiedAddress(null);
-      setIdentityError(null);
-      return;
-    }
+    if (!account) return;
     let cancelled = false;
-    setIdentityError(null);
+    const address = account.address;
     void ensureWalletIdentity({
       signer: dAppKit,
-      walletAddress: account.address,
+      walletAddress: address,
       displayName: "Club treasurer",
     })
       .then(() => {
-        if (!cancelled) setVerifiedAddress(account.address);
+        if (!cancelled) setIdentityResult({ address, error: null });
       })
       .catch((caught) => {
         if (!cancelled) {
-          setIdentityError(
-            caught instanceof Error
-              ? caught.message
-              : "The connected treasurer wallet could not be verified.",
-          );
+          setIdentityResult({
+            address,
+            error:
+              caught instanceof Error
+                ? caught.message
+                : "The connected treasurer wallet could not be verified.",
+          });
         }
       });
     return () => {
@@ -94,8 +98,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       : pathname.startsWith(match);
   };
 
-  const walletIdentityReady =
-    !account || verifiedAddress?.toLowerCase() === account.address.toLowerCase();
+  const currentAddress = account?.address.toLowerCase() ?? null;
+  const resultForCurrentWallet =
+    currentAddress && identityResult?.address.toLowerCase() === currentAddress
+      ? identityResult
+      : null;
+  const walletIdentityReady = !account || resultForCurrentWallet?.error === null;
+  const identityError = resultForCurrentWallet?.error ?? null;
 
   return (
     <div className="min-h-screen bg-[var(--canvas)] text-[var(--ink)] lg:grid lg:grid-cols-[256px_1fr]">
