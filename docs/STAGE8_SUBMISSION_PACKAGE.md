@@ -101,7 +101,42 @@ Native Circle Testnet USDC:
 0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC
 ```
 
-### Final Stage 8 A2 live acceptance
+### Latest final-demo transaction
+
+Use this as the headline on-chain evidence for the final Devfolio submission because it is the newest confirmed production payout from the completed demo workflow.
+
+```text
+Claim:
+eeb68898-0e97-42a2-8915-09fb979216f6
+
+Merchant:
+KFC
+
+Category:
+food
+
+Payout:
+0.10 USDC
+
+Recipient:
+0x6b5ccd6b9abe76887fd93bdf04659cbbe32c42c3e9c308a240963df0cd4e2560
+
+Treasury:
+0x3948cd01863da1016839864e605f9147bd68e205625036504fab317cdb9adc32
+
+Confirmed digest:
+9S7gWEcZ4L2cKUt9n89KVsm5NTi4uoRoaSNUzxDiiKCm
+
+Final claim/payment state:
+paid / paid
+
+Payment attempt:
+1 confirmed
+```
+
+### Earlier Stage 8 A2 production acceptance
+
+Keep this as historical technical verification of the production hotfix and controlled A2 acceptance.
 
 ```text
 Claim:
@@ -113,12 +148,6 @@ Campus Cafe
 Payout:
 0.10 USDC
 
-Recipient:
-0x6b5ccd6b9abe76887fd93bdf04659cbbe32c42c3e9c308a240963df0cd4e2560
-
-Treasury:
-0x403e3e172e17201c8b940672fbf9b980fb094b36e9a68ffe569b00e84e7e2737
-
 Confirmed digest:
 ASxHXkS2N31rzFY2XP7NpQXGdWtTicPxVrGW7EojpyWm
 
@@ -128,6 +157,8 @@ paid / paid
 Payment attempts:
 1 confirmed
 ```
+
+Detailed evidence: [`STAGE8_A2_LIVE_ACCEPTANCE.md`](STAGE8_A2_LIVE_ACCEPTANCE.md)
 
 ## Tracks
 
@@ -229,7 +260,7 @@ University clubs already operate shared budgets, expense reimbursements, committ
 
 ## Suggested 30-second Pitch
 
-> University clubs still manage money through spreadsheets, receipts, and chat approvals. ClubTreasury AI turns that into one safe workflow. Gemini understands budget instructions and receipt evidence, deterministic checks enforce hard financial rules, the treasurer remains the final approver, and Sui Move securely executes the approved USDC payment. We deployed it on Sui Testnet and verified a real end-to-end payout with duplicate-payment and reconciliation protections.
+> University clubs still manage money through spreadsheets, receipts, and chat approvals. ClubTreasury AI turns that into one safe workflow. Gemini understands budget instructions and receipt evidence, deterministic checks enforce hard financial rules, the treasurer remains the final approver, and Sui Move securely executes the approved USDC payment. We deployed it on Sui Testnet and verified real end-to-end payouts with duplicate-payment and reconciliation protections.
 
 ## Suggested Screenshots
 
@@ -238,8 +269,8 @@ Use 3–5 strong screenshots for Devfolio, with the strongest overview/dashboard
 1. live dashboard / treasury overview
 2. Gemini claim analysis + deterministic checks
 3. human approval boundary / approved-unpaid state
-4. confirmed paid state with transaction digest
-5. SuiVision USDC balance or event proof
+4. confirmed paid state with the KFC transaction digest
+5. SuiVision USDC transfer/event proof for the same digest
 
 Do not expose private receipt content unless it is synthetic and intentionally safe for submission.
 
@@ -272,6 +303,8 @@ Current MVP deliberately focuses on a safe auditable core. Post-hackathon opport
 - [x] README includes problem, solution, Sui, setup, team and AI declaration
 - [x] live production URL available
 - [x] Sui Testnet package / USDC / payout evidence documented
+- [x] latest KFC final-demo payout recorded as headline transaction evidence
+- [x] earlier A2 acceptance retained as historical technical verification
 - [x] final demo video uploaded to YouTube
 - [x] final demo video URL added to repository docs
 - [x] Track 01 explanation prepared
