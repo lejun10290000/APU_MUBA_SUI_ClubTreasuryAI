@@ -1,6 +1,6 @@
 # ClubTreasury AI — Hackathon Roadmap
 
-This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Core product scope is frozen; Stage 8 is submission and presentation work.
+This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Core product scope is frozen; Stage 8 is submission, live-demo reliability, and presentation work.
 
 ## Stage 0 — Planning and repository setup — COMPLETE
 
@@ -147,7 +147,7 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 
 ## Stage 8 — Submission and pitch — CURRENT
 
-### 8A — Submission package — IN PROGRESS
+### 8A — Submission package / live-demo polish — IN PROGRESS
 
 - [x] Advance project status to Stage 8
 - [x] Add all official team members
@@ -158,28 +158,30 @@ Successful Stage 7C rehearsal digest: `9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGP
 - [x] Document implemented Gemini product AI for judges
 - [x] Add live demo URL + screenshot/video placeholders
 - [x] Create copy-ready Devfolio submission package
-- [x] Implement local persisted Treasury → Budget → Claims continuity
+- [x] Implement persisted Treasury → Budget → Claims continuity
 - [x] Enable authenticated Member join-code claim path
 - [x] Block approval/payment/signing until verified Sui link
 - [x] Add owner-only verified Treasury/TreasurerCap link step
-- [x] Make an existing pre-link claim approvable after verified treasury linking and reload without resubmission
-- [x] Pass A1 local lint, typecheck, 232 unit tests, and production build
-- [x] Run all 9 Playwright scenarios without assertion failure; Windows cleanup hang remains accurately recorded
-- [x] Apply A1 Supabase migration with owner authorization
-- [x] Perform controlled production A1 acceptance without payout
-- [x] Verify Stage 7C paid evidence remains unchanged after migration
-- [x] Professionalize the judging workflow, mobile navigation, and public Sui proof presentation
 - [x] Implement A2 per-workspace Create/Fund/Allocate activation with digest-first reconciliation
 - [x] Add automatic multi-coin Circle Testnet USDC selection and exact funding
 - [x] Restrict join codes to Sui-active workspaces and lock claim recipients to verified wallets
 - [x] Resolve payouts from each workspace's immutable TreasurerCap relationship
 - [x] Replace sample History with authorized persisted paid claims
-- [x] Make production Gemini explicit live-or-manual-review with no mock fallback
-- [x] Pass A2 lint, typecheck, 263 tests, build, and 9/9 browser assertions
-- [ ] Obtain independent A2 code/migration review
-- [ ] Apply A2 migration only with owner authorization
-- [ ] Run owner-authorized smoke acceptance only after reviewed deployment
-- [ ] Verify public repo + no secrets after Stage 8A docs merge
+- [x] Make production Gemini explicit live-or-manual-review with no hidden mock fallback
+- [x] Deploy A2 and begin owner-authorized smoke acceptance
+- [x] Reach member claim → Gemini/deterministic review → treasurer human decision boundary in production
+- [x] Reproduce `treasury_object_id` ambiguity on approval without creating a payout
+- [x] Prepare PR #33 forward-only `decide_claim` hotfix with regression coverage; exact-head CI #188 green
+- [ ] Merge PR #33 and apply its migration to the production Supabase project
+- [ ] Resume the same under-review A2 smoke claim and verify Approve → `approved_unpaid`
+- [ ] Verify separate wallet-signed payout path only after approval is confirmed
+- [x] Replace production sample Overview with a live treasury-selectable dashboard in PR #34
+- [x] Filter Overview data by exact managed treasury ID for budgets, claims, and paid history
+- [x] Preserve treasury selection in `?treasury=<id>` and add manual + 30-second refresh
+- [x] Add live Overview unit/component coverage and pass exact code-head CI #202: lint, typecheck, 274 tests, build, Playwright smoke
+- [ ] Merge PR #34 after PR #33 integration/rebase keeps status docs accurate
+- [ ] Verify the merged production Overview using real persisted A2 treasury data
+- [ ] Verify public repo + no secrets after final Stage 8A merges
 
 ### 8B — Demo video — IN PROGRESS
 
@@ -241,4 +243,4 @@ Do not add these before submission unless explicitly required:
 
 ## Team Rule
 
-If an optional feature risks the core demo or submission deadline, skip it. Stage 8 is packaging and presentation, not feature expansion.
+If an optional feature risks the core demo or submission deadline, skip it. Stage 8 is packaging, live-demo reliability, and presentation rather than feature expansion.
