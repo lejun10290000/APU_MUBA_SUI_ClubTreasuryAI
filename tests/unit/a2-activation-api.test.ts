@@ -49,4 +49,17 @@ describe("A2 activation persistence rules", () => {
       assertCanRecordSignedActivationStep(activation, "create", "new"),
     ).toThrow(/already confirmed/i);
   });
+
+  it("allows a replacement signature only after the saved digest is proven failed on-chain", () => {
+    const failed = {
+      ...activation,
+      fundStatus: "failed",
+      fundDigest: "failed-digest",
+    } as unknown as TreasurySuiActivation;
+
+    expect(nextActivationStep(failed)).toBe("fund");
+    expect(() =>
+      assertCanRecordSignedActivationStep(failed, "fund", "replacement-digest"),
+    ).not.toThrow();
+  });
 });
