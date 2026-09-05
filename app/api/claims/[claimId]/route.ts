@@ -33,19 +33,20 @@ export async function GET(
             humanConfirmationRequired: true as const,
           }
         : null;
+    const provenancePayload = aiProvenance ? { aiProvenance } : {};
     try {
       const receiptPreviewUrl = await createAuthorizedReceiptUrl(claimId);
       return NextResponse.json({
         claim,
         treasuryLink,
-        aiProvenance,
+        ...provenancePayload,
         receiptPreviewUrl,
       });
     } catch {
       return NextResponse.json({
         claim,
         treasuryLink,
-        aiProvenance,
+        ...provenancePayload,
         receiptPreviewUrl: null,
         receiptPreviewError:
           "Private receipt preview is temporarily unavailable. The persisted claim can still be reviewed.",
