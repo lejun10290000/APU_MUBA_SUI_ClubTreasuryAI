@@ -2,7 +2,11 @@
 
 **AI-powered programmable treasury for university clubs, built on Sui.**
 
-Live demo: https://apumubasuiclubtreasuryai000.vercel.app
+## Submission Links
+
+- **Live demo:** https://apumubasuiclubtreasuryai000.vercel.app
+- **Demo video:** https://youtu.be/VLn7P-Cy6tQ
+- **Public repository:** https://github.com/lejun10290000/APU_MUBA_SUI_ClubTreasuryAI
 
 ## Problem
 
@@ -62,7 +66,7 @@ Gemini handles unstructured financial information that deterministic rules alone
 - category suggestion;
 - concise review reasons.
 
-Every live model response is validated server-side. The UI visibly identifies Gemini provider/model/mode and keeps human confirmation explicit.
+Every live model response is validated server-side. Invalid, incomplete, ambiguous, or schema-conflicting model output falls back to human review rather than becoming financial authority. The UI visibly identifies Gemini provider/model/mode and keeps human confirmation explicit.
 
 ## Why Sui Is Integral
 
@@ -79,6 +83,16 @@ It provides:
 - public transaction evidence.
 
 Before signing, the application also performs a server-authoritative Supabase ↔ Sui consistency check. If the database and on-chain Treasury state do not match, wallet signing is blocked.
+
+## Hackathon Tracks
+
+### Sui Track 01 — Payments & Stablecoins
+
+ClubTreasury AI demonstrates a real stablecoin treasury workflow for university clubs: Sui Testnet USDC custody, category budgeting, reimbursement claims, explicit treasurer-controlled payouts, and public transaction proof.
+
+### Sui Track 02 — AI × Sui
+
+Gemini solves the unstructured financial-understanding problem, deterministic rules and human approval keep the recommendation safe, and Sui is the integral custody and execution layer.
 
 ## Judge-facing Architecture
 
@@ -217,22 +231,25 @@ GEMINI_MODEL=gemini-2.5-flash
 
 Never expose Gemini or Supabase server secrets with a `NEXT_PUBLIC_` prefix.
 
-## Latest Verification
+## Latest Product Verification
 
-Latest product merge on `main`:
+Latest product-code baseline before the final docs-only submission refresh:
 
 ```text
-24255152976109a8f55399bf791e7a8768c5bacb
+4553857d549151328cf193e3d202f441c0f65bdd
 ```
 
-Post-merge GitHub Actions run #244:
+This includes PR #37, which made Sui allocation reconciliation compare exact category-reference/amount pairs independent of database row ordering.
+
+GitHub Actions run #249 on that exact product commit:
 
 ```text
 lint: PASS
 typecheck: PASS
-unit tests: PASS
+unit tests: 75 files / 290 tests PASS
 production build: PASS
-Playwright smoke/E2E: PASS
+Playwright smoke/E2E: 10/10 PASS
+Vercel deployment status: SUCCESS
 ```
 
 The Move package remains the previously verified deployment with **31/31 Move tests**.
@@ -278,7 +295,21 @@ Every teammate must declare any additional AI tool they personally used before f
 
 ## Demo Video
 
-The narrated demo MP4 has been rendered locally. Remaining submission task: upload it to YouTube or Loom and add the public URL here.
+**YouTube demo:** https://youtu.be/VLn7P-Cy6tQ
+
+The final submission video demonstrates the live treasury workflow, Gemini-assisted budget/receipt understanding, deterministic checks, human approval, wallet-signed Sui Testnet execution, and on-chain proof.
+
+## Limitations / Future Work
+
+The hackathon MVP deliberately focuses on a safe, auditable core. Post-hackathon opportunities include:
+
+- zkLogin and smoother identity onboarding;
+- sponsored transactions;
+- multi-signature / dual approval;
+- richer multi-club administration;
+- notifications;
+- advanced analytics and fraud scoring;
+- Walrus/MemWal integrations.
 
 ## Important Documentation
 
