@@ -4,7 +4,7 @@ This file is the **single source of truth for current implementation status, blo
 
 ## Current Snapshot
 
-- Last updated: **4 September 2026 (MYT)**
+- Last updated: **5 September 2026 (MYT)**
 - Default branch: `main`
 - **Current stage: Stage 8 — Submission and pitch**
 - Stage status: **CURRENT**
@@ -15,8 +15,8 @@ This file is the **single source of truth for current implementation status, blo
 - Production claims: **live Supabase**
 - Production rehearsal AI mode: **deterministic mock** (`AI_MODE=mock`, live Gemini disabled)
 - Sui network: **Testnet**
-- Current blocker: **PR #29 must integrate the merged professional UI refinement and pass exact-head review/CI**
-- Current priority: **resolve PR #29 against current `main` while preserving the professional UI and every A1/payment-safety invariant**
+- Current blocker: **A2 migration, deployment, live Gemini configuration, and acceptance transactions require separate owner authorization**
+- Current priority: **review the exact `stage8/a2-live-treasury-activation` head; do not migrate, enable Gemini, transact, or merge automatically**
 
 ## Stage Progress
 
@@ -104,7 +104,7 @@ Stage 7D also verified recovery messaging, same-digest reconciliation, private r
 
 Package the already-working product for judging. **Do not add optional features unless they are required for submission.**
 
-### A1 workflow continuity — production accepted, merge pending
+### A1 workflow continuity — merged, deployed, and production accepted
 
 The `stage8/a1-workflow-continuity` branch now implements:
 
@@ -130,7 +130,32 @@ Move tests: NOT RUN locally; Sui CLI unavailable
 
 The owner-authorized A1 migration and controlled production acceptance completed without a payout. The persisted Treasury → Budget → Claims workflow, refresh persistence, and unlinked approval guard were accepted, while the existing Stage 7C Paid claim and digest remained unchanged. Production AI remains deterministic mock (`AI_MODE=mock`, `GEMINI_LIVE_REQUESTS_ENABLED=false`).
 
-Latest development: PR #30 merged the professional UI refinement into `main`, so PR #29 is being updated with a manual merge resolution. The resolution retains the refined presentation together with current treasury-link state, pre-link approval blocking, guarded `decide_claim` transition after linking, and all Stage 6/7 payment boundaries. No migration, acceptance claim, wallet signature, or payout is part of this conflict-resolution task.
+The final A1 implementation and professional UI integration are merged in `30ae958a1ab221e651a5304cd8c6450184f8e398`. The resolution retained current treasury-link state, pre-link approval blocking, guarded `decide_claim` transition after linking, and all Stage 6/7 payment boundaries.
+
+### A2-Lite live treasury activation — implementation complete, owner gates pending
+
+The `stage8/a2-live-treasury-activation` branch now implements:
+
+- one persisted activation state machine per workspace with stable category references and a locked budget snapshot;
+- human-wallet-signed Create → exact multi-coin USDC Fund → dynamic Allocate transactions;
+- digest-first persistence, server verification, and same-digest reconciliation for every activation step;
+- join codes usable only after full Sui activation and claim recipients locked to the verified member wallet;
+- payout authorization from the exact workspace `TreasurerCap`, never the global demo Cap;
+- production Gemini live-or-manual-review behavior with no hidden mock fallback;
+- authorized, paid-only, newest-first persisted History with real Testnet digest links.
+
+Local verification on 5 September 2026:
+
+```text
+lint: PASS
+typecheck: PASS
+unit/integration: PASS (63 files / 263 tests)
+build: PASS
+Playwright assertions: 9/9 PASS across the full run plus focused rerun
+Playwright process: NOT a clean exit; Windows Next.js web-server cleanup hung and was terminated
+```
+
+The forward-only migration `20260905030000_stage8_a2_live_treasury_activation.sql` exists but is **NOT applied**. No real Sui transaction and no live Gemini request was executed during implementation.
 
 ### Stage 8A — Submission package
 
@@ -202,7 +227,7 @@ Before further work, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 8 — Submission and pitch
 STATUS: CURRENT
 COMPLETED STAGES: 0–7
-NEXT TASK: Verify the PR #29 merge-resolution head in GitHub CI and obtain owner review. Do not merge automatically or perform a live payout.
+NEXT TASK: Review the exact A2 branch head and migration. Do not apply the migration, enable live Gemini, perform a Sui transaction, or merge without separate owner authorization.
 ```
 
 ## Handoff Rule

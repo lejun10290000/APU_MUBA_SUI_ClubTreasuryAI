@@ -284,7 +284,7 @@ The synchronized budget moved from `1.00 allocated / 0 spent` to `0.10 spent / 0
 - human review notes
 - payment-attempt/reconciliation state
 
-## A1 Persisted Workflow Continuity — IMPLEMENTED LOCALLY, MIGRATION PENDING
+## A1 Persisted Workflow Continuity — DEPLOYED
 
 In live data mode, the app treasury UUID is the operational workspace identity. A treasurer creates it in Supabase, persists a balanced category budget, and members join it through an authenticated short-code flow. Claims select that same persisted treasury and categories; claim submission never creates or mutates Treasury/Budget records.
 
@@ -299,7 +299,27 @@ The owner-controlled link endpoint accepts an existing Testnet Treasury and Trea
 
 Once linked, A1 reuses the unchanged Stage 6/7 immutable-snapshot, pre-sign consistency, explicit wallet-signature, finality, event-verification, and same-digest reconciliation pipeline.
 
-The migration in `supabase/migrations/20260904170000_stage8_a1_workflow_continuity.sql` has not yet been applied to production. Therefore this section describes the reviewed branch implementation, not current production deployment state. Production remains `AI_MODE=mock` with `GEMINI_LIVE_REQUESTS_ENABLED=false`.
+The A1 migration is applied and production acceptance passed without a payout. Production remains `AI_MODE=mock` with `GEMINI_LIVE_REQUESTS_ENABLED=false`.
+
+## A2-Lite Per-Workspace Sui Activation — IMPLEMENTED, MIGRATION PENDING
+
+```text
+persisted workspace + dynamic budget
+  → lock stable category references
+  → wallet signs Create Treasury/Cap
+  → wallet signs exact multi-coin USDC Fund
+  → wallet signs dynamic Allocate/Confirm
+  → server verifies each saved digest
+  → Sui Active + join code
+  → verified member wallet recipient
+  → Gemini evidence + deterministic checks
+  → human Approve (unpaid)
+  → separate Pay using workspace TreasurerCap
+  → confirmed PayoutEvent
+  → persisted Paid History
+```
+
+Activation has a relational state machine and immutable budget snapshot. Signed digests are persisted before broadcast; uncertainty becomes `reconciliation_required` and never constructs a replacement transaction. Payout payload fields remain sourced only from the approved snapshot, while authorization metadata is resolved from the exact workspace Cap. The forward migration `20260905030000_stage8_a2_live_treasury_activation.sql` is not applied to production.
 
 ## Failure Handling
 
