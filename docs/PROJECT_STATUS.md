@@ -13,10 +13,9 @@ This file is the **single source of truth for current implementation status, blo
 - Stage 7 post-merge CI: **run #140 — SUCCESS**
 - Production app: `https://apumubasuiclubtreasuryai000.vercel.app`
 - Production claims: **live Supabase**
-- Production rehearsal AI mode: **deterministic mock** (`AI_MODE=mock`, live Gemini disabled)
 - Sui network: **Testnet**
-- Current blocker: **A2 migration, deployment, live Gemini configuration, and acceptance transactions require separate owner authorization**
-- Current priority: **review the exact `stage8/a2-live-treasury-activation` head; do not migrate, enable Gemini, transact, or merge automatically**
+- Current blocker: **production A2 smoke acceptance reaches treasurer review, but human approval remains blocked until PR #33 is merged and its forward-only `decide_claim` hotfix migration is applied to the production Supabase project**
+- Current priority: **merge/apply PR #33 first, then integrate PR #34 live Overview and resume the same under-review smoke-test claim; do not create a replacement claim or payout before approval is verified**
 
 ## Stage Progress
 
@@ -102,39 +101,17 @@ Stage 7D also verified recovery messaging, same-digest reconciliation, private r
 
 ## Stage 8 Current Goal
 
-Package the already-working product for judging. **Do not add optional features unless they are required for submission.**
+Package the already-working product for judging. **Do not add optional features unless they are required for submission or live-demo clarity.**
 
 ### A1 workflow continuity — merged, deployed, and production accepted
 
-The `stage8/a1-workflow-continuity` branch now implements:
+The A1 workflow provides persisted Treasury → Budget → Claims continuity, authenticated member join codes, an explicit unlinked approval/payment guard, and owner-only verified Sui Treasury/TreasurerCap linking while preserving the Stage 6/7 payment safety pipeline.
 
-- persisted app treasury creation and exact-sum category budgets in live mode;
-- Claims using the same persisted treasury UUID and categories without mutating them;
-- Member wallet verification, join-code membership, and claim entry;
-- explicit unlinked status with approval, payout preparation, preflight, signing, submission, and reconciliation blocked;
-- owner-only verification of an existing shared Sui `Treasury<USDC>` plus the exact wallet-owned `TreasurerCap` before linking;
-- claim review reads the current treasury link separately from the claim's historical pre-approval link, so an existing unlinked claim becomes approvable after a verified link and reload without resubmission;
-- preservation of the existing Stage 7C treasury, claim, payment attempt, digest, and no-blind-retry safety pipeline.
+The owner-authorized A1 migration and controlled production acceptance completed without a payout. The existing Stage 7C Paid claim and digest remained unchanged.
 
-Local verification on 4 September 2026:
+### A2-Lite live treasury activation — deployed, smoke acceptance in progress
 
-```text
-lint: PASS
-typecheck: PASS
-unit tests: PASS (51 files / 232 tests)
-build: PASS
-Playwright assertions: 9/9 scenarios completed without assertion failure
-Playwright process: NOT a clean exit; Windows Next.js web-server cleanup hung and was terminated
-Move tests: NOT RUN locally; Sui CLI unavailable
-```
-
-The owner-authorized A1 migration and controlled production acceptance completed without a payout. The persisted Treasury → Budget → Claims workflow, refresh persistence, and unlinked approval guard were accepted, while the existing Stage 7C Paid claim and digest remained unchanged. Production AI remains deterministic mock (`AI_MODE=mock`, `GEMINI_LIVE_REQUESTS_ENABLED=false`).
-
-The final A1 implementation and professional UI integration are merged in `30ae958a1ab221e651a5304cd8c6450184f8e398`. The resolution retained current treasury-link state, pre-link approval blocking, guarded `decide_claim` transition after linking, and all Stage 6/7 payment boundaries.
-
-### A2-Lite live treasury activation — implementation complete, owner gates pending
-
-The `stage8/a2-live-treasury-activation` branch now implements:
+The merged A2 implementation provides:
 
 - one persisted activation state machine per workspace with stable category references and a locked budget snapshot;
 - human-wallet-signed Create → exact multi-coin USDC Fund → dynamic Allocate transactions;
@@ -142,20 +119,47 @@ The `stage8/a2-live-treasury-activation` branch now implements:
 - join codes usable only after full Sui activation and claim recipients locked to the verified member wallet;
 - payout authorization from the exact workspace `TreasurerCap`, never the global demo Cap;
 - production Gemini live-or-manual-review behavior with no hidden mock fallback;
-- authorized, paid-only, newest-first persisted History with real Testnet digest links.
+- authorized, paid-only persisted History with real Testnet digest links.
 
-Local verification on 5 September 2026:
+The owner-authorized A2 migration/deployment is live. Production smoke acceptance reached the human approval boundary with `A2 Smoke Test 2`: a fresh `0.10 USDC` claim persisted private receipt evidence, matched requested/receipt amount, passed duplicate and budget checks, and reached treasurer review. Gemini extracted `Campus Cafe`, `0.10 USDC`, and the receipt date; its `Cafe` suggestion conflicted with the selected `Food` budget category, so deterministic policy correctly returned `REVIEW`.
+
+The subsequent Approve action failed before persistence with:
 
 ```text
-lint: PASS
-typecheck: PASS
-unit/integration: PASS (63 files / 263 tests)
-build: PASS
-Playwright assertions: 9/9 PASS across the full run plus focused rerun
-Playwright process: NOT a clean exit; Windows Next.js web-server cleanup hung and was terminated
+column reference "treasury_object_id" is ambiguous
 ```
 
-The forward-only migration `20260905030000_stage8_a2_live_treasury_activation.sql` exists but is **NOT applied**. No real Sui transaction and no live Gemini request was executed during implementation.
+PR #33 fixes this production blocker with a forward-only migration and regression test. Its exact reviewed head passed CI #188, but the PR still needs to be merged and the migration applied to the actual production Supabase project before retrying the same claim.
+
+### Live Overview dashboard — PR #34
+
+PR #34 replaces the production sample Overview with an authenticated live dashboard while preserving a clearly labeled mock-only development fallback.
+
+Implemented behavior:
+
+- owner/treasurer workspaces only in the Overview selector;
+- newest managed treasury selected by default;
+- explicit `?treasury=<id>` selection preserved in the URL;
+- live available balance, open-claim counts, budget health, category spending/remaining, recent managed claims, activation status, and confirmed payout history;
+- claim/history filtering by exact treasury ID rather than display name;
+- manual Refresh plus 30-second background refresh;
+- selected treasury remains stable across refreshes;
+- empty-state path to create the first treasury;
+- existing human approval and explicit Sui wallet-signature safety boundary remains visible;
+- mock mode remains available for deterministic CI/browser testing and is not presented as live production data.
+
+Verification for PR #34 code head `b26f401b866ad463a006e57e6b76bedceff75b2a`:
+
+```text
+GitHub Actions CI #202: SUCCESS
+lint: PASS
+typecheck: PASS
+unit tests: PASS (274/274)
+build: PASS
+Playwright smoke: PASS
+```
+
+PR #34 should be integrated after PR #33 so the production smoke-test blocker is repaired first. If PR #33 changes these status files on `main`, rebase/update PR #34 before merge and keep the combined handoff accurate.
 
 ### Stage 8A — Submission package
 
@@ -166,8 +170,8 @@ The forward-only migration `20260905030000_stage8_a2_live_treasury_activation.sq
 - live demo URL and Sui deployment evidence
 - AI-development-tool declaration
 - copy-ready Devfolio package
-- screenshots/video placeholders until final assets exist
-- submission-facing UI and workflow polish with the verified Sui evidence visible from the dashboard
+- submission-facing UI and workflow polish with verified Sui evidence
+- live treasury-selectable Overview for judge/demo clarity
 
 ### Stage 8B — Demo video
 
@@ -188,20 +192,6 @@ The forward-only migration `20260905030000_stage8_a2_live_treasury_activation.sq
 - verify public repository and video link
 - verify all AI tools are declared
 - submit before **5 September 2026, 11:59 PM MYT**
-
-## Stage 8 UI Refinement Verification
-
-The submission-facing workflow was polished on 4 September 2026 without changing the frozen product scope or performing a live Gemini request, wallet signature, or Sui payout.
-
-- stale stage labels, generic profile initials, and contradictory deployment messages removed from user-facing pages
-- user-facing product terminology follows sentence case while preserving proper names such as AI, USDC, Sui, Sui Testnet, Supabase, and Gemini
-- mobile navigation changed to a complete two-row grid with no hidden routes
-- dashboard reduced to a clear four-step judge flow
-- verified Stage 7C payout proof surfaced in the dashboard, history, and Sui Testnet views
-- risky live transaction controls placed behind an explicit collapsed disclosure
-- Open Graph/Twitter sharing metadata and a generated social preview added
-- `pnpm lint`, `pnpm typecheck`, production build, **201/201 unit tests**, and **7/7 Playwright smoke tests** pass
-- desktop and 390 px mobile visual QA pass with no application console errors or warnings
 
 ## Locked Product Story
 
@@ -227,7 +217,7 @@ Before further work, every coding agent must show:
 CURRENT PROJECT STAGE: Stage 8 — Submission and pitch
 STATUS: CURRENT
 COMPLETED STAGES: 0–7
-NEXT TASK: Review the exact A2 branch head and migration. Do not apply the migration, enable live Gemini, perform a Sui transaction, or merge without separate owner authorization.
+NEXT TASK: Merge/apply PR #33 claim-approval hotfix first, then integrate PR #34 live Overview and resume the same under-review A2 smoke-test claim. Do not create a replacement claim or payout before approval is verified.
 ```
 
 ## Handoff Rule
