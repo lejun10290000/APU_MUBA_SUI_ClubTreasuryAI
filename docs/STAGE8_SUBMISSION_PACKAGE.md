@@ -1,6 +1,6 @@
 # Stage 8 — Submission Package
 
-This file is the copy-ready source for Devfolio and final hackathon submission materials. Replace only the clearly marked TODO fields before submission.
+This file is the copy-ready source for Devfolio and final hackathon submission materials.
 
 ## Project Name
 
@@ -41,8 +41,6 @@ ClubTreasury AI creates a single workflow for club treasury management:
 10. Treasurer explicitly signs one Sui Testnet USDC payout.
 11. Claim/budget state updates only after verified chain finality and exact `PayoutEvent` evidence.
 
-Treasury and category budgets persist immediately for operational workflow. Claims and AI-assisted review can happen before chain setup. A payout cannot be approved until the workspace is linked to its own verified Sui Treasury; after linking, the existing human-controlled preflight/finality pipeline applies.
-
 ## Why AI
 
 Gemini is useful for unstructured information rather than authoritative financial execution.
@@ -55,7 +53,7 @@ Implemented Gemini tasks:
 - category suggestion
 - concise review reasons
 
-Every model response is validated. Invalid, ambiguous, or conflicting results fall back to human Review.
+Every model response is validated. Invalid, ambiguous, incomplete, or schema-conflicting results fall back to human Review.
 
 AI never authorizes payments, signs transactions, or owns authoritative balances.
 
@@ -74,13 +72,21 @@ The Move package provides:
 - typed `PayoutEvent`
 - public transaction proof
 
-The application also performs a pre-sign Supabase ↔ Sui consistency check. A mismatch blocks wallet `sign()` before a payment can be created.
+The application also performs a pre-sign Supabase ↔ Sui consistency check. A mismatch blocks wallet signing before a payment can be created.
 
-## Production Demo
+## Submission Links
 
-**Live URL:**
+**Live application:**
 
 https://apumubasuiclubtreasuryai000.vercel.app
+
+**Demo video:**
+
+https://youtu.be/VLn7P-Cy6tQ
+
+**Public repository:**
+
+https://github.com/lejun10290000/APU_MUBA_SUI_ClubTreasuryAI
 
 ## Public Sui Testnet Evidence
 
@@ -93,26 +99,34 @@ Move package:
 
 Native Circle Testnet USDC:
 0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC
-
-Treasury:
-0x9d9a0b5a7d58d4efa77419ba891a442f3ad23610b4c824a2fa67c7893917f0f3
-
-TreasurerCap:
-0xe811c873363307958e2fb1e0e644fce8c5cde75f801d89a856722dea02836101
-
-Stage 7C confirmed payout digest:
-9LToTmV38veaPcGzj9aMopr7Er47R8AwsnmaM6CGPgwL
 ```
 
-Verified Stage 7C payout:
+### Final Stage 8 A2 live acceptance
 
 ```text
+Claim:
+32c289f3-c1b6-4cf8-a6fb-ca49e1ad340a
+
+Merchant:
+Campus Cafe
+
+Payout:
 0.10 USDC
-category: events
-one total payment attempt
-one confirmed payment attempt
-zero active payment attempts
-final category balance: 0.80 USDC remaining
+
+Recipient:
+0x6b5ccd6b9abe76887fd93bdf04659cbbe32c42c3e9c308a240963df0cd4e2560
+
+Treasury:
+0x403e3e172e17201c8b940672fbf9b980fb094b36e9a68ffe569b00e84e7e2737
+
+Confirmed digest:
+ASxHXkS2N31rzFY2XP7NpQXGdWtTicPxVrGW7EojpyWm
+
+Final claim/payment state:
+paid / paid
+
+Payment attempts:
+1 confirmed
 ```
 
 ## Tracks
@@ -143,39 +157,23 @@ Gemini solves the unstructured financial-understanding problem; deterministic ru
 - GitHub Actions
 - Vercel
 
-## Verification
+## Final Product Verification
 
-Latest Stage 7 merged baseline:
+Latest product-code baseline before this docs-only submission refresh:
 
 ```text
 main commit:
-4a365c2897991c28a2b411d567ffa69b3b6e1173
+4553857d549151328cf193e3d202f441c0f65bdd
 
-GitHub Actions run #140: PASS
+GitHub Actions run #249: PASS
 lint: PASS
 typecheck: PASS
-unit tests: 41 files / 201 tests PASS
+unit tests: 75 files / 290 tests PASS
 build: PASS
-Playwright smoke: 7/7 PASS
-repository/history secret audit: PASS
+Playwright smoke/E2E: 10/10 PASS
+Vercel deployment status: SUCCESS
 Move tests: retained verified 31/31
 ```
-
-A1 workflow-continuity branch verification:
-
-```text
-lint: PASS
-typecheck: PASS
-unit tests: 51 files / 231 tests PASS
-build: PASS
-Playwright: all 9 scenarios completed without assertion failure; Windows web-server cleanup hung, so no clean process exit is claimed
-Move tests: not rerun locally because Sui CLI was unavailable
-Supabase migration: NOT APPLIED
-production acceptance: NOT PERFORMED
-live A1 payout: NOT PERFORMED
-```
-
-These A1 results describe the review branch. The public production deployment remains the verified Stage 7 baseline until the owner applies the migration and completes controlled no-payout acceptance. AI remains deterministic mock in production (`AI_MODE=mock`, `GEMINI_LIVE_REQUESTS_ENABLED=false`).
 
 ## Team
 
@@ -187,8 +185,6 @@ These A1 results describe the review branch. The public production deployment re
 
 ## AI Development Tools Declaration
 
-The team confirmed that **no development AI tools beyond ChatGPT and OpenAI Codex were used**.
-
 Development AI tools used:
 
 - **ChatGPT** — ideation, planning, architecture, documentation, implementation/debugging assistance, repository review
@@ -197,6 +193,8 @@ Development AI tools used:
 Product AI:
 
 - **Google Gemini Developer API** — natural-language budget parsing and receipt/image analysis
+
+Every teammate must disclose any additional AI tool they personally used before submission.
 
 ## Suggested Devfolio Highlights
 
@@ -212,51 +210,48 @@ ClubTreasury AI does not let AI control money. It combines AI understanding with
 - exact event/finality verification
 - digest-first reconciliation and no blind retry
 - private off-chain receipt evidence with RLS
-- production-deployed end-to-end rehearsal
+- production-deployed end-to-end acceptance
 
 ### Real-world Relevance
 
 University clubs already operate shared budgets, expense reimbursements, committee approvals, and event spending. The product replaces fragmented manual workflows with a transparent treasury system while keeping a human treasurer in control.
 
+## Challenges We Solved
+
+- safely separating AI advice from financial authority
+- mapping persistent Supabase treasury data to Sui shared objects and capabilities
+- preventing duplicate or blind-retry payouts
+- reconciling signed/broadcast transactions by digest
+- validating exact `PayoutEvent` evidence before marking claims paid
+- handling production database migration drift safely
+- fixing allocation reconciliation so exact category-reference/amount pairs are matched independent of database row ordering
+- preserving private receipt evidence while allowing short-lived authenticated previews
+
 ## Suggested 30-second Pitch
 
-> University clubs still manage money through spreadsheets, receipts, and chat approvals. ClubTreasury AI turns that into one safe workflow. Gemini understands budget instructions and receipt evidence, deterministic checks enforce hard financial rules, the treasurer remains the final approver, and Sui Move securely executes the approved USDC payment. We already deployed it on Sui Testnet and verified a real end-to-end payout with duplicate-payment and reconciliation protections.
+> University clubs still manage money through spreadsheets, receipts, and chat approvals. ClubTreasury AI turns that into one safe workflow. Gemini understands budget instructions and receipt evidence, deterministic checks enforce hard financial rules, the treasurer remains the final approver, and Sui Move securely executes the approved USDC payment. We deployed it on Sui Testnet and verified a real end-to-end payout with duplicate-payment and reconciliation protections.
 
-## Screenshots — TODO for Stage 8B
+## Suggested Screenshots
 
-Recommended final submission screenshots:
+Use 3–5 strong screenshots for Devfolio, with the strongest overview/dashboard image first:
 
-1. landing/dashboard overview
-2. persisted live Treasury and category balance
-3. claim review with AI recommendation + deterministic checks
-4. human approval boundary
-5. payout Ready state
-6. Paid state with confirmed digest
-7. Sui explorer transaction/event proof
-8. `/api/health` production readiness proof
+1. live dashboard / treasury overview
+2. Gemini claim analysis + deterministic checks
+3. human approval boundary / approved-unpaid state
+4. confirmed paid state with transaction digest
+5. SuiVision USDC balance or event proof
 
-Do not expose private receipt content unless the receipt is intentionally synthetic and safe.
+Do not expose private receipt content unless it is synthetic and intentionally safe for submission.
 
-## Demo Video — TODO for Stage 8B
+## Demo Video
 
-**Final YouTube/Loom URL:** `TODO`
+**Final YouTube URL:** https://youtu.be/VLn7P-Cy6tQ
 
-Requirements:
-
-- 3–5 minutes
-- live app/product flow
-- show AI understanding
-- show human final approval
-- show Sui integration
-- use existing Stage 7C payout/explorer proof instead of making an unnecessary second payout solely for recording
-
-## Repository
-
-https://github.com/lejun10290000/APU_MUBA_SUI_ClubTreasuryAI
+The video should be checked once in an incognito/private browser before final Devfolio submission to ensure judges can access it without the uploader account.
 
 ## Setup
 
-See the root `README.md` for tested Node/pnpm setup and environment configuration.
+See the root `README.md` for Node/pnpm setup and environment configuration.
 
 ## Limitations / Future Work
 
@@ -265,21 +260,27 @@ Current MVP deliberately focuses on a safe auditable core. Post-hackathon opport
 - zkLogin/product identity polish
 - sponsored transactions
 - multi-signature/dual approval
-- multi-club support
+- richer multi-club administration
 - notifications
 - advanced analytics/fraud scoring
 - Walrus/MemWal integrations
 
 ## Final Owner Checklist
 
-- [x] confirm all team information is accurate
-- [x] confirm every AI development tool used by every teammate is declared
-- [ ] add final screenshots
-- [ ] add final 3–5 minute YouTube/Loom URL
-- [ ] verify live production URL
-- [ ] verify public GitHub repository
-- [ ] verify no secrets/private receipts are committed
-- [ ] select intended hackathon tracks
-- [ ] paste/review Devfolio fields
-- [ ] submit before **5 September 2026, 11:59 PM MYT**
-- [ ] save submission confirmation/evidence
+- [x] public repository prepared
+- [x] source code and commit history available
+- [x] README includes problem, solution, Sui, setup, team and AI declaration
+- [x] live production URL available
+- [x] Sui Testnet package / USDC / payout evidence documented
+- [x] final demo video uploaded to YouTube
+- [x] final demo video URL added to repository docs
+- [x] Track 01 explanation prepared
+- [x] Track 02 explanation prepared
+- [x] development and product AI tools declared
+- [ ] confirm every teammate used no additional undeclared AI tool
+- [ ] open video in incognito/private browser and confirm playback
+- [ ] choose and upload final Devfolio screenshots
+- [ ] select intended Sui tracks on Devfolio
+- [ ] paste/review Devfolio project fields
+- [ ] click **Publish Project** / confirm submission before **5 September 2026, 11:59 PM MYT**
+- [ ] save Devfolio submitted-status screenshot/evidence
