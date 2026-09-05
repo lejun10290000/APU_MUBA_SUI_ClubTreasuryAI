@@ -6,10 +6,15 @@ import { useEffect, useMemo, useState } from "react";
 import { compareReceiptAmount } from "@/src/domain/claim-rules";
 import { formatUsdcMinor } from "@/src/domain/money";
 import type { PersistedClaim } from "@/src/domain/stage5-claims";
-import { receiptAnalysisSchema } from "@/src/lib/ai/types";
+import {
+  receiptAnalysisSchema,
+  type AIProvenance,
+} from "@/src/lib/ai/types";
 import type { TreasuryLinkState } from "@/src/lib/claims/types";
+import { AIProvenanceCard } from "./ai-provenance-card";
 import { ClaimPayoutPanel } from "./claim-payout-panel";
 import { Icon } from "./icon";
+import { SystemBoundaryBadges } from "./system-boundary-badges";
 
 const recommendationStyles = {
   approve: "border-emerald-200 bg-emerald-50 text-emerald-800",
@@ -23,6 +28,7 @@ export function ClaimReviewPanel() {
   const [claim, setClaim] = useState<PersistedClaim | null>(null);
   const [treasuryLink, setTreasuryLink] =
     useState<TreasuryLinkState | null>(null);
+  const [aiProvenance, setAiProvenance] = useState<AIProvenance | null>(null);
   const [receiptPreviewUrl, setReceiptPreviewUrl] = useState<string | null>(
     null,
   );
@@ -43,6 +49,7 @@ export function ClaimReviewPanel() {
         const result = (await response.json()) as {
           claim?: PersistedClaim;
           treasuryLink?: TreasuryLinkState;
+          aiProvenance?: AIProvenance | null;
           receiptPreviewUrl?: string | null;
           receiptPreviewError?: string | null;
           error?: string;
@@ -53,6 +60,7 @@ export function ClaimReviewPanel() {
         if (active) {
           setClaim(result.claim);
           setTreasuryLink(result.treasuryLink);
+          setAiProvenance(result.aiProvenance ?? null);
           setReceiptPreviewUrl(result.receiptPreviewUrl ?? null);
           setReceiptPreviewError(result.receiptPreviewError ?? null);
         }
@@ -192,6 +200,16 @@ export function ClaimReviewPanel() {
           />
         </div>
 
+        <section className="mt-7 rounded-2xl border border-[var(--line)] bg-slate-50 p-5">
+          <h3 className="text-sm font-bold">Decision pipeline</h3>
+          <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+            Gemini extracts evidence → deterministic rules validate → the treasurer decides → Sui executes only after a separate wallet signature.
+          </p>
+          <div className="mt-4">
+            <SystemBoundaryBadges />
+          </div>
+        </section>
+
         <div className="mt-7">
           <h3 className="text-sm font-bold">Stored validation results</h3>
           <div className="mt-3 divide-y divide-[var(--line)] rounded-2xl border border-[var(--line)]">
@@ -241,50 +259,58 @@ export function ClaimReviewPanel() {
           </div>
         </div>
 
-        <div className="mt-7 rounded-2xl border border-violet-200 bg-violet-50/70 p-5">
-          <h3 className="text-sm font-bold text-violet-950">
-            Stored AI receipt extraction
-          </h3>
-          {aiAnalysis ? (
-            <>
-              <dl className="mt-4 grid gap-3 text-xs text-violet-950/70 sm:grid-cols-2">
-                <Snapshot
-                  label="Merchant"
-                  value={aiAnalysis.merchant ?? "Missing"}
-                />
-                <Snapshot
-                  label="Amount"
-                  value={
-                    aiAnalysis.amountMinor === null
-                      ? "Missing"
-                      : formatUsdcMinor(aiAnalysis.amountMinor)
-                  }
-                />
-                <Snapshot
-                  label="Receipt date"
-                  value={aiAnalysis.receiptDate ?? "Missing"}
-                />
-                <Snapshot
-                  label="Suggested category"
-                  value={aiAnalysis.categorySuggestion ?? "Missing"}
-                />
-              </dl>
-              <ul className="mt-4 space-y-1 text-xs leading-5 text-violet-950/70">
-                {aiAnalysis.reasons.map((reason) => (
-                  <li key={reason}>• {reason}</li>
-                ))}
-                {aiAnalysis.missingFields.length > 0 && (
-                  <li>
-                    • Missing fields: {aiAnalysis.missingFields.join(", ")}
-                  </li>
-                )}
-              </ul>
-            </>
-          ) : (
-            <p className="mt-3 text-sm leading-6 text-violet-950/70">
-              {analysisFailureMessage(claim.receiptAnalysis)}
-            </p>
+        <div className="mt-7 space-y-3">
+          {aiProvenance && (
+            <AIProvenanceCard
+              provenance={aiProvenance}
+              title="Current live Gemini configuration · Stored receipt extraction"
+            />
           )}
+          <div className="rounded-2xl border border-violet-200 bg-violet-50/70 p-5">
+            <h3 className="text-sm font-bold text-violet-950">
+              Stored AI receipt extraction
+            </h3>
+            {aiAnalysis ? (
+              <>
+                <dl className="mt-4 grid gap-3 text-xs text-violet-950/70 sm:grid-cols-2">
+                  <Snapshot
+                    label="Merchant"
+                    value={aiAnalysis.merchant ?? "Missing"}
+                  />
+                  <Snapshot
+                    label="Amount"
+                    value={
+                      aiAnalysis.amountMinor === null
+                        ? "Missing"
+                        : formatUsdcMinor(aiAnalysis.amountMinor)
+                    }
+                  />
+                  <Snapshot
+                    label="Receipt date"
+                    value={aiAnalysis.receiptDate ?? "Missing"}
+                  />
+                  <Snapshot
+                    label="Suggested category"
+                    value={aiAnalysis.categorySuggestion ?? "Missing"}
+                  />
+                </dl>
+                <ul className="mt-4 space-y-1 text-xs leading-5 text-violet-950/70">
+                  {aiAnalysis.reasons.map((reason) => (
+                    <li key={reason}>• {reason}</li>
+                  ))}
+                  {aiAnalysis.missingFields.length > 0 && (
+                    <li>
+                      • Missing fields: {aiAnalysis.missingFields.join(", ")}
+                    </li>
+                  )}
+                </ul>
+              </>
+            ) : (
+              <p className="mt-3 text-sm leading-6 text-violet-950/70">
+                {analysisFailureMessage(claim.receiptAnalysis)}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="mt-7 rounded-2xl bg-slate-50 p-5">
@@ -334,9 +360,8 @@ export function ClaimReviewPanel() {
           <div className="mt-6">
             {approvalBlocked && (
               <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
-                Link this treasury to Sui before approval.
-                Claim review is safe to continue, but no payout snapshot can be
-                created yet.
+                Link this treasury to Sui before approval. Claim review is safe
+                to continue, but no payout snapshot can be created yet.
               </p>
             )}
             <label className="text-sm font-bold" htmlFor="decisionReason">

@@ -32,6 +32,7 @@ import {
 } from "@/src/lib/sui/payment-safety";
 import { treasuryTransactionService } from "@/src/lib/sui/transaction-service";
 import { verifyTreasurerCap } from "@/src/lib/sui/treasurer-cap-verification";
+import { SystemBoundaryBadges } from "./system-boundary-badges";
 
 export function ClaimPayoutPanel({
   claim,
@@ -225,6 +226,20 @@ export function ClaimPayoutView({
         </dl>
       )}
 
+      {paid && (
+        <div className="mt-5 rounded-2xl border border-emerald-200 bg-white/75 p-4">
+          <p className="text-sm font-bold text-emerald-950">
+            Treasurer signed → Treasury paid → Member received
+          </p>
+          <p className="mt-1 text-xs leading-5 text-emerald-950/65">
+            The app marks this paid only after Sui finality and payout-event reconciliation succeed.
+          </p>
+          <div className="mt-3">
+            <SystemBoundaryBadges boundaries={["human", "sui"]} />
+          </div>
+        </div>
+      )}
+
       {paid && claim.paidAt && (
         <p className="mt-4 text-xs text-emerald-950/70">
           Confirmed {new Date(claim.paidAt).toLocaleString()}
@@ -237,12 +252,13 @@ export function ClaimPayoutView({
       )}
       {paid && digestUrl && (
         <a
-          className="mt-4 inline-flex rounded-xl border border-emerald-300 bg-white px-4 py-2 text-xs font-bold text-emerald-800"
+          aria-label="View on Sui Testnet explorer · View on SuiVision"
+          className="mt-4 inline-flex rounded-xl bg-[var(--brand)] px-4 py-2.5 text-xs font-bold text-white"
           href={digestUrl}
           rel="noreferrer"
           target="_blank"
         >
-          View on Sui Testnet explorer
+          View on SuiVision
         </a>
       )}
 

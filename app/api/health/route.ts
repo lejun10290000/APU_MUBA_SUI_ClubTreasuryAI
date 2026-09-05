@@ -29,6 +29,7 @@ export function GET() {
       readiness: {
         ai: {
           mode: serverConfig.AI_MODE,
+          model: serverConfig.GEMINI_MODEL,
           liveRequestsEnabled: serverConfig.GEMINI_LIVE_REQUESTS_ENABLED,
           apiKeyConfigured: Boolean(serverConfig.GEMINI_API_KEY),
         },

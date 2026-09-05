@@ -52,6 +52,12 @@ const navigation: Array<{
     mobileLabel: "Sui proof",
     match: "/dashboard/testnet",
   },
+  {
+    href: "/dashboard/status",
+    icon: "shield",
+    label: "System",
+    match: "/dashboard/status",
+  },
 ];
 
 type IdentityResult = {
@@ -176,7 +182,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           </div>
           <nav
             aria-label="Mobile treasurer navigation"
-            className="grid grid-cols-3 gap-1 border-t border-[var(--line)] px-3 py-2 lg:hidden"
+            className="grid grid-cols-4 gap-1 border-t border-[var(--line)] px-3 py-2 lg:hidden"
           >
             {navigation.map((item) => (
               <Link
