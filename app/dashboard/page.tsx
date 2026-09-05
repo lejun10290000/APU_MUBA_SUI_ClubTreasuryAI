@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { DemoTreasuryNotice } from "@/src/components/demo-treasury-notice";
 import { Icon } from "@/src/components/icon";
-import { LiveOverviewDashboard } from "@/src/components/live-overview-dashboard";
+import { LiveOverviewDashboard } from "@/src/components/live-overview-dashboard-v2";
 import { publicConfig } from "@/src/config/public-env";
 import { demoTreasury } from "@/src/data/mock-dashboard";
 
