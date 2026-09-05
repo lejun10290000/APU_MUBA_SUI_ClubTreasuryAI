@@ -252,6 +252,7 @@ export function ClaimPayoutView({
       )}
       {paid && digestUrl && (
         <a
+          aria-label="View on Sui Testnet explorer · View on SuiVision"
           className="mt-4 inline-flex rounded-xl bg-[var(--brand)] px-4 py-2.5 text-xs font-bold text-white"
           href={digestUrl}
           rel="noreferrer"
