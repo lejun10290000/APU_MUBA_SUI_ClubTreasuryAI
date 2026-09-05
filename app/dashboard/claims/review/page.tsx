@@ -12,9 +12,9 @@ export default function ClaimReviewPage() {
     <main className="mx-auto max-w-[1320px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10">
       <Link
         className="inline-flex items-center gap-2 text-sm font-bold text-[var(--muted)] transition hover:text-[var(--brand)]"
-        href="/dashboard"
+        href="/dashboard/claims"
       >
-        <span aria-hidden="true">←</span> Back to dashboard
+        <span aria-hidden="true">←</span> Back to claims
       </Link>
       <section className="mb-7 mt-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
