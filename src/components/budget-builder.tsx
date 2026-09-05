@@ -6,6 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { ZodError } from "zod";
 import { Icon } from "./icon";
+import { AIProvenanceCard } from "./ai-provenance-card";
+import { SystemBoundaryBadges } from "./system-boundary-badges";
 import {
   removeDemoSessionValue,
   useDemoSessionValue,
@@ -30,6 +32,7 @@ import { treasurySchema } from "@/src/domain/schemas";
 import { demoTreasuryStorageKey } from "@/src/domain/treasury-setup";
 import { demoTreasury } from "@/src/data/mock-dashboard";
 import { publicConfig } from "@/src/config/public-env";
+import type { BudgetDraftResponse } from "@/src/lib/ai/types";
 import type { PersistedTreasuryWorkspace } from "@/src/lib/treasuries/types";
 import type { PersistedBudgetCategory } from "@/src/lib/treasuries/types";
 import { TreasuryActivationPanel } from "./treasury-activation-panel";
@@ -53,6 +56,11 @@ export function BudgetBuilder() {
   const [persistedTreasury, setPersistedTreasury] =
     useState<PersistedTreasuryWorkspace | null>(null);
   const [loadingTreasury, setLoadingTreasury] = useState(live);
+  const [budgetInstruction, setBudgetInstruction] = useState("");
+  const [budgetDraftResponse, setBudgetDraftResponse] =
+    useState<BudgetDraftResponse | null>(null);
+  const [generatingBudget, setGeneratingBudget] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const {
     register,
     control,
@@ -63,10 +71,11 @@ export function BudgetBuilder() {
   } = useForm<BudgetSetupFields>({
     defaultValues: { categories: defaultCategories },
   });
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "categories",
   });
+
   useEffect(() => {
     if (!live) return;
     let cancelled = false;
@@ -113,6 +122,7 @@ export function BudgetBuilder() {
       cancelled = true;
     };
   }, [clearErrors, live, requestedTreasuryId, setError]);
+
   const treasury = live
     ? {
         id: persistedTreasury?.id ?? "unavailable",
@@ -140,6 +150,41 @@ export function BudgetBuilder() {
     () => inspectAllocations(treasury.totalBudgetMinor, categories),
     [categories, treasury.totalBudgetMinor],
   );
+
+  async function generateBudgetDraft() {
+    if (!live || budgetLocked || !budgetInstruction.trim()) return;
+    setGeneratingBudget(true);
+    setGenerationError(null);
+    setBudgetDraftResponse(null);
+    try {
+      const response = await fetch("/api/ai/budget-draft", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ instruction: budgetInstruction.trim() }),
+      });
+      const result = (await response.json()) as BudgetDraftResponse & {
+        error?: string;
+      };
+      if (!response.ok || !result.draft || !result.provenance) {
+        throw new Error(result.error ?? "Gemini could not generate a budget draft.");
+      }
+      replace(
+        result.draft.categories.map((category) => ({
+          name: category.name,
+          allocation: (category.amountMinor / 100).toFixed(2),
+        })),
+      );
+      setBudgetDraftResponse(result);
+    } catch (error) {
+      setGenerationError(
+        error instanceof Error
+          ? error.message
+          : "Gemini could not generate a budget draft.",
+      );
+    } finally {
+      setGeneratingBudget(false);
+    }
+  }
 
   const confirmBudget = async (values: BudgetSetupFields) => {
     clearErrors("root");
@@ -242,6 +287,69 @@ export function BudgetBuilder() {
             Total · {formatUsdcMinor(treasury.totalBudgetMinor)}
           </span>
         </div>
+
+        {live && (
+          <section className="mt-6 rounded-2xl border border-violet-200 bg-violet-50/40 p-5">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-violet-700">
+              Gemini budget assistant
+            </p>
+            <h3 className="mt-2 text-lg font-bold">Turn natural language into an editable draft</h3>
+            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+              Gemini proposes categories only. Deterministic totals still validate the draft and you must confirm it manually.
+            </p>
+            <label
+              className="mt-4 block text-sm font-bold"
+              htmlFor="budgetInstruction"
+            >
+              Describe your budget
+            </label>
+            <textarea
+              className="mt-2 min-h-24 w-full resize-y rounded-xl border border-violet-200 bg-white px-4 py-3 text-sm outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60"
+              id="budgetInstruction"
+              maxLength={4_000}
+              placeholder="e.g. I have 10 USDC: 4 for food, 3 for marketing, 2 for transport and 1 for miscellaneous."
+              value={budgetInstruction}
+              onChange={(event) => setBudgetInstruction(event.target.value)}
+              disabled={budgetLocked || generatingBudget}
+            />
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <button
+                className="rounded-xl bg-violet-700 px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                type="button"
+                onClick={generateBudgetDraft}
+                disabled={
+                  budgetLocked || generatingBudget || !budgetInstruction.trim()
+                }
+              >
+                {generatingBudget ? "Generating…" : "Generate with Gemini"}
+              </button>
+              <SystemBoundaryBadges boundaries={["ai", "rules", "human"]} />
+            </div>
+            {generationError && (
+              <p
+                className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700"
+                role="alert"
+              >
+                {generationError}
+              </p>
+            )}
+            {budgetDraftResponse && (
+              <div className="mt-4 space-y-3">
+                <AIProvenanceCard provenance={budgetDraftResponse.provenance} />
+                {budgetDraftResponse.draft.notes.length > 0 && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+                    <p className="font-bold">Gemini notes</p>
+                    <ul className="mt-2 space-y-1">
+                      {budgetDraftResponse.draft.notes.map((note) => (
+                        <li key={note}>• {note}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        )}
 
         <div className="mt-6 space-y-4">
           {fields.map((field, index) => (
