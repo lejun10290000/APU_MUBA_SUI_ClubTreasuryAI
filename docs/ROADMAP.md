@@ -106,21 +106,48 @@ Successful Stage 7C rehearsal digest:
 - [x] Verify GitHub Actions run #249 green
 - [x] Verify Vercel deployment success for product baseline
 - [x] Refresh final submission documentation
+- [x] Promote newest KFC production payout as headline final-demo evidence
+- [x] Retain Campus Cafe A2 acceptance as historical technical verification
 
-Final Stage 8 A2 smoke evidence:
+Latest final-demo transaction:
+
+```text
+Claim:
+eeb68898-0e97-42a2-8915-09fb979216f6
+
+Merchant:
+KFC
+
+Category:
+food
+
+Payout:
+0.10 USDC
+
+Confirmed digest:
+9S7gWEcZ4L2cKUt9n89KVsm5NTi4uoRoaSNUzxDiiKCm
+
+Final state:
+paid / paid
+
+Payment attempt:
+1 confirmed
+```
+
+Historical Stage 8 A2 acceptance remains documented separately:
 
 ```text
 Claim:
 32c289f3-c1b6-4cf8-a6fb-ca49e1ad340a
+
+Merchant:
+Campus Cafe
 
 Payout:
 0.10 USDC
 
 Confirmed digest:
 ASxHXkS2N31rzFY2XP7NpQXGdWtTicPxVrGW7EojpyWm
-
-Payment attempts for claim:
-1 confirmed
 ```
 
 See [`STAGE8_A2_LIVE_ACCEPTANCE.md`](STAGE8_A2_LIVE_ACCEPTANCE.md).
@@ -165,6 +192,7 @@ https://youtu.be/VLn7P-Cy6tQ
 - [x] AI tools declaration prepared
 - [x] Sui Track 01 explanation prepared
 - [x] Sui Track 02 explanation prepared
+- [x] Latest final-demo payout evidence prepared
 - [ ] confirm no teammate used any additional undeclared AI tool
 - [ ] verify YouTube video playback in incognito/private browser
 - [ ] choose/upload final Devfolio screenshots

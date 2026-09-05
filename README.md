@@ -123,7 +123,42 @@ Native Circle Testnet USDC:
 0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC
 ```
 
-### Final Stage 8 A2 live acceptance
+### Latest final-demo transaction
+
+This is the newest confirmed production payout used as the headline evidence for the final demo/submission.
+
+```text
+Claim:
+eeb68898-0e97-42a2-8915-09fb979216f6
+
+Merchant:
+KFC
+
+Category:
+food
+
+Payout:
+0.10 USDC
+
+Recipient:
+0x6b5ccd6b9abe76887fd93bdf04659cbbe32c42c3e9c308a240963df0cd4e2560
+
+Treasury:
+0x3948cd01863da1016839864e605f9147bd68e205625036504fab317cdb9adc32
+
+Confirmed digest:
+9S7gWEcZ4L2cKUt9n89KVsm5NTi4uoRoaSNUzxDiiKCm
+
+Final claim/payment state:
+paid / paid
+
+Payment attempt:
+1 confirmed
+```
+
+### Earlier Stage 8 A2 production acceptance
+
+The original Campus Cafe A2 acceptance is intentionally retained as historical technical verification of the production claim-approval hotfix and controlled end-to-end acceptance.
 
 ```text
 Claim:
@@ -134,12 +169,6 @@ Campus Cafe
 
 Payout:
 0.10 USDC
-
-Recipient:
-0x6b5ccd6b9abe76887fd93bdf04659cbbe32c42c3e9c308a240963df0cd4e2560
-
-Treasury:
-0x403e3e172e17201c8b940672fbf9b980fb094b36e9a68ffe569b00e84e7e2737
 
 Confirmed digest:
 ASxHXkS2N31rzFY2XP7NpQXGdWtTicPxVrGW7EojpyWm

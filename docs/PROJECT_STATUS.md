@@ -19,6 +19,7 @@ This file is the **single source of truth for current implementation status, blo
 - Production claims/payments: **live Supabase**
 - Production Supabase project ref: `arldlnqiywhcuungvgei`
 - Sui network: **Testnet**
+- Latest headline demo transaction: **KFC · 0.10 USDC · paid · digest `9S7gWEcZ4L2cKUt9n89KVsm5NTi4uoRoaSNUzxDiiKCm`**
 - Current blocker: **none in the core Treasury → Budget → Claim → Approval → Payout path**
 - Current priority: **complete Devfolio submission, save submission evidence, then prepare the 5-minute pitch/Q&A**
 
@@ -36,9 +37,47 @@ This file is the **single source of truth for current implementation status, blo
 | 7 | Demo hardening and deployment | COMPLETE |
 | 8 | Submission and pitch | CURRENT |
 
-## Final Stage 8 Core Acceptance
+## Latest Final Demo Evidence
 
-The Stage 8 A2 production blocker has been resolved and the original Campus Cafe smoke workflow was completed end to end.
+The newest confirmed production payout is now the headline transaction for the final demo/submission.
+
+```text
+Claim:
+eeb68898-0e97-42a2-8915-09fb979216f6
+
+Merchant:
+KFC
+
+Approved category:
+food
+
+Payout:
+0.10 USDC
+
+Recipient:
+0x6b5ccd6b9abe76887fd93bdf04659cbbe32c42c3e9c308a240963df0cd4e2560
+
+Treasury:
+0x3948cd01863da1016839864e605f9147bd68e205625036504fab317cdb9adc32
+
+Final claim status:
+paid
+
+Final payment status:
+paid
+
+Confirmed digest:
+9S7gWEcZ4L2cKUt9n89KVsm5NTi4uoRoaSNUzxDiiKCm
+
+Payment attempt:
+1 confirmed
+```
+
+This transaction is newer than the Campus Cafe A2 acceptance and is the preferred judge-facing example for the final submission.
+
+## Historical Stage 8 A2 Core Acceptance
+
+The A2 acceptance is intentionally retained because it records the production hotfix and controlled end-to-end acceptance that established the system was safe to continue using.
 
 ### `decide_claim` hotfix
 
@@ -50,7 +89,7 @@ Production Supabase contains:
 
 The live `public.decide_claim(...)` function uses `linked_treasury_object_id`; the ambiguous `treasury_object_id = treasury_object_id` assignment is gone.
 
-### Successful Campus Cafe smoke claim
+### Campus Cafe A2 acceptance claim
 
 ```text
 Claim:
@@ -65,23 +104,15 @@ Payout:
 Approved category:
 food
 
-Recipient:
-0x6b5ccd6b9abe76887fd93bdf04659cbbe32c42c3e9c308a240963df0cd4e2560
-
-Treasury:
-0x403e3e172e17201c8b940672fbf9b980fb094b36e9a68ffe569b00e84e7e2737
-
-Final claim status:
-paid
-
-Final payment status:
-paid
-
 Confirmed digest:
 ASxHXkS2N31rzFY2XP7NpQXGdWtTicPxVrGW7EojpyWm
-```
 
-Exactly one payment attempt exists for this claim and it is confirmed with the same digest.
+Final claim/payment state:
+paid / paid
+
+Payment attempts:
+1 confirmed
+```
 
 Detailed evidence: [`STAGE8_A2_LIVE_ACCEPTANCE.md`](STAGE8_A2_LIVE_ACCEPTANCE.md)
 
@@ -187,16 +218,16 @@ AI is advisory. It never owns authoritative balances, authorizes payment, signs 
 
 ## Production Supabase Snapshot
 
-At the final Stage 8 verification:
+Latest read-only production snapshot during final documentation refresh:
 
 ```text
-claims: 14
-treasuries: 6
-budget_categories: 18
-claim_payment_attempts: 7
+claims: 16
+treasuries: 8
+budget_categories: 24
+claim_payment_attempts: 9
 ```
 
-No additional schema migration is required by the final judge-facing polish or allocation-reconciliation hotfix.
+No additional schema migration is required by the final judge-facing polish, allocation-reconciliation hotfix, or final-demo documentation updates.
 
 ## Official Team
 
