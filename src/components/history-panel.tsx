@@ -7,6 +7,7 @@ import { formatUsdcMinor } from "@/src/domain/money";
 import type { PaidHistoryItem } from "@/src/lib/history/types";
 import { testnetExplorerTransactionUrl } from "@/src/lib/sui/execution";
 import { Icon } from "./icon";
+import { SystemBoundaryBadges } from "./system-boundary-badges";
 
 export function HistoryPanel() {
   const [history, setHistory] = useState<PaidHistoryItem[]>([]);
@@ -98,6 +99,17 @@ export function HistoryPanel() {
               {new Date(item.confirmedAt).toLocaleString()}
             </time>
           </div>
+          <div className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+            <p className="text-sm font-bold text-emerald-950">
+              Treasurer signed → Treasury paid → Member received
+            </p>
+            <p className="mt-1 text-xs leading-5 text-emerald-950/65">
+              The saved digest below is independent Sui Testnet evidence for this confirmed payout.
+            </p>
+            <div className="mt-3">
+              <SystemBoundaryBadges boundaries={["human", "sui"]} />
+            </div>
+          </div>
           <dl className="mt-5 space-y-3 border-t border-[var(--line)] pt-5 text-xs">
             <div>
               <dt className="font-bold">Recipient</dt>
@@ -113,13 +125,13 @@ export function HistoryPanel() {
             </div>
           </dl>
           <a
-            aria-label={`Open Sui Testnet transaction ${item.digest}`}
-            className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[var(--brand)]"
+            aria-label={`View on SuiVision ${item.digest}`}
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-bold text-white"
             href={testnetExplorerTransactionUrl(item.digest) ?? undefined}
             rel="noreferrer"
             target="_blank"
           >
-            Open explorer proof <Icon className="size-4" name="arrow" />
+            View on SuiVision <Icon className="size-4" name="arrow" />
           </a>
         </article>
       ))}
