@@ -85,7 +85,7 @@ beforeEach(() => {
               totalBudgetMinor: workspace.totalBudgetMinor,
               suiTreasuryObjectId: workspace.treasuryObjectId,
               linkedToSui: true,
-              role: "owner",
+              role: "member",
               categories: workspace.categories.map((category) => ({
                 id: "22222222-2222-4222-8222-222222222222",
                 ...category,
@@ -112,7 +112,7 @@ afterEach(() => {
 });
 
 describe("live claim submission authentication ordering", () => {
-  it("authenticates the connected wallet before loading the protected live workspace", async () => {
+  it("authenticates the connected member wallet before loading the protected live workspace", async () => {
     render(<LiveClaimSubmissionForm />);
 
     await waitFor(() => {
