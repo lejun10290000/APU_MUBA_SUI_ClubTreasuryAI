@@ -157,7 +157,7 @@ export class SupabaseClaimRepository implements Stage6ClaimRepository {
         treasury_object_id: input.workspace.treasuryObjectId,
         member_user_id: input.identity.userId,
         member_wallet_address: input.identity.walletAddress,
-        recipient_sui_address: input.submission.recipientSuiAddress,
+        recipient_sui_address: input.identity.walletAddress,
         submitter_name: input.submission.submitterName,
         merchant: input.submission.merchant,
         description: input.submission.description,

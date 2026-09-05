@@ -37,11 +37,18 @@ export async function POST(request: Request) {
         .from("treasuries")
         .select("*")
         .eq("join_code", input.joinCode)
-        .eq("status", "active")
         .maybeSingle();
     if (treasuryLookupError) throw treasuryLookupError;
     if (!adminTreasury) {
       throw new Error("An active treasury with that join code was not found.");
+    }
+    if (
+      adminTreasury.status !== "active" ||
+      adminTreasury.sui_activation_status !== "active" ||
+      !adminTreasury.sui_treasury_object_id ||
+      !adminTreasury.sui_treasurer_cap_object_id
+    ) {
+      throw new Error("This treasury is not yet active on Sui.");
     }
 
     const { data: existingMembership, error: membershipLookupError } =
@@ -100,7 +107,11 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: message },
       {
-        status: /authenticate|verify the connected/i.test(message) ? 401 : 400,
+        status: /authenticate|verify the connected/i.test(message)
+          ? 401
+          : /not yet active on Sui/i.test(message)
+            ? 409
+            : 400,
       },
     );
   }

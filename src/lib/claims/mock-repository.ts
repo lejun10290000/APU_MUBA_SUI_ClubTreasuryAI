@@ -123,7 +123,7 @@ export class MockClaimRepository implements Stage6ClaimRepository {
       categoryExternalReference: input.workspace.categoryExternalReference,
       treasuryObjectId: input.workspace.treasuryObjectId,
       memberWalletAddress: input.identity.walletAddress,
-      recipientSuiAddress: input.submission.recipientSuiAddress,
+      recipientSuiAddress: input.identity.walletAddress,
       submitterName: input.submission.submitterName,
       merchant: input.submission.merchant,
       description: input.submission.description,

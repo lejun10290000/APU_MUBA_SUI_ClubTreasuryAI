@@ -35,7 +35,6 @@ export function LiveClaimSubmissionForm() {
   const [receiptReference, setReceiptReference] = useState(
     () => `DEMO-${Date.now()}`,
   );
-  const [recipient, setRecipient] = useState("");
   const [receipt, setReceipt] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -175,11 +174,6 @@ export function LiveClaimSubmissionForm() {
       );
       return;
     }
-    const payoutRecipient = recipient.trim() || account.address;
-    if (!payoutRecipient) {
-      setError("Enter a recipient Sui address.");
-      return;
-    }
     if (!receipt) {
       setError("Upload a receipt image.");
       return;
@@ -204,7 +198,6 @@ export function LiveClaimSubmissionForm() {
         requestedAmountMinor: parseUsdcDisplay(requestedAmount),
         receiptAmountMinor: parseUsdcDisplay(requestedAmount),
         receiptReference: receiptReference || null,
-        recipientSuiAddress: payoutRecipient,
         currency: "USDC",
       };
       const formData = new FormData();
@@ -344,13 +337,10 @@ export function LiveClaimSubmissionForm() {
             onChange={(event) => setReceiptReference(event.target.value)}
           />
         </Field>
-        <Field label="Recipient Sui address">
-          <input
-            className={`${inputClass} font-mono text-xs`}
-            value={recipient || account?.address || ""}
-            onChange={(event) => setRecipient(event.target.value)}
-            required
-          />
+        <Field label="Verified wallet payout recipient">
+          <p className="mt-2 break-all rounded-xl border border-[var(--line)] bg-stone-50 px-4 py-3 font-mono text-xs font-normal">
+            {account?.address ?? "Connect a verified wallet"}
+          </p>
         </Field>
         <div className="sm:col-span-2">
           <Field label="Receipt image">
