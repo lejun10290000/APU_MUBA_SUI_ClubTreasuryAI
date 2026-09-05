@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { serverConfig } from "@/src/config/env";
+import { receiptAnalysisSchema } from "@/src/lib/ai/types";
 import { getClaimRepository } from "@/src/lib/claims";
 import { createAuthorizedReceiptUrl } from "@/src/lib/claims/receipt-url";
 
@@ -19,13 +21,31 @@ export async function GET(
     const treasuryLink = await repository.getTreasuryLinkState(
       claim.treasuryId,
     );
+    const parsedAnalysis = receiptAnalysisSchema.safeParse(claim.receiptAnalysis);
+    const aiProvenance =
+      serverConfig.AI_MODE === "live" && parsedAnalysis.success
+        ? {
+            provider: "Google Gemini" as const,
+            model: serverConfig.GEMINI_MODEL,
+            mode: "live" as const,
+            task: "receipt_analysis" as const,
+            generatedAt: claim.createdAt,
+            humanConfirmationRequired: true as const,
+          }
+        : null;
     try {
       const receiptPreviewUrl = await createAuthorizedReceiptUrl(claimId);
-      return NextResponse.json({ claim, treasuryLink, receiptPreviewUrl });
+      return NextResponse.json({
+        claim,
+        treasuryLink,
+        aiProvenance,
+        receiptPreviewUrl,
+      });
     } catch {
       return NextResponse.json({
         claim,
         treasuryLink,
+        aiProvenance,
         receiptPreviewUrl: null,
         receiptPreviewError:
           "Private receipt preview is temporarily unavailable. The persisted claim can still be reviewed.",
