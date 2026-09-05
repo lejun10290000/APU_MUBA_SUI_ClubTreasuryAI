@@ -4,6 +4,7 @@ import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { publicConfig } from "@/src/config/public-env";
 import { ensureWalletIdentity } from "@/src/lib/sui/wallet-identity";
 import { BrandMark } from "./brand-mark";
 import { Icon, type IconName } from "./icon";
@@ -30,7 +31,10 @@ const navigation: Array<{
     match: "/dashboard/budget",
   },
   {
-    href: "/dashboard/claims",
+    href:
+      publicConfig.claimDataMode === "live"
+        ? "/dashboard/claims"
+        : "/dashboard/claims/new",
     icon: "receipt",
     label: "Claims",
     match: "/dashboard/claims",
