@@ -8,6 +8,7 @@ export type ActivationStepStatus =
   | "submitted"
   | "confirmed"
   | "reconciliation_required"
+  | "failed"
   | "failed_before_signing";
 
 export type TreasuryActivationStatus =
