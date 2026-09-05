@@ -1,8 +1,11 @@
 "use client";
 
+import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { publicConfig } from "@/src/config/public-env";
+import { ensureWalletIdentity } from "@/src/lib/sui/wallet-identity";
 import { BrandMark } from "./brand-mark";
 import { Icon, type IconName } from "./icon";
 import { SuiWalletControl } from "./sui-wallet-control";
@@ -28,7 +31,10 @@ const navigation: Array<{
     match: "/dashboard/budget",
   },
   {
-    href: "/dashboard/claims/new",
+    href:
+      publicConfig.claimDataMode === "live"
+        ? "/dashboard/claims"
+        : "/dashboard/claims/new",
     icon: "receipt",
     label: "Claims",
     match: "/dashboard/claims",
@@ -48,13 +54,61 @@ const navigation: Array<{
   },
 ];
 
+type IdentityResult = {
+  address: string;
+  error: string | null;
+};
+
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const account = useCurrentAccount();
+  const dAppKit = useDAppKit();
+  const [identityResult, setIdentityResult] = useState<IdentityResult | null>(
+    null,
+  );
+  const [identityAttempt, setIdentityAttempt] = useState(0);
+
+  useEffect(() => {
+    if (!account) return;
+    let cancelled = false;
+    const address = account.address;
+    void ensureWalletIdentity({
+      signer: dAppKit,
+      walletAddress: address,
+      displayName: "Club treasurer",
+    })
+      .then(() => {
+        if (!cancelled) setIdentityResult({ address, error: null });
+      })
+      .catch((caught) => {
+        if (!cancelled) {
+          setIdentityResult({
+            address,
+            error:
+              caught instanceof Error
+                ? caught.message
+                : "The connected treasurer wallet could not be verified.",
+          });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [account, dAppKit, identityAttempt]);
+
   const isActive = (match: string) => {
     return match === "/dashboard"
       ? pathname === match
       : pathname.startsWith(match);
   };
+
+  const currentAddress = account?.address.toLowerCase() ?? null;
+  const resultForCurrentWallet =
+    currentAddress && identityResult?.address.toLowerCase() === currentAddress
+      ? identityResult
+      : null;
+  const walletIdentityReady = !account || resultForCurrentWallet?.error === null;
+  const identityError = resultForCurrentWallet?.error ?? null;
 
   return (
     <div className="min-h-screen bg-[var(--canvas)] text-[var(--ink)] lg:grid lg:grid-cols-[256px_1fr]">
@@ -72,7 +126,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 APU Blockchain Club
               </span>
               <span className="block text-xs text-white/50">
-                Demo workspace
+                Treasurer workspace
               </span>
             </span>
           </div>
@@ -94,8 +148,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             <Icon className="size-4" name="shield" /> Human-controlled
           </div>
           <p className="text-xs leading-5 text-white/55">
-            Sample pages never move funds. Every Sui Testnet transaction needs
-            an explicit wallet signature.
+            AI advises only. Approval and every Sui Testnet payment remain
+            controlled by the verified treasurer wallet.
           </p>
         </div>
       </aside>
@@ -111,12 +165,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             </Link>
             <div className="hidden items-center gap-2 text-sm text-[var(--muted)] lg:flex">
               <span className="size-2 rounded-full bg-emerald-500" />
-              AI: deterministic demo mode
+              AI-assisted · human-controlled
             </div>
             <div className="flex items-center gap-3">
               <SuiWalletControl />
               <span className="hidden text-sm font-semibold sm:inline">
-                Treasurer demo
+                Treasurer
               </span>
             </div>
           </div>
@@ -136,7 +190,39 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
         </header>
-        {children}
+        {walletIdentityReady ? (
+          children
+        ) : (
+          <main className="p-5 sm:p-8 lg:p-10">
+            <section className="mx-auto max-w-xl rounded-3xl border border-[var(--line)] bg-white p-7 shadow-[0_12px_40px_rgba(24,49,43,0.05)]">
+              <p className="text-xs font-bold uppercase tracking-[0.13em] text-[var(--brand)]">
+                Wallet authorization
+              </p>
+              <h1 className="mt-2 text-2xl font-bold">
+                Verifying connected treasurer wallet
+              </h1>
+              {identityError ? (
+                <>
+                  <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                    {identityError}
+                  </p>
+                  <button
+                    className="mt-5 rounded-xl bg-[var(--brand)] px-5 py-3 text-sm font-bold text-white"
+                    onClick={() => setIdentityAttempt((attempt) => attempt + 1)}
+                    type="button"
+                  >
+                    Verify connected wallet again
+                  </button>
+                </>
+              ) : (
+                <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                  Confirm the personal-message request if your connected wallet
+                  changed. No transaction or USDC transfer is being signed.
+                </p>
+              )}
+            </section>
+          </main>
+        )}
       </div>
     </div>
   );

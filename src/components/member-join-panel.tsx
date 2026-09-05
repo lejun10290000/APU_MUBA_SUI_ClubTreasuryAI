@@ -45,6 +45,9 @@ export function MemberJoinPanel() {
       if (!response.ok || !result.treasury) {
         throw new Error(result.error ?? "The treasury could not be joined.");
       }
+      if (result.treasury.role !== "member") {
+        throw new Error("Only treasury members can submit reimbursement claims.");
+      }
       setTreasury(result.treasury);
     } catch (caught) {
       setError(
@@ -106,7 +109,7 @@ export function MemberJoinPanel() {
           </ul>
           <Link
             className="mt-5 inline-flex rounded-xl bg-[var(--brand)] px-5 py-3 text-sm font-bold text-white"
-            href={`/dashboard/claims/new?treasury=${treasury.id}`}
+            href={`/member/claim?treasury=${treasury.id}`}
           >
             Submit reimbursement claim
           </Link>

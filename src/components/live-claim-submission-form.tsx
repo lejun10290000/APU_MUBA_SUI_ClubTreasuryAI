@@ -72,13 +72,16 @@ export function LiveClaimSubmissionForm() {
               "Persisted treasuries could not be loaded.",
           );
         }
+        const memberTreasuries = treasuriesResult.treasuries.filter(
+          (treasury) => treasury.role === "member",
+        );
         const selectedTreasury =
-          treasuriesResult.treasuries.find(
+          memberTreasuries.find(
             (treasury) => treasury.id === requestedTreasuryId,
-          ) ?? treasuriesResult.treasuries[0];
+          ) ?? memberTreasuries[0];
         if (!selectedTreasury) {
           throw new Error(
-            "Create or join a treasury before submitting a claim.",
+            "Only treasury members can submit reimbursement claims.",
           );
         }
         const response = await fetch(
@@ -95,7 +98,7 @@ export function LiveClaimSubmissionForm() {
           );
         }
         if (cancelled) return;
-        setTreasuries(treasuriesResult.treasuries);
+        setTreasuries(memberTreasuries);
         setSelectedTreasuryId(selectedTreasury.id);
         setWorkspace(result.workspace);
         setCategoryReference(
@@ -216,7 +219,7 @@ export function LiveClaimSubmissionForm() {
           result.error ?? "The live claim could not be submitted.",
         );
       }
-      router.push(`/dashboard/claims/review?claim=${result.claim.id}`);
+      router.push(`/member/submitted?claim=${result.claim.id}`);
     } catch (caught) {
       setError(
         caught instanceof Error

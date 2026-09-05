@@ -5,6 +5,19 @@ import { getClaimRepository } from "@/src/lib/claims";
 
 const paramsSchema = z.object({ claimId: z.string().uuid() });
 
+function readDecisionErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message;
+  }
+  return "The human decision could not be saved.";
+}
+
 export async function POST(
   request: Request,
   context: { params: Promise<{ claimId: string }> },
@@ -20,12 +33,7 @@ export async function POST(
     return NextResponse.json({ claim });
   } catch (error) {
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "The human decision could not be saved.",
-      },
+      { error: readDecisionErrorMessage(error) },
       { status: 400 },
     );
   }
