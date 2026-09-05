@@ -83,6 +83,7 @@ export async function GET() {
     return NextResponse.json({
       claims: (claimResult.data ?? []).map((claim) => ({
         id: claim.id,
+        treasuryId: claim.treasury_id,
         treasuryName: treasuryNames.get(claim.treasury_id) ?? "Treasury",
         categoryName: categoryNames.get(claim.category_id) ?? "Category",
         merchant: claim.merchant,
