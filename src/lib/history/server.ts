@@ -41,6 +41,7 @@ export function buildAuthorizedPaidHistory(input: {
     )
     .map((claim) => ({
       claimId: claim.id,
+      treasuryId: claim.treasury_id,
       treasuryName: treasuries.get(claim.treasury_id)!,
       categoryName: categories.get(claim.category_id)!,
       amountMinor: asMinorAmount(claim.approved_amount_minor!),
