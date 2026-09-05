@@ -100,9 +100,26 @@ export const receiptAnalysisInputSchema = z.object({
 
 export const budgetInstructionSchema = z.string().trim().min(1).max(4_000);
 
+export const aiTaskSchema = z.enum(["budget_draft", "receipt_analysis"]);
+
+export const aiProvenanceSchema = z.object({
+  provider: z.literal("Google Gemini"),
+  model: z.string().trim().min(1).max(120),
+  mode: z.literal("live"),
+  task: aiTaskSchema,
+  generatedAt: z.string().datetime(),
+  humanConfirmationRequired: z.literal(true),
+});
+
 export type BudgetDraft = z.infer<typeof budgetDraftSchema>;
 export type ReceiptAnalysis = z.infer<typeof receiptAnalysisSchema>;
 export type ReceiptAnalysisInput = z.input<typeof receiptAnalysisInputSchema>;
+export type AIProvenance = z.infer<typeof aiProvenanceSchema>;
+
+export interface BudgetDraftResponse {
+  draft: BudgetDraft;
+  provenance: AIProvenance;
+}
 
 export interface AIService {
   parseBudget(input: string): Promise<BudgetDraft>;
