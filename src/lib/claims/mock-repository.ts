@@ -24,6 +24,8 @@ import type {
 interface MockWorkspace extends PersistedWorkspace {
   ownerUserId: string;
   externalReference: string;
+  suiActivationStatus?: "not_started" | "active";
+  suiTreasurerCapObjectId?: string | null;
 }
 
 interface MockClaimStore {
@@ -89,6 +91,12 @@ export class MockClaimRepository implements Stage6ClaimRepository {
       categoryAllocatedMinor: selectedCategory.allocatedMinor,
       categorySpentMinor: selectedCategory.spentMinor,
       treasuryObjectId: submission.workspace.treasuryObjectId,
+      suiActivationStatus: submission.workspace.treasuryObjectId
+        ? "active"
+        : "not_started",
+      suiTreasurerCapObjectId: submission.workspace.treasuryObjectId
+        ? demoSuiAddress
+        : null,
     };
     if (!this.store.workspaces.includes(workspace)) {
       this.store.workspaces.push(workspace);
@@ -278,13 +286,30 @@ export class MockClaimRepository implements Stage6ClaimRepository {
   async preparePaymentAttempt(claimId: string) {
     const claim = this.requireClaim(claimId);
     const snapshot = parseApprovedPayoutSnapshot(claim);
+    const workspace = this.store.workspaces.find(
+      (candidate) => candidate.treasuryId === claim.treasuryId,
+    );
+    if (
+      !workspace ||
+      workspace.suiActivationStatus !== "active" ||
+      !workspace.suiTreasurerCapObjectId ||
+      workspace.treasuryObjectId !== snapshot.treasuryObjectId
+    ) {
+      throw new Error(
+        "The workspace Sui activation and TreasurerCap must be confirmed before payout.",
+      );
+    }
     const existing = [...this.store.paymentAttempts.values()].find(
       (attempt) =>
         attempt.claimId === claimId &&
         isActivePaymentAttemptStatus(attempt.status),
     );
     if (existing) {
-      return { attempt: structuredClone(existing), snapshot };
+      return {
+        attempt: structuredClone(existing),
+        snapshot,
+        treasurerCapObjectId: workspace.suiTreasurerCapObjectId,
+      };
     }
 
     const now = new Date().toISOString();
@@ -302,7 +327,11 @@ export class MockClaimRepository implements Stage6ClaimRepository {
       confirmedAt: null,
     };
     this.store.paymentAttempts.set(attempt.id, attempt);
-    return { attempt: structuredClone(attempt), snapshot };
+    return {
+      attempt: structuredClone(attempt),
+      snapshot,
+      treasurerCapObjectId: workspace.suiTreasurerCapObjectId,
+    };
   }
 
   async getPaymentAttempt(attemptId: string) {
@@ -325,6 +354,14 @@ export class MockClaimRepository implements Stage6ClaimRepository {
     if (!workspace.treasuryObjectId) {
       throw new Error("Payment treasury is not linked to Sui.");
     }
+    if (
+      workspace.suiActivationStatus !== "active" ||
+      !workspace.suiTreasurerCapObjectId
+    ) {
+      throw new Error(
+        "Payment workspace activation and TreasurerCap are not confirmed.",
+      );
+    }
     return {
       attempt: structuredClone(attempt),
       claim: {
@@ -339,6 +376,8 @@ export class MockClaimRepository implements Stage6ClaimRepository {
       treasury: {
         id: workspace.treasuryId,
         suiTreasuryObjectId: workspace.treasuryObjectId,
+        suiTreasurerCapObjectId: workspace.suiTreasurerCapObjectId,
+        suiActivationStatus: workspace.suiActivationStatus,
         currency: "USDC",
         status: "active",
       },

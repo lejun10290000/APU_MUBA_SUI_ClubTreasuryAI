@@ -32,6 +32,7 @@ describe("Stage 6 payment API contracts", () => {
         status: "prepared",
       }),
       snapshot: claim.approvedSnapshot,
+      treasurerCapObjectId: demoSuiAddress,
     });
   });
 

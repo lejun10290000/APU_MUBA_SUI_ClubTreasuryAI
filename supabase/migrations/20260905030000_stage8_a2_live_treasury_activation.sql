@@ -420,3 +420,89 @@ revoke all on function public.reconcile_treasury_activation_step(uuid, uuid, tex
 grant execute on function public.start_treasury_sui_activation(uuid, uuid, text) to service_role;
 grant execute on function public.record_treasury_activation_signed(uuid, uuid, text, text) to service_role;
 grant execute on function public.reconcile_treasury_activation_step(uuid, uuid, text, text, text, text, text) to service_role;
+
+-- A2 payouts must resolve authorization from the exact activated workspace.
+-- The immutable approved_* values remain the transaction payload authority;
+-- the workspace TreasurerCap is separate server-side authorization metadata.
+create or replace function public.prepare_claim_payment(p_claim_id uuid)
+returns public.claim_payment_attempts
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  actor uuid := public.current_wallet_user_id();
+  claim_row public.claims;
+  attempt_row public.claim_payment_attempts;
+  treasury_row public.treasuries;
+begin
+  if actor is null then raise exception 'Authentication required'; end if;
+
+  select claim.* into claim_row
+  from public.claims claim
+  where claim.id = p_claim_id
+  for update;
+  if claim_row.id is null then raise exception 'Claim not found'; end if;
+  if not public.can_manage_treasury(claim_row.treasury_id) then
+    raise exception 'Treasurer role required';
+  end if;
+
+  if claim_row.status = 'paid' and claim_row.payment_status = 'paid' then
+    select attempt.* into attempt_row
+    from public.claim_payment_attempts attempt
+    where attempt.claim_id = claim_row.id and attempt.status = 'confirmed'
+    order by attempt.confirmed_at desc limit 1;
+    if attempt_row.id is null then
+      raise exception 'Paid claim is missing confirmed payment evidence';
+    end if;
+    return attempt_row;
+  end if;
+
+  if claim_row.status <> 'approved_unpaid'
+    or claim_row.decision <> 'approve'
+    or claim_row.payment_status <> 'unpaid'
+    or claim_row.approved_treasury_object_id is null
+    or claim_row.approved_category_reference is null
+    or claim_row.approved_recipient_sui_address is null
+    or claim_row.approved_amount_minor is null
+    or claim_row.approved_currency <> 'USDC'
+  then raise exception 'Claim is not eligible for payment'; end if;
+
+  select treasury.* into treasury_row
+  from public.treasuries treasury
+  where treasury.id = claim_row.treasury_id;
+  if treasury_row.id is null
+    or treasury_row.status <> 'active'
+    or treasury_row.sui_activation_status <> 'active'
+    or treasury_row.sui_treasury_object_id is null
+    or treasury_row.sui_treasurer_cap_object_id is null
+  then
+    raise exception 'Workspace Sui activation and TreasurerCap must be confirmed before payout';
+  end if;
+  if claim_row.approved_treasury_object_id is distinct from treasury_row.sui_treasury_object_id then
+    raise exception 'Approved claim does not match its activated Sui Treasury';
+  end if;
+
+  select attempt.* into attempt_row
+  from public.claim_payment_attempts attempt
+  where attempt.claim_id = claim_row.id
+    and attempt.status in ('prepared', 'signed', 'submitted', 'reconciliation_required')
+  order by attempt.created_at desc limit 1;
+  if attempt_row.id is not null then return attempt_row; end if;
+
+  insert into public.claim_payment_attempts (
+    claim_id, treasury_id, category_id, initiated_by,
+    expected_treasury_object_id, expected_category_reference,
+    expected_recipient_sui_address, expected_amount_minor, expected_currency
+  ) values (
+    claim_row.id, claim_row.treasury_id, claim_row.category_id, actor,
+    claim_row.approved_treasury_object_id, claim_row.approved_category_reference,
+    claim_row.approved_recipient_sui_address, claim_row.approved_amount_minor,
+    claim_row.approved_currency
+  ) returning * into attempt_row;
+  return attempt_row;
+end;
+$$;
+
+revoke all on function public.prepare_claim_payment(uuid) from public, anon;
+grant execute on function public.prepare_claim_payment(uuid) to authenticated;
