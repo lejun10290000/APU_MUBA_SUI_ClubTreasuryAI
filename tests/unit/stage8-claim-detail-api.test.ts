@@ -74,7 +74,7 @@ describe("Stage 8 claim detail AI provenance", () => {
     expect(json.aiProvenance).not.toHaveProperty("apiKey");
   });
 
-  it("returns no provenance when the stored receipt analysis is not structured", async () => {
+  it("omits provenance when the stored receipt analysis is not structured", async () => {
     state.getClaim.mockResolvedValue({
       id: claimId,
       treasuryId: "355fbe92-9e46-41be-8b08-620d01e119ec",
@@ -87,6 +87,6 @@ describe("Stage 8 claim detail AI provenance", () => {
     });
     const json = await response.json();
 
-    expect(json.aiProvenance).toBeNull();
+    expect(json.aiProvenance).toBeUndefined();
   });
 });
