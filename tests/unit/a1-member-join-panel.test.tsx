@@ -54,7 +54,7 @@ afterEach(() => {
 });
 
 describe("A1 member join panel", () => {
-  it("verifies the wallet, joins by code, and links to the selected claim form", async () => {
+  it("verifies the wallet, joins by code, and links to the member claim form", async () => {
     render(<MemberJoinPanel />);
 
     fireEvent.change(screen.getByLabelText(/treasury join code/i), {
@@ -80,7 +80,7 @@ describe("A1 member join panel", () => {
       screen.getByRole("link", { name: /submit reimbursement claim/i }),
     ).toHaveAttribute(
       "href",
-      "/dashboard/claims/new?treasury=11111111-1111-4111-8111-111111111111",
+      "/member/claim?treasury=11111111-1111-4111-8111-111111111111",
     );
   });
 });
