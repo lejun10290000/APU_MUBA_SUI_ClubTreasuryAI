@@ -86,7 +86,9 @@ it("shows Gemini provenance and the AI-to-Sui decision pipeline", async () => {
   const { ClaimReviewPanel } = await import("@/src/components/claim-review-panel");
   render(<ClaimReviewPanel />);
 
-  expect(await screen.findByText("Campus Cafe")).toBeInTheDocument();
+  expect(
+    await screen.findByRole("heading", { name: "Campus Cafe" }),
+  ).toBeInTheDocument();
   expect(screen.getByText("Google Gemini")).toBeInTheDocument();
   expect(screen.getByText("gemini-2.5-flash")).toBeInTheDocument();
   expect(screen.getByText("Gemini AI")).toBeInTheDocument();
