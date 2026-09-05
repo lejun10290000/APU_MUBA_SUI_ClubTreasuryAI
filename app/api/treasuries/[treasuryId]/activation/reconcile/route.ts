@@ -5,6 +5,7 @@ import { serverConfig } from "@/src/config/env";
 import { appMinorToUsdcBaseUnits } from "@/src/lib/sui/payment-safety";
 import { readActivationTransaction, readActivationTreasury, verifyActivationTreasurerCap } from "@/src/lib/sui/activation-server";
 import {
+  ActivationExecutionFailedError,
   verifyAllocationActivation,
   verifyCreateActivation,
   verifyCreatedTreasuryState,
@@ -117,6 +118,31 @@ export async function POST(request: Request, context: { params: Promise<{ treasu
   } catch (error) {
     const message = error instanceof Error ? error.message : "Activation could not be reconciled.";
     if (reconciliationContext) {
+      if (error instanceof ActivationExecutionFailedError) {
+        try {
+          const activation = await persistActivationReconciliation({
+            client: reconciliationContext.adminClient,
+            treasuryId,
+            ownerUserId: reconciliationContext.ownerUserId,
+            step: reconciliationContext.step,
+            digest: reconciliationContext.digest,
+            outcome: "failed",
+          });
+          return NextResponse.json(
+            {
+              error: message,
+              transactionFailed: true,
+              activation,
+            },
+            { status: 409 },
+          );
+        } catch {
+          return NextResponse.json(
+            { error: message, transactionFailed: true },
+            { status: 409 },
+          );
+        }
+      }
       try {
         const activation = await persistActivationReconciliation({
           client: reconciliationContext.adminClient,
