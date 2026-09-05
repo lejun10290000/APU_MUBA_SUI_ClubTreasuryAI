@@ -40,7 +40,7 @@ This roadmap follows `docs/DEVELOPMENT_STAGES.md`. Core product scope is frozen;
 - [x] Multimodal receipt/image extraction
 - [x] Structured/Zod-validated outputs
 - [x] Category suggestion and concise reasons
-- [x] Live Gemini remains explicitly configured; CI stays mock-first
+- [x] Live Gemini explicitly configured; CI remains mock-first
 
 ## Stage 5 — Claim and receipt workflow integration — COMPLETE
 
@@ -77,7 +77,7 @@ Successful Stage 7C rehearsal digest:
 
 ## Stage 8 — Submission and pitch — CURRENT
 
-### 8A — Submission package — CORE PRODUCT COMPLETE
+### 8A — Submission package — COMPLETE
 
 - [x] Persisted Treasury → Budget → Claims continuity
 - [x] Member join-code claim path
@@ -101,8 +101,11 @@ Successful Stage 7C rehearsal digest:
 - [x] Add `/dashboard/status`
 - [x] Add security-boundary regression coverage
 - [x] Add final judge golden-path Playwright test
-- [x] Post-merge `main` CI #244 green
-- [x] Refresh project documentation with final A2 acceptance evidence
+- [x] Merge allocation reconciliation hotfix PR #37
+- [x] Verify product baseline `4553857d549151328cf193e3d202f441c0f65bdd`
+- [x] Verify GitHub Actions run #249 green
+- [x] Verify Vercel deployment success for product baseline
+- [x] Refresh final submission documentation
 
 Final Stage 8 A2 smoke evidence:
 
@@ -122,13 +125,19 @@ Payment attempts for claim:
 
 See [`STAGE8_A2_LIVE_ACCEPTANCE.md`](STAGE8_A2_LIVE_ACCEPTANCE.md).
 
-### 8B — Demo video — IN PROGRESS
+### 8B — Demo video — COMPLETE
 
 - [x] Finalize 3–5 minute script/storyboard
 - [x] Capture safe production screenshots/video
-- [x] Render final narrated MP4 locally
-- [ ] Upload final video to YouTube or Loom
-- [ ] Add public video URL to README and submission package
+- [x] Render final narrated MP4
+- [x] Upload final video to YouTube
+- [x] Add public video URL to README and submission package
+
+Final video:
+
+```text
+https://youtu.be/VLn7P-Cy6tQ
+```
 
 ### 8C — Pitch — NEXT
 
@@ -147,16 +156,22 @@ See [`STAGE8_A2_LIVE_ACCEPTANCE.md`](STAGE8_A2_LIVE_ACCEPTANCE.md).
 - [x] Sui execution/public proof clearly surfaced
 - [ ] Prepare Q&A
 
-### 8D — Final submission — NEXT
+### 8D — Final submission — IN PROGRESS
 
-- [ ] Final Devfolio field review
-- [ ] Public repository link verified
-- [ ] Production demo link verified
-- [ ] Video link verified
-- [ ] All AI tools declared accurately
-- [ ] Select intended tracks
-- [ ] Submit before **5 Sep 2026, 11:59 PM MYT**
-- [ ] Save submission confirmation/evidence
+- [x] Devfolio-ready field copy prepared
+- [x] Public repository link prepared
+- [x] Production demo link prepared
+- [x] Video link added to repository docs
+- [x] AI tools declaration prepared
+- [x] Sui Track 01 explanation prepared
+- [x] Sui Track 02 explanation prepared
+- [ ] confirm no teammate used any additional undeclared AI tool
+- [ ] verify YouTube video playback in incognito/private browser
+- [ ] choose/upload final Devfolio screenshots
+- [ ] select intended Sui tracks on Devfolio
+- [ ] paste/review Devfolio fields
+- [ ] click Publish Project before **5 Sep 2026, 11:59 PM MYT**
+- [ ] save submission confirmation/evidence
 
 ## Official Team
 
@@ -168,4 +183,4 @@ See [`STAGE8_A2_LIVE_ACCEPTANCE.md`](STAGE8_A2_LIVE_ACCEPTANCE.md).
 
 ## Scope Rule
 
-Do not add optional features before submission unless explicitly required. The core live demo is accepted; prioritize reliability, pitch, video, and submission evidence.
+Do not add optional features before submission unless explicitly required. The core live demo is accepted; prioritize Devfolio submission evidence, pitch, and Q&A.

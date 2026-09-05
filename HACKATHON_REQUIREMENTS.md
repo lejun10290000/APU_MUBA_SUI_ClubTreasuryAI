@@ -186,16 +186,24 @@ The 3–5 minute demo video should show as much of the real end-to-end workflow 
 12. Dashboard updates
 13. Show transaction result / explorer reference where available
 
+Final demo video:
+
+https://youtu.be/VLn7P-Cy6tQ
+
 ## AI Tool Declaration
 
 The submission requires declaration of **every AI tool used**.
 
-Maintain this list throughout development. Current known tools:
+Current declared development tools:
 
-- ChatGPT — ideation, planning, architecture discussion, documentation assistance
-- OpenAI Codex — coding assistance, implementation, debugging, repository work (when used)
+- ChatGPT — ideation, planning, architecture, documentation, implementation/debugging assistance, repository review
+- OpenAI Codex — coding assistance, implementation, debugging, repository work and verification
 
-Every teammate must add any additional AI tool they use.
+Product AI:
+
+- Google Gemini Developer API — natural-language budget parsing and receipt/image analysis
+
+Every teammate must add any additional AI tool they personally used before submission.
 
 ## Security / Repository Safety
 
@@ -207,32 +215,45 @@ Do not commit:
 - seed phrases
 - passwords
 - personal secrets
+- private receipt URLs/content
 
 Use `.env.example` with placeholders only.
 
 ## Final Submission Checklist
 
-- [ ] Public repository
-- [ ] All source code included
-- [ ] Clear commit history
-- [ ] README complete
-- [ ] Project description present
-- [ ] Problem present
-- [ ] Blockchain listed as Sui
-- [ ] Sui testnet contract/package/object IDs added
-- [ ] Setup/install instructions tested
-- [ ] Team members listed
-- [ ] All AI tools declared
-- [ ] 3–5 minute demo video uploaded
-- [ ] Demo video link works
-- [ ] Live application works
-- [ ] Sui wallet flow works
-- [ ] Sui testnet transaction works
-- [ ] Track 01 explanation present
-- [ ] Track 02 explanation present
-- [ ] No secrets committed
-- [ ] Devfolio submitted before 5 Sep 2026, 11:59 PM MYT
-- [ ] 5-minute pitch prepared
-- [ ] 5-minute Q&A prepared
-- [ ] Live demo prepared
-- [ ] Backup screenshots/video prepared in case of connectivity problems
+Repository / product readiness:
+
+- [x] Public repository prepared
+- [x] All source code included
+- [x] Clear commit history
+- [x] README complete
+- [x] Project description present
+- [x] Problem present
+- [x] Blockchain listed as Sui
+- [x] Sui testnet package / USDC / transaction evidence documented
+- [x] Setup/install instructions present
+- [x] Team members listed
+- [x] Development and product AI tools declared in repository docs
+- [x] 3–5 minute demo video uploaded to YouTube
+- [x] Demo video URL added to README and submission package
+- [x] Live application deployed
+- [x] Sui wallet flow implemented
+- [x] Sui Testnet transaction verified
+- [x] Track 01 explanation present
+- [x] Track 02 explanation present
+- [x] Final product CI verified: run #249 SUCCESS
+- [x] Final product Playwright smoke/E2E verified: 10/10 PASS
+- [x] Final product Vercel deployment verified SUCCESS
+
+Owner actions that still require manual confirmation on Devfolio / external UI:
+
+- [ ] confirm every teammate used no additional undeclared AI tool
+- [ ] verify the YouTube video plays in incognito/private browsing
+- [ ] choose/upload final Devfolio screenshots
+- [ ] select intended Sui tracks in Devfolio
+- [ ] paste/review all Devfolio fields
+- [ ] publish before **5 Sep 2026, 11:59 PM MYT**
+- [ ] save Devfolio submission confirmation/evidence
+- [ ] finalize 5-minute pitch
+- [ ] finalize 5-minute Q&A
+- [ ] keep backup screenshots/video ready for pitching

@@ -9,14 +9,18 @@ This file is the **single source of truth for current implementation status, blo
 - Current stage: **Stage 8 — Submission and pitch**
 - Stage status: **CURRENT**
 - Completed stages: **Stage 0–7**
-- Latest product merge on `main`: `24255152976109a8f55399bf791e7a8768c5bacb` (PR #35)
-- Post-merge CI: **run #244 — SUCCESS**
+- Latest product-code baseline on `main`: `4553857d549151328cf193e3d202f441c0f65bdd` (PR #37)
+- Product CI: **run #249 — SUCCESS**
+- Unit tests: **75 files / 290 tests PASS**
+- Playwright smoke/E2E: **10/10 PASS**
+- Vercel deployment for product baseline: **SUCCESS**
 - Production app: `https://apumubasuiclubtreasuryai000.vercel.app`
+- Demo video: `https://youtu.be/VLn7P-Cy6tQ`
 - Production claims/payments: **live Supabase**
 - Production Supabase project ref: `arldlnqiywhcuungvgei`
 - Sui network: **Testnet**
 - Current blocker: **none in the core Treasury → Budget → Claim → Approval → Payout path**
-- Current priority: **final submission packaging, public video link, pitch/Q&A, and final production sanity checks**
+- Current priority: **complete Devfolio submission, save submission evidence, then prepare the 5-minute pitch/Q&A**
 
 ## Stage Progress
 
@@ -44,7 +48,7 @@ Production Supabase contains:
 20260905070013 stage8_a2_decide_claim_ambiguity_hotfix
 ```
 
-The live `public.decide_claim(...)` function now uses `linked_treasury_object_id`; the ambiguous `treasury_object_id = treasury_object_id` assignment is gone.
+The live `public.decide_claim(...)` function uses `linked_treasury_object_id`; the ambiguous `treasury_object_id = treasury_object_id` assignment is gone.
 
 ### Successful Campus Cafe smoke claim
 
@@ -95,21 +99,38 @@ PR #35 added:
 - security-boundary regression tests;
 - final Playwright judge golden-path coverage.
 
-PR #35 merged as:
+## Stage 8 Activation Reconciliation Hotfix — MERGED
+
+PR #37 fixed a real demo-blocking reconciliation issue. On-chain allocation verification now compares exact category-reference/amount pairs independent of database row ordering, so categories tied on `created_at` cannot produce a false mismatch.
+
+PR #37 merged as:
 
 ```text
-24255152976109a8f55399bf791e7a8768c5bacb
+4553857d549151328cf193e3d202f441c0f65bdd
 ```
 
-Post-merge GitHub Actions run #244 passed:
+GitHub Actions run #249 on that exact product commit passed:
 
 ```text
 lint: PASS
 typecheck: PASS
-unit tests: PASS
+unit tests: 75 files / 290 tests PASS
 production build: PASS
-Playwright smoke/E2E: PASS
+Playwright smoke/E2E: 10/10 PASS
+Vercel deployment status: SUCCESS
 ```
+
+No Supabase migration or new Sui transaction was required for PR #37.
+
+## Demo Video — COMPLETE
+
+Final YouTube demo:
+
+```text
+https://youtu.be/VLn7P-Cy6tQ
+```
+
+The public link has been added to the README and submission package.
 
 ## Verified Sui Evidence
 
@@ -175,7 +196,7 @@ budget_categories: 18
 claim_payment_attempts: 7
 ```
 
-No additional schema migration is required by PR #35; the judge-facing polish is application/UI/test work on top of the already-applied A2 database migrations and hotfix.
+No additional schema migration is required by the final judge-facing polish or allocation-reconciliation hotfix.
 
 ## Official Team
 
@@ -187,10 +208,14 @@ No additional schema migration is required by PR #35; the judge-facing polish is
 
 ## Remaining Stage 8 Work
 
-- upload final demo video to YouTube or Loom and add the public URL;
-- finalize 5-minute pitch and Q&A;
-- verify Devfolio fields, tracks, public repo, live demo and AI-tool declarations;
-- submit before the deadline and save submission evidence.
+- confirm every teammate has no additional undeclared AI tools;
+- verify the YouTube demo opens in an incognito/private browser;
+- choose/upload final Devfolio screenshots;
+- select intended Sui tracks;
+- paste/review Devfolio fields;
+- publish the project before the deadline;
+- save Devfolio submission confirmation/evidence;
+- finalize the 5-minute pitch and Q&A for 6 September 2026.
 
 ## Mandatory Agent Startup Output
 
@@ -200,9 +225,9 @@ Before further coding work, every coding agent should show:
 CURRENT PROJECT STAGE: Stage 8 — Submission and pitch
 STATUS: CURRENT
 COMPLETED STAGES: 0–7
-NEXT TASK: Final submission packaging and demo/pitch verification. Core live Treasury → Budget → Claim → Approval → Sui payout acceptance is complete; do not introduce optional scope that risks the demo.
+NEXT TASK: Complete Devfolio submission and preserve evidence; do not introduce optional product scope before pitching.
 ```
 
 ## Handoff Rule
 
-Keep this file and `docs/ROADMAP.md` accurate after every Stage 8 change. Do not mark Stage 8 COMPLETE until the owner confirms the final submission is complete.
+Keep this file and `docs/ROADMAP.md` accurate after every Stage 8 change. Do not mark Stage 8 COMPLETE until the owner confirms the final Devfolio submission is complete.
