@@ -28,6 +28,7 @@ export function nextActivationStep(
   if (activation.status === "active") return "complete";
   for (const step of ["create", "fund", "allocation"] as const) {
     const state = stepState(activation, step);
+    if (state.status === "failed") return step;
     if (state.status === "reconciliation_required" || state.digest) {
       if (state.status !== "confirmed") return "reconcile";
     }
@@ -45,7 +46,7 @@ export function assertCanRecordSignedActivationStep(
   if (state.status === "confirmed") {
     throw new Error(`${step} is already confirmed and cannot be signed again.`);
   }
-  if (state.digest && state.digest !== digest) {
+  if (state.status !== "failed" && state.digest && state.digest !== digest) {
     throw new Error(
       `Reconcile existing ${step} digest ${state.digest} before any replacement transaction.`,
     );
@@ -132,7 +133,11 @@ export async function persistActivationReconciliation({
   ownerUserId: string;
   step: ActivationStep;
   digest: string;
-  outcome: "confirmed" | "reconciliation_required" | "failed_before_signing";
+  outcome:
+    | "confirmed"
+    | "reconciliation_required"
+    | "failed"
+    | "failed_before_signing";
   treasuryObjectId?: string;
   treasurerCapObjectId?: string;
 }): Promise<TreasurySuiActivation> {
