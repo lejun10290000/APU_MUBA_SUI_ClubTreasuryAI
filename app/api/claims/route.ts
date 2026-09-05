@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { publicConfig } from "@/src/config/public-env";
 import { persistedClaimSubmissionSchema } from "@/src/domain/stage5-claims";
 import { getClaimAIService } from "@/src/lib/ai";
 import { getClaimRepository } from "@/src/lib/claims";
@@ -22,7 +23,9 @@ export async function POST(request: Request) {
     const submission = persistedClaimSubmissionSchema.parse(
       JSON.parse(rawPayload),
     );
-    await requireMemberClaimSubmission(submission.workspace.treasuryId);
+    if (publicConfig.claimDataMode === "live") {
+      await requireMemberClaimSubmission(submission.workspace.treasuryId);
+    }
     const result = await submitClaimWorkflow({
       repository: await getClaimRepository(),
       aiService: getClaimAIService(),
