@@ -113,7 +113,11 @@ it("uses Gemini only to populate an editable draft and persists only after human
   );
   expect(budgetWritesBeforeConfirm).toHaveLength(0);
 
-  fireEvent.click(screen.getByRole("button", { name: /^confirm budget$/i }));
+  const confirmButton = screen.getByRole("button", {
+    name: /^confirm budget$/i,
+  });
+  await waitFor(() => expect(confirmButton).toBeEnabled());
+  fireEvent.click(confirmButton);
 
   await waitFor(() => {
     expect(state.fetch).toHaveBeenCalledWith(
