@@ -41,4 +41,10 @@ describe("A2 claim role flow regression", () => {
       "Only treasury members can submit reimbursement claims.",
     );
   });
+
+  it("surfaces database authorization errors on human decisions", () => {
+    const route = source("app/api/claims/[claimId]/decision/route.ts");
+    expect(route).toContain("readDecisionErrorMessage");
+    expect(route).toContain('"message" in error');
+  });
 });
