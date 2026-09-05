@@ -37,12 +37,15 @@ describe("A2 claim role flow regression", () => {
     expect(shell).toContain("Verifying connected treasurer wallet");
   });
 
-  it("enforces member-only claim submission on the server", () => {
+  it("enforces member-only claim submission only in live mode", () => {
     const route = source("app/api/claims/route.ts");
     const authorization = source(
       "src/lib/claims/submission-authorization.ts",
     );
-    expect(route).toContain("requireMemberClaimSubmission");
+    expect(route).toContain('publicConfig.claimDataMode === "live"');
+    expect(route).toMatch(
+      /claimDataMode === "live"[\s\S]*?requireMemberClaimSubmission/,
+    );
     expect(authorization).toContain('membership.role !== "member"');
     expect(authorization).toContain(
       "Only treasury members can submit reimbursement claims.",
