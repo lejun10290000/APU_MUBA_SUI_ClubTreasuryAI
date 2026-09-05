@@ -6,7 +6,7 @@ test("judge golden path keeps AI advisory, human approval separate, and Sui proo
 }) => {
   await page.goto("/dashboard/status");
   await expect(page.getByRole("heading", { name: "System Status" })).toBeVisible();
-  await expect(page.getByText("Gemini AI")).toBeVisible();
+  await expect(page.getByText("Gemini AI").first()).toBeVisible();
   await expect(page.getByText("Deterministic Rule")).toBeVisible();
   await expect(page.getByText("Human Decision")).toBeVisible();
   await expect(page.getByText("Sui On-chain")).toBeVisible();
