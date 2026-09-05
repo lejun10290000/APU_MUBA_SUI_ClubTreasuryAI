@@ -98,7 +98,7 @@ Stage 7D also verified recovery messaging, same-digest reconciliation, private r
 | ------------- | --------- | ---------------- | --------------- |
 | CHUA LE JUN   | Developer | UTM Kuala Lumpur | `lejun10290000` |
 | LE YONG XIANG | Developer | UTM Kuala Lumpur | `yx-le`         |
-| LAI YAN QI    | Presenter | APU               | `YANKEY-CODE`   |
+| LAI YAN QI    | Presenter | UTM Kuala Lumpur | `YANKEY-CODE`   |
 
 ## Stage 8 Current Goal
 
