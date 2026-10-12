@@ -294,6 +294,29 @@ export function ClaimReviewPanel() {
                     value={aiAnalysis.categorySuggestion ?? "Missing"}
                   />
                 </dl>
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+                  <p className="font-bold">AI visual risk screening · advisory only</p>
+                  {aiAnalysis.visualWarnings.length > 0 ? (
+                    <>
+                      <p className="mt-1 text-xs">
+                        {aiAnalysis.visualWarnings.length} visible warning(s) identified.
+                        These are not proof of fraud. Treasurer review is required.
+                      </p>
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-xs">
+                        {aiAnalysis.visualWarnings.map((warning, index) => (
+                          <li key={`${warning.kind}-${index}`}>
+                            <strong>{warning.kind.replaceAll("_", " ")}:</strong>{" "}
+                            {warning.observation}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : (
+                    <p className="mt-1 text-xs">
+                      No visual warnings reported. This does not establish receipt authenticity.
+                    </p>
+                  )}
+                </div>
                 <ul className="mt-4 space-y-1 text-xs leading-5 text-violet-950/70">
                   {aiAnalysis.reasons.map((reason) => (
                     <li key={reason}>• {reason}</li>

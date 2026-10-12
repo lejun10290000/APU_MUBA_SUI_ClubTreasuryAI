@@ -28,6 +28,7 @@ const defaultReceipt = receiptAnalysisSchema.parse({
   categorySuggestion: "Marketing",
   needsReview: false,
   missingFields: [],
+  visualWarnings: [],
   reasons: ["Schema-valid deterministic mock response"],
 });
 

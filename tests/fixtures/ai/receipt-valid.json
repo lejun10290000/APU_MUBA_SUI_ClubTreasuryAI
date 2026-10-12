@@ -7,5 +7,6 @@
   "categorySuggestion": "Marketing",
   "needsReview": false,
   "missingFields": [],
+  "visualWarnings": [],
   "reasons": ["Synthetic fixture for mock development only"]
 }
