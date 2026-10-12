@@ -93,6 +93,29 @@ describe("Stage 5 claim workflow", () => {
     expect(missing.claim.recommendation).toBe("review");
   });
 
+  it("routes new AI visual anomalies to human review without executing payments", async () => {
+    const result = await submit(
+      new MockClaimRepository(),
+      makeSubmission(),
+      validAnalysis({
+        needsReview: true,
+        visualWarnings: [
+          {
+            kind: "multiple_possible_totals",
+            observation: "Two different amounts are both labeled total.",
+          },
+        ],
+      }),
+      "risk-warning-test",
+    );
+    expect(result.claim.recommendation).toBe("review");
+    expect(result.claim.status).toBe("under_review");
+    expect(result.claim.paymentStatus).toBe("unpaid");
+    expect(result.claim.receiptAnalysis).toMatchObject({
+      visualWarnings: [{ kind: "multiple_possible_totals" }],
+    });
+  });
+
   it("rejects a claim that exceeds the persisted category balance", async () => {
     const result = await submit(
       new MockClaimRepository(),
