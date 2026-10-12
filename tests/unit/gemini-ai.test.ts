@@ -140,6 +140,41 @@ describe("GeminiAIService", () => {
     });
   });
 
+  it("extracts a specific visual warning and requires treasurer review", async () => {
+    const { service } = makeService({
+      ...receiptFixture,
+      needsReview: true,
+      visualWarnings: [
+        {
+          kind: "inconsistent_arithmetic",
+          observation: "Printed line items total 12.00 but displayed total is 14.00.",
+        },
+      ],
+    });
+
+    await expect(service.analyzeReceipt(receiptInput)).resolves.toMatchObject({
+      needsReview: true,
+      visualWarnings: [{ kind: "inconsistent_arithmetic" }],
+    });
+  });
+
+  it("rejects visual warnings that try to skip required human review", async () => {
+    const { service } = makeService({
+      ...receiptFixture,
+      needsReview: false,
+      visualWarnings: [
+        {
+          kind: "overwritten_text",
+          observation: "Total field appears overwritten.",
+        },
+      ],
+    });
+
+    await expect(service.analyzeReceipt(receiptInput)).rejects.toMatchObject({
+      code: "INVALID_MODEL_OUTPUT",
+    });
+  });
+
   it.each([
     ["negative amount", { ...receiptFixture, amountMinor: -1 }],
     ["wrong currency", { ...receiptFixture, currency: "MYR" }],
