@@ -47,6 +47,17 @@ export const receiptMissingFieldSchema = z.enum([
   "category",
 ]);
 
+export const receiptVisualWarningSchema = z.object({
+  kind: z.enum([
+    "inconsistent_arithmetic",
+    "multiple_possible_totals",
+    "overwritten_text",
+    "conflicting_dates",
+    "unreadable_key_field",
+  ]),
+  observation: conciseTextSchema,
+});
+
 export const receiptAnalysisSchema = z
   .object({
     merchant: z.string().trim().min(1).max(120).nullable(),
@@ -60,18 +71,21 @@ export const receiptAnalysisSchema = z
     categorySuggestion: categoryNameSchema.nullable(),
     needsReview: z.boolean(),
     missingFields: z.array(receiptMissingFieldSchema).max(6).default([]),
+    // Default supports persisted receipts created before the AI EXPO upgrade.
+    visualWarnings: z.array(receiptVisualWarningSchema).max(4).default([]),
     reasons: z.array(conciseTextSchema).min(1).max(8),
   })
   .superRefine((analysis, context) => {
     const evidenceIsIncomplete =
       analysis.merchant === null ||
       analysis.amountMinor === null ||
-      analysis.missingFields.length > 0;
+      analysis.missingFields.length > 0 ||
+      analysis.visualWarnings.length > 0;
 
     if (evidenceIsIncomplete && !analysis.needsReview) {
       context.addIssue({
         code: "custom",
-        message: "Incomplete receipt evidence must require human review.",
+        message: "Incomplete or visually flagged receipt evidence must require human review.",
         path: ["needsReview"],
       });
     }
