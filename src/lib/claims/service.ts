@@ -89,6 +89,7 @@ export async function submitClaimWorkflow({
       aiNeedsReview =
         result.needsReview ||
         result.missingFields.length > 0 ||
+        result.visualWarnings.length > 0 ||
         !categorySuggestion ||
         !categoryMatches;
     } catch (error) {
